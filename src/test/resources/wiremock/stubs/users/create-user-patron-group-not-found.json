@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/users",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "text/plain"
+    },
+    "body": "Cannot add af8ff160-8d4d-4190-bb18-c91dbe8b507b. Patron group not found"
+  }
+}

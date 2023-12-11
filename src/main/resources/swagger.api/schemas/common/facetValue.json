@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Facet value Schema",
+  "description": "A facet value",
+  "type": "object",
+  "properties": {
+    "count": {
+      "type": "integer",
+      "description": "Count of facet values"
+    },
+    "value": {
+      "description": "Value Object"
+    }
+  }
+}

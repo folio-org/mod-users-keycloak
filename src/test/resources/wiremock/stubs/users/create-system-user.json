@@ -1,0 +1,52 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/users",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": {
+          "expression": "$.username",
+          "equalTo": "master-system-user"
+        }
+      },
+      {
+        "matchesJsonPath": {
+          "expression": "$.personal.firstName",
+          "equalTo": "System User"
+        }
+      },
+      {
+        "matchesJsonPath": {
+          "expression": "$.personal.lastName",
+          "equalTo": "System"
+        }
+      },
+      {
+        "matchesJsonPath": {
+          "expression": "$.personal.email",
+          "equalTo": "master-system-user@ebsco.com"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "83eb1e14-c657-4db8-8ba4-119670fc3552",
+      "username": "master-system-user",
+      "active": true,
+      "personal": {
+        "firstName": "System User",
+        "lastName": "System",
+        "email": "master-system-user@ebsco.com"
+      }
+    }
+  }
+}

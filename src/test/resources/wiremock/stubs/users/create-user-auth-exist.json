@@ -1,0 +1,45 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/users",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "username": "create-user-auth-exist",
+      "id": "d24b7b4a-00ed-416e-a810-981b003bd158",
+      "barcode": "12359",
+      "active": true,
+      "type": "",
+      "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+      "departments": [],
+      "proxyFor": [],
+      "personal": {
+        "lastName": "Zakir",
+        "firstName": "Bailey",
+        "middleName": "",
+        "preferredFirstName": "",
+        "email": "au_exist@mail.com",
+        "phone": "",
+        "mobilePhone": "",
+        "addresses": [],
+        "preferredContactTypeId": "002"
+      },
+      "enrollmentDate": "2020-10-07T04:00:00.000+00:00",
+      "expirationDate": "2023-02-28T23:59:59.000+00:00",
+      "createdDate": "2023-02-08T15:26:14.278+00:00",
+      "updatedDate": "2023-02-08T15:26:14.278+00:00",
+      "metadata": {
+        "createdDate": "2023-02-08T15:26:14.208+00:00",
+        "updatedDate": "2023-02-08T15:26:14.208+00:00"
+      }
+    }
+  }
+}

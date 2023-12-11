@@ -1,0 +1,52 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/service-points/7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+      "name": "Circ Desk 1",
+      "code": "cd1",
+      "discoveryDisplayName": "Circulation Desk -- Hallway",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 3,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Move_to_the_end_of_the_next_open_day",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2023-11-02T01:49:11.970+00:00",
+        "updatedDate": "2023-11-02T10:02:01.402+00:00",
+        "updatedByUserId": "f4e55e17-4b5a-5482-8e2d-fb3f53225f7e"
+      }
+    }
+  }
+}

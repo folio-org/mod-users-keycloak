@@ -1,0 +1,1 @@
+TRUNCATE TABLE master_mod_users_keycloak.user_migration_job CASCADE;

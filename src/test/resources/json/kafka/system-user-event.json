@@ -1,0 +1,12 @@
+{
+  "type": "CREATE",
+  "tenant": "master",
+  "resourceName": "System user",
+  "new": {
+    "name": "mod-foo",
+    "type": "module",
+    "permissions": [
+      "foo.bar"
+    ]
+  }
+}

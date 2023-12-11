@@ -1,0 +1,110 @@
+spring:
+  application:
+    name: mod-users-keycloak
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+  datasource:
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:postgres}
+  liquibase:
+    change-log: classpath:changelog/changelog-master.xml
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  cache:
+    type: caffeine
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:kafka}:${KAFKA_PORT:9092}
+    security:
+      protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+    ssl:
+      key-store-password: ${KAFKA_SSL_KEYSTORE_PASSWORD:}
+      key-store-location: ${KAFKA_SSL_KEYSTORE_LOCATION:}
+      trust-store-password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+      trust-store-location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+coffee-boots:
+  cache:
+    spec:
+      keycloak-configuration: maximumSize=500,expireAfterWrite=${KC_CONFIG_TTL:3600s}
+      keycloak-client-configuration: maximumSize=500,expireAfterWrite=${KC_CONFIG_TTL:3600s}
+      token: maximumSize=10,expireAfterWrite=${KC_ADMIN_TOKEN_TTL:60s}
+
+folio:
+  jpa:
+    repository:
+      base-packages: org.folio.uk.domain
+
+server:
+  port: 8081
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json
+
+management:
+  endpoints.web:
+    base-path: /admin
+    exposure:
+      include: info,health,liquibase,threaddump,heapdump,httptrace,loggers
+
+application:
+  environment: ${ENV:folio}
+  system-user:
+    username-template: ${SYSTEM_USER_USERNAME_TEMPLATE:{tenantId}-system-user}
+    email-template: ${SYSTEM_USER_EMAIL_TEMPLATE:{tenantId}-system-user@ebsco.com}
+    system-user-role: ${SYSTEM_USER_ROLE:System}
+    password-length: ${SYSTEM_USER_PASSWORD_LENGTH:32}
+    retry-attempts: ${SYSTEM_USER_RETRY_COUNT:10}
+    retry-delay: ${SYSTEM_USER_RETRY_DELAY:250}
+  keycloak:
+    url: ${KC_URL:http://keycloak:8080}
+    grant-type: ${KC_ADMIN_GRANT_TYPE:client_credentials}
+    client-id: ${KC_ADMIN_CLIENT_ID:folio-backend-admin-client}
+    login:
+      client-name-suffix: ${KC_LOGIN_CLIENT_SUFFIX:-login-application}
+    password-reset:
+      client-id: ${KC_PASSWORD_RESET_CLIENT_ID:password-reset-client}
+  secret-store:
+    type: ${SECRET_STORE_TYPE}
+    aws-ssm:
+      region: ${SECRET_STORE_AWS_SSM_REGION:}
+      use-iam: ${SECRET_STORE_AWS_SSM_USE_IAM:true}
+      ecs-credentials-endpoint: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT:}
+      ecs-credentials-path: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_PATH:}
+    vault:
+      token: ${SECRET_STORE_VAULT_TOKEN:}
+      address: ${SECRET_STORE_VAULT_ADDRESS:}
+      enable-ssl: ${SECRET_STORE_VAULT_ENABLE_SSL:false}
+      pem-file-path: ${SECRET_STORE_VAULT_PEM_FILE_PATH:}
+      keystore-password: ${SECRET_STORE_VAULT_KEYSTORE_PASSWORD:}
+      keystore-file-path: ${SECRET_STORE_VAULT_KEYSTORE_FILE_PATH:}
+      truststore-file-path: ${SECRET_STORE_VAULT_TRUSTSTORE_FILE_PATH:}
+  migration:
+    batch-size: ${MIGRATION_BATCH_SIZE:20}
+  kafka:
+    listener:
+      system-user:
+        topic-pattern: ${KAFKA_SYS_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)mgr-tenant-entitlements.system-user}
+        group-id: ${application.environment}-mod-users-keycloak-system-user-group
+  retry:
+    system-user-event:
+      retry-attempts: ${KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS:9223372036854775807}
+      retry-delay: ${KAFKA_SYS_USER_TOPIC_RETRY_DELAY:1s}
+    system-user-capabilities:
+      retry-attempts: ${KAFKA_SYS_USER_CAPABILITIES_RETRY_ATTEMPTS:60}
+      retry-delay: ${KAFKA_SYS_USER_CAPABILITIES_RETRY_DELAY:5s}
+
+okapi.url: ${OKAPI_URL:http://sidecar:8081}

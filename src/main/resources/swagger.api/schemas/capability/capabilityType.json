@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "The type of capability",
+  "type": "string",
+  "enum": [
+    "settings",
+    "data",
+    "procedural"
+  ]
+}

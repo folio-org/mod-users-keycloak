@@ -1,0 +1,40 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/users",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "master"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "username": "mod-foo",
+          "id": "${json-unit.any-string}",
+          "active": true,
+          "type": "module",
+          "personal": {
+            "lastName": "System",
+            "firstName": "System user - mod-foo"
+          }
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "de5bb75d-e696-4d43-9df8-289f39367079",
+      "username": "mod-foo",
+      "active": true,
+      "personal": {
+        "firstName": "System User - mod-foo",
+        "lastName": "System"
+      }
+    }
+  }
+}

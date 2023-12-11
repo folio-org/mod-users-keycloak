@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Service point",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "id"
+    },
+    "name": {
+      "type": "string",
+      "description": "Service point name"
+    },
+    "code": {
+      "type": "string",
+      "description": "Service point code"
+    },
+    "discoveryDisplayName": {
+      "type": "string",
+      "description": "Service point discovery name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Service point description"
+    },
+    "shelvingLagTime": {
+      "type": "integer",
+      "description": "Shelving lag time"
+    },
+    "pickupLocation": {
+      "type": "boolean",
+      "description": "Pick up location"
+    },
+    "staffSlips": {
+      "type": "array",
+      "description": "List of staff slips for this service point",
+      "items": {
+        "$ref": "staffSlip.json"
+      }
+    },
+    "locationIds": {
+      "type": "array",
+      "description": "Location Ids",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "metadata": {
+      "$ref": "common/metadata.json",
+      "readonly": true,
+      "description": "Metadata"
+    }
+  },
+  "required": [
+    "name",
+    "code",
+    "discoveryDisplayName"
+  ]
+}

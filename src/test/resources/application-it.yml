@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    username: ebsco_admin
+    password: qwerty123
+    hikari:
+      data-source-properties:
+        preparedStatementCacheQueries: 0
+  jpa:
+    show-sql: true
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+application:
+  environment: it-test
+  secret-store:
+    type: EPHEMERAL
+    ephemeral:
+      content:
+        it-test_master_folio-backend-admin-client: ${KC_ADMIN_CLIENT_SECRET}
+  retry:
+    system-user-capabilities:
+      retry-attempts: 2
+      retry-delay: 50ms
+
+header:
+  validation:
+    x-okapi-user-id:
+      exclude:
+        base-paths: /tests, /admin

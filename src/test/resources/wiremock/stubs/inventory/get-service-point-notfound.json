@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/service-points/7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "test" }
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "text/plain"
+    },
+    "body": "Not found"
+  }
+}

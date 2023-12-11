@@ -1,0 +1,164 @@
+{
+  "roles": {
+    "realm": [
+      {
+        "name": "Password Reset",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "attributes": {}
+      },
+      {
+        "name": "System",
+        "description": "System role for module-to-module communication",
+        "composite": false,
+        "clientRole": false,
+        "attributes": {}
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "folio-backend-admin-client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "supersecret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true
+    },
+    {
+      "id": "425d6b74-4dbd-41af-af37-54d5754914ab",
+      "clientId": "master-login-application",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "supersecret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.url": "",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "fullScopeAllowed": true,
+      "authorizationSettings": {
+        "allowRemoteResourceManagement": true,
+        "policyEnforcementMode": "ENFORCING",
+        "resources": [
+          {
+            "name": "/users-keycloak/password-reset/reset",
+            "displayName": "",
+            "uris": [],
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ],
+            "icon_uri": ""
+          },
+          {
+            "name": "/users-keycloak/password-reset/validate",
+            "displayName": "",
+            "uris": [],
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ],
+            "icon_uri": ""
+          }
+        ],
+        "policies": [
+        ],
+        "scopes": [
+          {
+            "name": "GET",
+            "iconUri": "GET",
+            "displayName": "GET"
+          },
+          {
+            "name": "POST",
+            "iconUri": "POST",
+            "displayName": "POST"
+          },
+          {
+            "name": "PUT",
+            "iconUri": "PUT",
+            "displayName": "PUT"
+          },
+          {
+            "name": "DELETE",
+            "iconUri": "DELETE",
+            "displayName": "DELETE"
+          },
+          {
+            "name": "PATCH",
+            "iconUri": "PATCH",
+            "displayName": "PATCH"
+          },
+          {
+            "name": "OPTIONS",
+            "iconUri": "OPTIONS",
+            "displayName": "OPTIONS"
+          },
+          {
+            "name": "HEAD"
+          },
+          {
+            "name": "TRACE"
+          }
+        ],
+        "decisionStrategy": "AFFIRMATIVE"
+      }
+    },
+    {
+      "clientId": "password-reset-client",
+      "name": "password-reset-client",
+      "description": "",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "**********",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.url": "",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-folio-backend-admin-client",
+      "enabled": true,
+      "serviceAccountClientId": "folio-backend-admin-client",
+      "realmRoles": [
+        "admin",
+        "create-realm"
+      ]
+    },
+    {
+      "username": "service-account-password-reset-client",
+      "enabled": true,
+      "serviceAccountClientId": "password-reset-client",
+      "realmRoles": [
+        "Password Reset"
+      ]
+    }
+  ]
+}

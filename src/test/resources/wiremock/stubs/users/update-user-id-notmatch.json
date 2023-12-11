@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPattern": "/users/.+",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "username": "ZakirBailey",
+          "id": "d3958402-2f80-421b-a527-9933245a3556",
+          "barcode": "12359",
+          "active": true,
+          "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+          "personal": {
+            "lastName": "Zakir",
+            "firstName": "Bailey",
+            "email": "new9@new.com"
+          },
+          "enrollmentDate": "2020-10-07T04:00:00.000+00:00",
+          "expirationDate": "2023-02-28T23:59:59.000+00:00"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "text/plain"
+    },
+    "body": "You cannot change the value of the id field"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "endpoint.json",
+  "description": "Object containing the details of the http-endpoint.",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Endpoint's static path / expression"
+    },
+    "method": {
+      "$ref": "httpMethod.json"
+    }
+  }
+}

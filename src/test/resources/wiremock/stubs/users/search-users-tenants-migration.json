@@ -1,0 +1,42 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/user-tenants",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "master"
+      },
+      "x-okapi-token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    },
+    "queryParameters": {
+      "userId": {
+        "matches": ".*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "userTenants": [
+        {
+          "id": "adf434c7-4ab8-4c90-ae53-9bf8c925e4f2",
+          "userId": "adf434c7-4ab8-4c90-ae53-9bf8c925e4f2",
+          "externalSystemId": "externalsystemid:54001",
+          "tenantId": "diku"
+        },
+        {
+          "id": "adf434c7-4ab8-4c90-ae53-9bf8c925e4f2",
+          "userId": "adf434c7-4ab8-4c90-ae53-9bf8c925e4f2",
+          "externalSystemId": "externalsystemid:54001",
+          "tenantId": "master"
+        }
+      ],
+      "totalRecords": 2
+    }
+  }
+}

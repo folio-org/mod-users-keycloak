@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/notify",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "master"
+      },
+      "x-okapi-token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": {
+          "expression": "$.eventConfigName",
+          "equalTo": "USERNAME_LOCATED_EVENT"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

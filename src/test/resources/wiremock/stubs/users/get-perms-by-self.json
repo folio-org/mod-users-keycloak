@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/permissions/users/ac6767c3-1325-5205-89d5-c578c991a45a?onlyVisible=true&expand=true",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "userId": "ac6767c3-1325-5205-89d5-c578c991a45a",
+      "permissions": [
+        "ui.all"
+      ]
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/service-points-users?query=userId==ac6767c3-1325-5205-89d5-c578c991a45a&limit=1",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "test"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "servicePointsUsers": [
+        {
+          "id": "e66e30fd-0473-4a3f-910b-7921817eb3ea",
+          "userId": "ac6767c3-1325-5205-89d5-c578c991a45a",
+          "servicePointsIds": [
+            "7c5abc9f-f3d7-4856-b8d7-6712462ca007"
+          ],
+          "defaultServicePointId": "7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+          "metadata": {
+            "createdDate": "2023-11-02T01:51:27.886+00:00",
+            "updatedDate": "2023-11-02T01:51:27.886+00:00"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

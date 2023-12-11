@@ -1,0 +1,468 @@
+openapi: 3.0.0
+
+info:
+  title: Users Keycloak API
+  version: v1
+  description: Users Keycloak API
+
+servers:
+  - url: http://localhost:8081
+    description: Locally deployed server
+
+paths:
+  /users-keycloak/users:
+    post:
+      operationId: createUser
+      description: Create a new user
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/keycloak-only'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        '201':
+          description: 'User has been created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '422':
+          $ref: '#/components/responses/unprocessableEntity'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
+    get:
+      operationId: getUsers
+      description: Retrieve a list of users
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/cql-query'
+        - $ref: '#/components/parameters/query-offset'
+        - $ref: '#/components/parameters/query-limit'
+      responses:
+        '200':
+          description: Retrieve a list of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
+    delete:
+      operationId: deleteUsers
+      description: Delete a collection of users selected by a CQL query;
+        | this doesn't delete proxyFor records that reference them
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/cql-query'
+      responses:
+        '204':
+          description: All selected users deleted
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
+  /users-keycloak/users/{id}:
+    put:
+      operationId: updateUser
+      description: Update user with given id
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        '204':
+          description: User successfully updated
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '404':
+          $ref: '#/components/responses/entityNotFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
+    get:
+      operationId: getUser
+      description: Get a single user
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      responses:
+        '200':
+          description: Returns user with a given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '404':
+          $ref: '#/components/responses/entityNotFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
+    delete:
+      operationId: deleteUser
+      description: Delete user with given id
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      responses:
+        '204':
+          description: User deleted successfully
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '404':
+          $ref: '#/components/responses/entityNotFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
+  /users-keycloak/_self:
+    get:
+      operationId: getUserBySelfReference
+      description: Get a user by self reference
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/query-include'
+        - $ref: '#/components/parameters/query-expand-permissions'
+      responses:
+        '200':
+          description: Returns user by self reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/compositeUser'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '403':
+          $ref: '#/components/responses/forbidden'
+        '404':
+          $ref: '#/components/responses/entityNotFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
+  /users-keycloak/migrations:
+    get:
+      operationId: getMigrations
+      description: Retrieve a list of user migrations
+      tags:
+        - migration
+      parameters:
+        - $ref: '#/components/parameters/cql-query'
+        - $ref: '#/components/parameters/query-offset'
+        - $ref: '#/components/parameters/query-limit'
+      responses:
+        '200':
+          description: Retrieve a list of user migrations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userMigrationJobs'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    post:
+      operationId: migrateUsers
+      description: Migrate users from mod-users to Keycloak
+      tags:
+        - migration
+      responses:
+        '201':
+          description: 'User migration jobs'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userMigrationJob'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '422':
+          $ref: '#/components/responses/unprocessableEntity'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users-keycloak/migrations/{id}:
+    get:
+      description: Retrieve a user migration
+      operationId: getMigration
+      tags:
+        - migration
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      responses:
+        '200':
+          description: Retrieve a user migration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userMigrationJob'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      description: Delete a user migration
+      operationId: deleteMigration
+      tags:
+        - migration
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      responses:
+        '204':
+          description: Delete a user migration
+  /users-keycloak/forgotten/password:
+    post:
+      description: called when a user has forgotten a password
+      operationId: resetForgottenPassword
+      tags:
+        - forgotten-username-password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/identifier'
+      responses:
+        '204':
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '422':
+          $ref: '#/components/responses/unprocessableEntity'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users-keycloak/forgotten/username:
+    post:
+      description: called when a user has forgotten a username
+      operationId: recoverForgottenUsername
+      tags:
+        - forgotten-username-password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/identifier'
+      responses:
+        '204':
+          description: "Successful call to forgotten username"
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '422':
+          $ref: '#/components/responses/unprocessableEntity'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users-keycloak/password-reset/reset:
+    post:
+      operationId: passwordReset
+      tags:
+        - password-reset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/passwordReset'
+      responses:
+        '204':
+          description: "Successful password reset"
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '422':
+          $ref: '#/components/responses/unprocessableEntity'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  /users-keycloak/password-reset/link:
+    post:
+      operationId: generatePasswordResetLink
+      tags:
+        - password-reset
+      description: Generate and send password reset link
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/generateLinkRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/generateLinkResponse'
+  /users-keycloak/password-reset/validate:
+    post:
+      operationId: validatePasswordResetLink
+      tags:
+        - password-reset
+      description: Validates password reset link
+      responses:
+        204:
+          description: "Successful link validation"
+        422:
+          description: "Unprocessable Entity"
+          body:
+            text/plain:
+              example: "Bad request"
+        500:
+          description: "Internal server error"
+          body:
+            text/plain:
+              example: "Internal server error"
+
+components:
+  schemas:
+    errorResponse:
+      $ref: schemas/common/errors.json
+    error:
+      $ref: schemas/common/error.json
+    parameter:
+      $ref: schemas/common/parameter.json
+    user:
+      $ref: schemas/user.json
+    users:
+      $ref: schemas/users.json
+    compositeUser:
+      $ref: schemas/compositeUser.json
+    userTenant:
+      $ref: schemas/userTenant.json
+    userTenantCollection:
+      $ref: schemas/userTenantCollection.json
+    userMigrationJob:
+      $ref: schemas/migration/userMigrationJob.json
+    userMigrationJobs:
+      $ref: schemas/migration/userMigrationJobs.json
+    userCapabilitiesRequest:
+      $ref: schemas/capability/user/userCapabilitiesRequest.json
+    capabilities:
+      $ref: schemas/capability/capabilities.json
+    identifier:
+      $ref: schemas/identifier.json
+    passwordReset:
+      $ref: schemas/passwordReset.json
+    generateLinkRequest:
+      $ref: schemas/generateLinkRequest.json
+    generateLinkResponse:
+      $ref: schemas/generateLinkResponse.json
+    errorCode:
+      $ref: schemas/common/errorCode.json
+
+    includedField:
+      type: string
+      title: Included field
+      enum:
+        - groups
+        - perms
+        - proxiesfor
+        - servicepoints
+        - expanded_perms
+        - expanded_servicepoints
+
+  responses:
+    badRequest:
+      description: Bad request, e.g. malformed request body or query parameter
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+    unprocessableEntity:
+      description: Validation errors
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+    forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+    entityNotFound:
+      description: Error response if entity is not found by id (in json format)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+    internalServerError:
+      description: Error response for unhandled or critical server exceptions, e.g. NullPointerException.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+
+  parameters:
+    path-entity-id:
+      in: path
+      required: true
+      name: id
+      description: Entity id
+      schema:
+        type: string
+        format: uuid
+    query-limit:
+      in: query
+      required: false
+      name: limit
+      description: Limit the number of elements returned in the response.
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 500
+        default: 10
+    query-offset:
+      in: query
+      required: false
+      name: offset
+      description: Skip over a number of elements by specifying an offset value for the query.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    query-include:
+      in: query
+      required: false
+      name: include
+      description: Indicates which referenced fields should be populated (de-referenced) by the service
+      schema:
+        type: array
+        items:
+          $ref: IncludedField
+
+    query-expand-permissions:
+      in: query
+      required: false
+      name: expandPermissions
+      description: Whether or not to expand permissions listings
+      schema:
+        type: boolean
+        default: false
+    cql-query:
+      name: query
+      in: query
+      required: false
+      description: A CQL query string with search conditions.
+      schema:
+        type: string
+    keycloak-only:
+      in: query
+      required: false
+      name: keycloakOnly
+      description: Create auth user only during user creation
+      schema:
+        type: boolean
+        default: false

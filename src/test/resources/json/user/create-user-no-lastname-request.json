@@ -1,0 +1,20 @@
+{
+  "username": "ZakirBailey",
+  "id": "d3958402-2f80-421b-a527-9933245a3556",
+  "barcode": "12359",
+  "active": true,
+  "type": "",
+  "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+  "personal": {
+    "firstName": "Bailey",
+    "middleName": "",
+    "preferredFirstName": "",
+    "email": "new9@new.com",
+    "phone": "",
+    "mobilePhone": "",
+    "addresses": [],
+    "preferredContactTypeId": "002"
+  },
+  "enrollmentDate": "2020-10-07T04:00:00.000+00:00",
+  "expirationDate": "2023-02-28T23:59:59.000+00:00"
+}

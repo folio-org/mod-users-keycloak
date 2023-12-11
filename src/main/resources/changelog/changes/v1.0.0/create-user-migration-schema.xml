@@ -1,0 +1,24 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="create-user-migration-tables" author="okuzminov">
+    <sql>
+      CREATE TYPE user_migration_job_status_type AS ENUM ('IN_PROGRESS', 'FINISHED', 'FAILED');
+    </sql>
+
+    <createTable tableName="user_migration_job">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" primaryKeyName="pk_user_migration_job"/>
+      </column>
+      <column name="status" type="user_migration_job_status_type"/>
+      <column name="total_records" type="INT4"/>
+      <column name="started_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="finished_at" type="TIMESTAMP"/>
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Service points expanded user",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Id"
+    },
+    "userId": {
+      "type": "string",
+      "description": "User Id"
+    },
+    "servicePointsIds": {
+      "type": "array",
+      "description": "Service Points Ids",
+      "items": {
+        "type": "string"
+      }
+    },
+    "servicePoints": {
+      "type": "array",
+      "description": "Service Points",
+      "items": {
+        "$ref": "servicePoint.json"
+      }
+    },
+    "defaultServicePointId": {
+      "type": "string",
+      "description": "Default Service Point Id"
+    },
+    "defaultServicePoint": {
+      "description": "Default Service Point Object",
+      "$ref": "servicePoint.json"
+    },
+    "metadata": {
+      "$ref": "common/metadata.json",
+      "readonly": true
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "userId"
+  ]
+}

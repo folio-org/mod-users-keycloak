@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/configurations/entries?query=module==USERSBL",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "diku" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "configs": [
+        {
+          "module": "USERSBL",
+          "configName": "validation_rules",
+          "code": "FOLIO_HOST",
+          "description": "for patrons",
+          "default": true,
+          "enabled": true,
+          "value": "http://localhost:3000"
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

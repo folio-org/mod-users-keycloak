@@ -1,0 +1,213 @@
+package org.folio.uk.base;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.test.TestUtils.asJsonString;
+import static org.folio.test.TestUtils.readString;
+import static org.folio.test.extensions.impl.KeycloakContainerExtension.getKeycloakAdminClient;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import feign.FeignException;
+import java.util.Set;
+import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.folio.spring.integration.XOkapiHeaders;
+import org.folio.tenant.domain.dto.TenantAttributes;
+import org.folio.test.base.BaseBackendIntegrationTest;
+import org.folio.test.extensions.EnableKafka;
+import org.folio.test.extensions.EnableKeycloak;
+import org.folio.test.extensions.EnablePostgres;
+import org.folio.test.extensions.EnableWireMock;
+import org.folio.test.extensions.impl.KafkaTestExecutionListener;
+import org.folio.test.extensions.impl.KeycloakExecutionListener;
+import org.folio.test.extensions.impl.WireMockAdminClient;
+import org.folio.test.extensions.impl.WireMockExecutionListener;
+import org.folio.uk.integration.keycloak.TokenService;
+import org.folio.uk.integration.keycloak.model.KeycloakRole;
+import org.folio.uk.support.TestConstants;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.keycloak.representations.idm.authorization.RolePolicyRepresentation;
+import org.keycloak.representations.idm.authorization.RolePolicyRepresentation.RoleDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.web.servlet.ResultActions;
+
+@Log4j2
+@EnableKafka
+@EnableWireMock
+@EnableKeycloak
+@EnablePostgres
+@EnableRetry
+@EnableAsync
+@SpringBootTest
+@ActiveProfiles("it")
+@AutoConfigureMockMvc
+@DirtiesContext(classMode = AFTER_CLASS)
+@Import(BaseIntegrationTest.TopicConfiguration.class)
+@TestExecutionListeners(listeners =
+  {WireMockExecutionListener.class, KeycloakExecutionListener.class, KafkaTestExecutionListener.class},
+  mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
+public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
+
+  public static final String FOLIO_SYSTEM_USER_TOPIC = "it-test.master.mgr-tenant-entitlements.system-user";
+
+  protected static WireMockAdminClient wmAdminClient;
+
+  @Autowired protected CacheManager cacheManager;
+
+  @BeforeEach
+  void setUp() {
+    evictAllCaches();
+  }
+
+  @AfterEach
+  void afterEach() {
+    evictAllCaches();
+  }
+
+  public void evictAllCaches() {
+    cacheManager.getCacheNames().forEach(cacheName -> cacheManager.getCache(cacheName).clear());
+  }
+
+  public static ResultActions attemptGet(String uri, Object... args) throws Exception {
+    return mockMvc.perform(get(uri, args)
+      .headers(okapiHeaders())
+      .contentType(APPLICATION_JSON));
+  }
+
+  protected static ResultActions attemptPost(String uri, Object body, Object... args) throws Exception {
+    return mockMvc.perform(post(uri, args)
+      .headers(okapiHeaders())
+      .content(asJsonString(body))
+      .contentType(APPLICATION_JSON));
+  }
+
+  protected static ResultActions attemptPut(String uri, Object body, Object... args) throws Exception {
+    return mockMvc.perform(put(uri, args)
+      .headers(okapiHeaders())
+      .content(asJsonString(body))
+      .contentType(APPLICATION_JSON));
+  }
+
+  protected static ResultActions attemptDelete(String uri, Object... args) throws Exception {
+    return mockMvc.perform(delete(uri, args)
+      .headers(okapiHeaders())
+      .contentType(APPLICATION_JSON));
+  }
+
+  public static ResultActions doGet(String uri, Object... args) throws Exception {
+    return attemptGet(uri, args).andExpect(status().isOk());
+  }
+
+  protected static ResultActions doPost(String uri, Object body, Object... args) throws Exception {
+    return attemptPost(uri, body, args).andExpect(status().isCreated());
+  }
+
+  protected static ResultActions doPut(String uri, Object body, Object... args) throws Exception {
+    return attemptPut(uri, body, args).andExpect(status().isNoContent());
+  }
+
+  protected static ResultActions doDelete(String uri, Object... args) throws Exception {
+    return attemptDelete(uri, args).andExpect(status().isNoContent());
+  }
+
+  protected static HttpHeaders okapiHeaders() {
+    var headers = new HttpHeaders();
+    headers.add(XOkapiHeaders.URL, wmAdminClient.getWireMockUrl());
+    headers.add(XOkapiHeaders.TOKEN, TestConstants.OKAPI_AUTH_TOKEN);
+    headers.add(XOkapiHeaders.TENANT, TestConstants.TENANT_NAME);
+    return headers;
+  }
+
+  @SneakyThrows
+  protected static void enableTenant(String tenant, TokenService tokenService, KeycloakTestClient keycloakTestClient) {
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/create-system-user.json"));
+
+    createKeycloakPasswordResetPolicy();
+    createKeycloakSystemRole(tokenService, keycloakTestClient);
+
+    var tenantAttributes = new TenantAttributes().moduleTo(TestConstants.MODULE_NAME);
+    mockMvc.perform(post("/_/tenant")
+        .content(asJsonString(tenantAttributes))
+        .contentType(APPLICATION_JSON)
+        .header(XOkapiHeaders.TENANT, tenant)
+        .header(XOkapiHeaders.URL, wmAdminClient.getWireMockUrl())
+        .header(XOkapiHeaders.TOKEN, TestConstants.OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
+
+    assertThat(wmAdminClient.unmatchedRequests().getRequests()).isEmpty();
+    wmAdminClient.resetAll();
+  }
+
+  private static void createKeycloakPasswordResetPolicy() {
+    log.info("Setting up Password Reset policy");
+    var realm = getKeycloakAdminClient().realm("master");
+    var cliId = realm.clients()
+      .findByClientId("master-login-application").get(0).getId();
+    log.info("master login client id {}", cliId);
+
+    var rolePolicy = new RolePolicyRepresentation();
+    rolePolicy.setName("Password Reset policy");
+    rolePolicy.setRoles(Set.of(new RoleDefinition("Password Reset", false)));
+    realm.clients().get(cliId).authorization().policies().role().create(rolePolicy).close();
+  }
+
+  private static void createKeycloakSystemRole(TokenService tokenService, KeycloakTestClient client) {
+    var keycloakRole = new KeycloakRole();
+    keycloakRole.setName("System");
+    keycloakRole.setComposite(false);
+    keycloakRole.setDescription("System role");
+
+    try {
+      client.create(TestConstants.TENANT_NAME, tokenService.issueToken(), keycloakRole);
+    } catch (FeignException.Conflict e) {
+      log.debug("Role is already created");
+    }
+  }
+
+  @SneakyThrows
+  protected static void removeTenant(String tenantId) {
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/find-system-user-by-query.json"));
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/delete-system-user.json"));
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/find-system-user-by-id.json"));
+
+    var tenantAttributes = new TenantAttributes().moduleFrom(TestConstants.MODULE_NAME).purge(true);
+    mockMvc.perform(post("/_/tenant")
+        .content(asJsonString(tenantAttributes))
+        .contentType(APPLICATION_JSON)
+        .header(XOkapiHeaders.TENANT, tenantId)
+        .header(XOkapiHeaders.URL, wmAdminClient.getWireMockUrl())
+        .header(XOkapiHeaders.TOKEN, TestConstants.OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
+
+    assertThat(wmAdminClient.unmatchedRequests().getRequests()).isEmpty();
+    wmAdminClient.resetAll();
+  }
+
+  @TestConfiguration
+  public static class TopicConfiguration {
+
+    @Bean
+    public NewTopic systemUserTopic() {
+      return new NewTopic(FOLIO_SYSTEM_USER_TOPIC, 1, (short) 1);
+    }
+  }
+}

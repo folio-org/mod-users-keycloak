@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/capabilities",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "master"
+      }
+    },
+    "queryParameters": {
+      "query": {
+        "contains": "permission==(\"foo.bar\")"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "capabilities": [
+        {
+          "id": "b190defd-8e0e-4a04-ba14-448091f76b3f",
+          "permission": "foo.bar"
+        }
+      ],
+      "total_records": 1
+    }
+  }
+}

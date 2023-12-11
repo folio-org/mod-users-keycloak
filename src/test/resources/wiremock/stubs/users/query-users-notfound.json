@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/users",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "master"
+      },
+      "x-okapi-token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    },
+    "queryParameters": {
+      "query": {
+        "contains": "unknownuser"
+      },
+      "limit": {
+        "equalTo": "2"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "users": [],
+      "totalRecords": 0
+    }
+  }
+}

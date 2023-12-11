@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Facet Schema",
+  "description": "A facet",
+  "type": "object",
+  "properties": {
+    "facetValues": {
+      "type": "array",
+      "description": "Array of facet values",
+      "items": {
+        "$ref": "facetValue.json"
+      }
+    },
+    "type": {
+      "type": "string",
+      "description": "Type of facet"
+    }
+  },
+  "additionalProperties": false
+}

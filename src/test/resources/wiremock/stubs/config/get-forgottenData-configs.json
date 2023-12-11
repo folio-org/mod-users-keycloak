@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/configurations/entries",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    },
+    "queryParameters": {
+      "query": {
+        "contains": "module==USERSBL"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "configs": [
+        {
+          "module": "USERSBL",
+          "configName": "fogottenData",
+          "code": "phoneNumber",
+          "description": "personal.phone, personal.mobilePhone",
+          "default": false,
+          "enabled": true,
+          "value": "personal.phone, personal.mobilePhone"
+        },
+        {
+          "module": "USERSBL",
+          "configName": "fogottenData",
+          "code": "email",
+          "description": "personal.email",
+          "default": false,
+          "enabled": true,
+          "value": "personal.email"
+        }
+      ],
+      "totalRecords": 2
+    }
+  }
+}

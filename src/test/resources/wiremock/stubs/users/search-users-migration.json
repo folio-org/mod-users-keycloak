@@ -1,0 +1,935 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/users",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "master"
+      },
+      "x-okapi-token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    },
+    "queryParameters": {
+      "query": {
+        "contains": "id=("
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "users": [
+        {
+          "username": "username:54001",
+          "id": "adf434c7-4ab8-4c90-ae53-9bf8c925e4f2",
+          "externalSystemId": "externalsystemid:54001",
+          "barcode": "0000054001",
+          "active": true,
+          "type": "",
+          "patronGroup": "470a1e14-9854-430f-a490-e4f4e56c2a67",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Jackson",
+            "firstName": "Richard",
+            "middleName": "B",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "256-578-3513",
+            "mobilePhone": "",
+            "dateOfBirth": "1963-04-18T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "9b6c735c-8b99-41c4-bc2f-d61680afe183",
+                "countryId": "United States",
+                "addressLine1": "4029 Marcus Street",
+                "addressLine2": "",
+                "city": "Huntsville",
+                "region": "AL",
+                "postalCode": "35802",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.072+00:00",
+          "updatedDate": "2022-12-05T10:43:38.072+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.069+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.069+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54002",
+          "id": "b88643f0-8b31-413e-8a71-43b3bfe71ba5",
+          "externalSystemId": "externalsystemid:54002",
+          "barcode": "0000054002",
+          "active": true,
+          "type": "",
+          "patronGroup": "bd0203da-a5c4-4a7e-8140-765fe9d851ff",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Jones",
+            "firstName": "Debbie",
+            "middleName": "M",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "610-426-4007",
+            "mobilePhone": "",
+            "dateOfBirth": "1955-01-03T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "9dad2593-2ab4-4326-b882-f677194e418d",
+                "countryId": "United States",
+                "addressLine1": "2981 Stone Lane",
+                "addressLine2": "",
+                "city": "Philadelphia",
+                "region": "PA",
+                "postalCode": "19103",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.100+00:00",
+          "updatedDate": "2022-12-05T10:43:38.100+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.096+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.096+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54005",
+          "id": "97e6052d-d1db-457f-a4e7-c9df05b4322f",
+          "externalSystemId": "externalsystemid:54005",
+          "barcode": "0000054005",
+          "active": true,
+          "type": "",
+          "patronGroup": "470a1e14-9854-430f-a490-e4f4e56c2a67",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Mays",
+            "firstName": "Carol",
+            "middleName": "R",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "712-730-8094",
+            "mobilePhone": "",
+            "dateOfBirth": "1955-11-19T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "18d872b9-3041-40e0-8d24-985e0bb008f3",
+                "countryId": "United States",
+                "addressLine1": "1857 Centennial Farm Road",
+                "addressLine2": "",
+                "city": "Spencer",
+                "region": "IA",
+                "postalCode": "51301",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.177+00:00",
+          "updatedDate": "2022-12-05T10:43:38.177+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.173+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.173+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54006",
+          "id": "8ef219b5-3595-4cc1-80f6-f3feda15e465",
+          "externalSystemId": "externalsystemid:54006",
+          "barcode": "0000054006",
+          "active": true,
+          "type": "",
+          "patronGroup": "28bf3a28-b509-463c-b5e1-da787bc017fb",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Holmes",
+            "firstName": "Angela",
+            "middleName": "P",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "915-872-7702",
+            "mobilePhone": "",
+            "dateOfBirth": "1994-07-15T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "be738249-5505-48c4-9cd0-b4c6795cf173",
+                "countryId": "United States",
+                "addressLine1": "3224 Frederick Street",
+                "addressLine2": "",
+                "city": "El Paso",
+                "region": "TX",
+                "postalCode": "79927",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.207+00:00",
+          "updatedDate": "2022-12-05T10:43:38.207+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.201+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.201+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54009",
+          "id": "e2bd47cd-2d5a-444f-9436-f3d5857f0d8d",
+          "externalSystemId": "externalsystemid:54009",
+          "barcode": "0000054009",
+          "active": true,
+          "type": "",
+          "patronGroup": "32274b17-90d6-4185-aa95-ce1c981a87ec",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Hubbard",
+            "firstName": "Sylvia",
+            "middleName": "C",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "617-819-1279",
+            "mobilePhone": "",
+            "dateOfBirth": "1969-02-07T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "f7104829-ec70-4281-bbad-a4a48dab4f01",
+                "countryId": "United States",
+                "addressLine1": "3176 Gerald L. Bates Drive",
+                "addressLine2": "",
+                "city": "Boston",
+                "region": "MA",
+                "postalCode": "2199",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.288+00:00",
+          "updatedDate": "2022-12-05T10:43:38.288+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.282+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.282+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54007",
+          "id": "bd28c005-bbca-4ecf-bf64-d66f3025555a",
+          "externalSystemId": "externalsystemid:54007",
+          "barcode": "0000054007",
+          "active": true,
+          "type": "",
+          "patronGroup": "24bc1e53-93f3-4c7b-930d-e87dd46a7cec",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Juhasz",
+            "firstName": "Bill",
+            "middleName": "N",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "623-327-0547",
+            "mobilePhone": "",
+            "dateOfBirth": "1986-08-16T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "ffd75a2c-6e45-40e9-a3cb-d21dbc4fe71d",
+                "countryId": "United States",
+                "addressLine1": "1238 Preston Street",
+                "addressLine2": "",
+                "city": "Buckeye",
+                "region": "AZ",
+                "postalCode": "85326",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.230+00:00",
+          "updatedDate": "2022-12-05T10:43:38.230+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.227+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.227+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54008",
+          "id": "8095e8b1-bca3-4552-80db-d8e49f77ef81",
+          "externalSystemId": "externalsystemid:54008",
+          "barcode": "0000054008",
+          "active": true,
+          "type": "",
+          "patronGroup": "7da4ba23-cfc5-4aec-bdb2-ee6720b0b76d",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Levesque",
+            "firstName": "Bethany",
+            "middleName": "B",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "512-687-1793",
+            "mobilePhone": "",
+            "dateOfBirth": "1988-02-07T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "2d7108db-bc0c-4c8c-83a2-af2f5241fbd1",
+                "countryId": "United States",
+                "addressLine1": "3545 Valley Lane",
+                "addressLine2": "",
+                "city": "Austin",
+                "region": "TX",
+                "postalCode": "78701",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.255+00:00",
+          "updatedDate": "2022-12-05T10:43:38.255+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.252+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.252+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54010",
+          "id": "3bfee3dd-f4be-4e5c-b458-6b0b422876ef",
+          "externalSystemId": "externalsystemid:54010",
+          "barcode": "0000054010",
+          "active": true,
+          "type": "",
+          "patronGroup": "bd0203da-a5c4-4a7e-8140-765fe9d851ff",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Navarro",
+            "firstName": "Douglas",
+            "middleName": "C",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "308-935-3791",
+            "mobilePhone": "",
+            "dateOfBirth": "1968-11-09T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "9de5a6a3-ecd9-469d-b427-f6c5e5abc78e",
+                "countryId": "United States",
+                "addressLine1": "1333 Rollins Road",
+                "addressLine2": "",
+                "city": "Ansley",
+                "region": "NE",
+                "postalCode": "68814",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.313+00:00",
+          "updatedDate": "2022-12-05T10:43:38.313+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.310+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.310+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54011",
+          "id": "63dbbc9c-34dd-4c32-b958-4c87f3f4ace4",
+          "externalSystemId": "externalsystemid:54011",
+          "barcode": "0000054011",
+          "active": true,
+          "type": "",
+          "patronGroup": "24bc1e53-93f3-4c7b-930d-e87dd46a7cec",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Dyson",
+            "firstName": "Jeanne",
+            "middleName": "J",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "214-813-3949",
+            "mobilePhone": "",
+            "dateOfBirth": "1982-04-04T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "05d1d8b6-f810-4443-83f0-bdcce3610e4b",
+                "countryId": "United States",
+                "addressLine1": "2820 Liberty Street",
+                "addressLine2": "",
+                "city": "Plano",
+                "region": "TX",
+                "postalCode": "75074",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.343+00:00",
+          "updatedDate": "2022-12-05T10:43:38.343+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.340+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.340+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54012",
+          "id": "dcc6eb44-b417-4bd3-9347-616864b4c106",
+          "externalSystemId": "externalsystemid:54012",
+          "barcode": "0000054012",
+          "active": true,
+          "type": "",
+          "patronGroup": "294db32c-0675-4dd5-8c5f-e3974c4ab6f2",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Smathers",
+            "firstName": "Hazel",
+            "middleName": "J",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "732-441-6484",
+            "mobilePhone": "",
+            "dateOfBirth": "1955-08-17T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "dadde6dc-ff3d-4537-89df-4cf4d74a0172",
+                "countryId": "United States",
+                "addressLine1": "4646 Finwood Road",
+                "addressLine2": "",
+                "city": "Keyport",
+                "region": "NJ",
+                "postalCode": "7735",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.371+00:00",
+          "updatedDate": "2022-12-05T10:43:38.371+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.368+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.368+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54017",
+          "id": "43650a3a-c36a-463a-86de-ce3c71a37b90",
+          "externalSystemId": "externalsystemid:54017",
+          "barcode": "0000054017",
+          "active": true,
+          "type": "",
+          "patronGroup": "10ed499c-19c2-4bb2-bff9-15bc559fe36a",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Rudolph",
+            "firstName": "Victoria",
+            "middleName": "K",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "503-354-6531",
+            "mobilePhone": "",
+            "dateOfBirth": "1992-10-26T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "a1de2a30-c7a6-4259-92b8-5064f349f82d",
+                "countryId": "United States",
+                "addressLine1": "1708 Mattson Street",
+                "addressLine2": "",
+                "city": "Portland",
+                "region": "OR",
+                "postalCode": "97209",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.528+00:00",
+          "updatedDate": "2022-12-05T10:43:38.528+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.524+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.524+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54018",
+          "id": "649de9fe-aae4-4397-b226-2710be83d1bf",
+          "externalSystemId": "externalsystemid:54018",
+          "barcode": "0000054018",
+          "active": true,
+          "type": "",
+          "patronGroup": "46dd39b5-a17c-421b-9e88-cf24e297ba4d",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Allen",
+            "firstName": "Richard",
+            "middleName": "J",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "503-961-0355",
+            "mobilePhone": "",
+            "dateOfBirth": "1961-06-29T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "b898b1ef-0f97-4365-bb22-35a98aae4477",
+                "countryId": "United States",
+                "addressLine1": "3850 Seneca Drive",
+                "addressLine2": "",
+                "city": "Portland",
+                "region": "OR",
+                "postalCode": "97218",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.562+00:00",
+          "updatedDate": "2022-12-05T10:43:38.562+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.552+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.552+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54020",
+          "id": "0910f68a-8a4a-46cf-8a38-9448c38b71d2",
+          "externalSystemId": "externalsystemid:54020",
+          "barcode": "0000054020",
+          "active": true,
+          "type": "",
+          "patronGroup": "dea545b4-5d0f-43d2-b2fe-a43a39cb345d",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Gibson",
+            "firstName": "Isidro",
+            "middleName": "S",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "605-932-1968",
+            "mobilePhone": "",
+            "dateOfBirth": "1953-04-03T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "7abfe6fb-74da-4251-9879-1c98ca14165d",
+                "countryId": "United States",
+                "addressLine1": "3831 Leroy Lane",
+                "addressLine2": "",
+                "city": "Peever",
+                "region": "SD",
+                "postalCode": "57257",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.618+00:00",
+          "updatedDate": "2022-12-05T10:43:38.618+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.613+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.613+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54013",
+          "id": "920a3964-bf55-404a-a942-9d0f26c16835",
+          "externalSystemId": "externalsystemid:54013",
+          "barcode": "0000054013",
+          "active": true,
+          "type": "",
+          "patronGroup": "e7d47de9-5b49-4859-b091-e32a74d11313",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Mulligan",
+            "firstName": "Cesar",
+            "middleName": "J",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "917-832-7135",
+            "mobilePhone": "",
+            "dateOfBirth": "1975-12-11T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "f062f3e2-bd14-4411-a7f7-4125e1f5c970",
+                "countryId": "United States",
+                "addressLine1": "1950 Settlers Lane",
+                "addressLine2": "",
+                "city": "New York",
+                "region": "NY",
+                "postalCode": "10016",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.407+00:00",
+          "updatedDate": "2022-12-05T10:43:38.407+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.394+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.394+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54014",
+          "id": "8d5be160-ef43-4389-bd5a-1b548747ed4b",
+          "externalSystemId": "externalsystemid:54014",
+          "barcode": "0000054014",
+          "active": true,
+          "type": "",
+          "patronGroup": "2a77b5ea-132d-47ba-97ee-c2e6d6afdedf",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Long",
+            "firstName": "Marc",
+            "middleName": "C",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "315-273-9287",
+            "mobilePhone": "",
+            "dateOfBirth": "1983-08-20T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "5f12e79c-f1b3-4865-a3d3-f72a20dd1c10",
+                "countryId": "United States",
+                "addressLine1": "199 Gandy Street",
+                "addressLine2": "",
+                "city": "Canton",
+                "region": "NY",
+                "postalCode": "13617",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.443+00:00",
+          "updatedDate": "2022-12-05T10:43:38.443+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.432+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.432+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54015",
+          "id": "00ea443f-7ce4-4086-8ec4-951af0e52abf",
+          "externalSystemId": "externalsystemid:54015",
+          "barcode": "0000054015",
+          "active": true,
+          "type": "",
+          "patronGroup": "32274b17-90d6-4185-aa95-ce1c981a87ec",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Cardona",
+            "firstName": "Donald",
+            "middleName": "M",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "702-932-6259",
+            "mobilePhone": "",
+            "dateOfBirth": "1997-08-23T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "2b92b461-93b5-4b15-9e15-4ef610fab047",
+                "countryId": "United States",
+                "addressLine1": "3543 Sunrise Road",
+                "addressLine2": "",
+                "city": "Henderson",
+                "region": "NV",
+                "postalCode": "89014",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.472+00:00",
+          "updatedDate": "2022-12-05T10:43:38.472+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.466+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.466+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54016",
+          "id": "7f9c8650-4daa-47ba-ad9a-792b14516f0d",
+          "externalSystemId": "externalsystemid:54016",
+          "barcode": "0000054016",
+          "active": true,
+          "type": "",
+          "patronGroup": "648ec9f2-c292-4e74-932b-9e5cf059d4d6",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Vasquez",
+            "firstName": "Stephen",
+            "middleName": "R",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "714-564-9139",
+            "mobilePhone": "",
+            "dateOfBirth": "1976-02-17T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "3e36130e-1b93-4bed-ae15-4a154616fd5c",
+                "countryId": "United States",
+                "addressLine1": "3889 Cimmaron Road",
+                "addressLine2": "",
+                "city": "Santa Ana",
+                "region": "CA",
+                "postalCode": "92701",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.499+00:00",
+          "updatedDate": "2022-12-05T10:43:38.499+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.494+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.494+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54019",
+          "id": "16679160-c777-4999-b1a3-e9b39bc701d5",
+          "externalSystemId": "externalsystemid:54019",
+          "barcode": "0000054019",
+          "active": true,
+          "type": "",
+          "patronGroup": "bd0203da-a5c4-4a7e-8140-765fe9d851ff",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Smith",
+            "firstName": "Annie",
+            "middleName": "H",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "952-915-1936",
+            "mobilePhone": "",
+            "dateOfBirth": "1978-05-03T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "43272da4-5e5f-4621-b2ec-43e8ec995bb1",
+                "countryId": "United States",
+                "addressLine1": "3067 Orchard Street",
+                "addressLine2": "",
+                "city": "Minneapolis",
+                "region": "MN",
+                "postalCode": "55410",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.593+00:00",
+          "updatedDate": "2022-12-05T10:43:38.593+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.587+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.587+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54022",
+          "id": "51ce9287-bbf3-4de9-8667-9a32d99eac39",
+          "externalSystemId": "externalsystemid:54022",
+          "barcode": "0000054022",
+          "active": true,
+          "type": "",
+          "patronGroup": "0fa228a0-b4f3-4a58-b767-04bbf630c2c5",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Guertin",
+            "firstName": "Dawn",
+            "middleName": "J",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "804-594-4970",
+            "mobilePhone": "",
+            "dateOfBirth": "1986-09-22T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "94fce7ae-0bc3-45eb-9d2e-d5b11c08cac5",
+                "countryId": "United States",
+                "addressLine1": "3720 Biddie Lane",
+                "addressLine2": "",
+                "city": "Midlothian",
+                "region": "VA",
+                "postalCode": "23113",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.676+00:00",
+          "updatedDate": "2022-12-05T10:43:38.676+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.670+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.670+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        },
+        {
+          "username": "username:54021",
+          "id": "bb824994-7f4c-4aa3-ac38-926a6b6f7c05",
+          "externalSystemId": "externalsystemid:54021",
+          "barcode": "0000054021",
+          "active": true,
+          "type": "",
+          "patronGroup": "b30466f5-d8fc-407a-9000-8f3576e4e88a",
+          "departments": [],
+          "proxyFor": [],
+          "personal": {
+            "lastName": "Carothers",
+            "firstName": "Roy",
+            "middleName": "K",
+            "preferredFirstName": "",
+            "email": "fse.hosting@ebsco.com",
+            "phone": "760-277-2976",
+            "mobilePhone": "",
+            "dateOfBirth": "1976-02-19T00:00:00.000+00:00",
+            "addresses": [
+              {
+                "id": "b8e5e42e-5361-412a-acfe-3018c2c25e37",
+                "countryId": "United States",
+                "addressLine1": "676 Parkway Street",
+                "addressLine2": "",
+                "city": "San Diego",
+                "region": "CA",
+                "postalCode": "92121",
+                "addressTypeId": "ae749f82-a4ef-47ca-b29c-0a5ad7bbff03",
+                "primaryAddress": true
+              }
+            ],
+            "preferredContactTypeId": "001"
+          },
+          "expirationDate": "2023-12-31T23:59:59.000+00:00",
+          "createdDate": "2022-12-05T10:43:38.651+00:00",
+          "updatedDate": "2022-12-05T10:43:38.651+00:00",
+          "metadata": {
+            "createdDate": "2022-12-05T10:43:38.648+00:00",
+            "createdByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684",
+            "updatedDate": "2022-12-05T10:43:38.648+00:00",
+            "updatedByUserId": "9eb67301-6f6e-468f-9b1a-6134dc39a684"
+          },
+          "customFields": {}
+        }
+      ],
+      "totalRecords": 43340,
+      "resultInfo": {
+        "totalRecords": 43340,
+        "facets": [],
+        "diagnostics": []
+      }
+    }
+  }
+}

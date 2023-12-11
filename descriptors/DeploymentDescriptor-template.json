@@ -1,0 +1,7 @@
+{
+  "srvcId": "@artifactId@-@version@",
+  "nodeId": "localhost",
+  "descriptor": {
+    "exec": "java -jar ../mod-users-keycloak/target/mod-users-keycloak-fat.jar -Dhttp.port=%p"
+  }
+}

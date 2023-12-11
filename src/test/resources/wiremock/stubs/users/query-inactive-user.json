@@ -1,0 +1,42 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/users",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "master"
+      },
+      "x-okapi-token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    },
+    "queryParameters": {
+      "query": {
+        "contains": "userinactive"
+      },
+      "limit": {
+        "equalTo": "2"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "users": [
+        {
+          "username": "userinactive",
+          "id": "d3958402-2f80-421b-a527-9933245a3556",
+          "active": false,
+          "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+          "personal": {
+            "email": "userinactive@example.com"
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}
