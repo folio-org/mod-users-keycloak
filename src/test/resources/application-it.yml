@@ -1,6 +1,6 @@
 spring:
   datasource:
-    username: ebsco_admin
+    username: folio_admin
     password: qwerty123
     hikari:
       data-source-properties:
