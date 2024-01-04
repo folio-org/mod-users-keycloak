@@ -10,7 +10,6 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
-import static org.folio.uk.domain.dto.UserMigrationJobStatus.FINISHED;
 
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,6 +31,7 @@ import org.folio.uk.domain.dto.UserMigrationJob;
 import org.folio.uk.domain.dto.UserMigrationJobStatus;
 import org.folio.uk.domain.dto.UserMigrationJobs;
 import org.folio.uk.domain.dto.UserTenant;
+import org.folio.uk.domain.entity.EntityUserMigrationJobStatus;
 import org.folio.uk.domain.entity.UserMigrationJobEntity;
 import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.integration.keycloak.KeycloakService;
@@ -109,12 +109,12 @@ public class UserMigrationService {
                                                                        FolioExecutionContext context) {
     return (result, ex) -> {
       try (var ignored = new FolioExecutionContextSetter(context)) {
-        UserMigrationJobStatus status;
+        EntityUserMigrationJobStatus status;
         if (ex != null) {
-          status = UserMigrationJobStatus.FAILED;
+          status = EntityUserMigrationJobStatus.FAILED;
           log.error("User Migration was failed. Id: {}", job.getId(), ex);
         } else {
-          status = FINISHED;
+          status = EntityUserMigrationJobStatus.FINISHED;
           log.info("User Migration was successfully finished. Id: {} Total Records: {}",
             job.getId(), job.getTotalRecords());
         }
@@ -131,13 +131,13 @@ public class UserMigrationService {
   private UserMigrationJobEntity buildUserMigrationsEntity() {
     var migration = new UserMigrationJobEntity();
     migration.setId(UUID.randomUUID());
-    migration.setStatus(UserMigrationJobStatus.IN_PROGRESS);
+    migration.setStatus(EntityUserMigrationJobStatus.IN_PROGRESS);
     migration.setStartedAt(Instant.now());
     return migration;
   }
 
   private void validateRunningMigrations(List<String> userIds) {
-    if (repository.existsByStatus(UserMigrationJobStatus.IN_PROGRESS)) {
+    if (repository.existsByStatus(EntityUserMigrationJobStatus.IN_PROGRESS)) {
       throw new RequestValidationException("There is already exists active migration job", "status",
         UserMigrationJobStatus.IN_PROGRESS);
     }
