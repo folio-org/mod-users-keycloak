@@ -242,6 +242,7 @@ paths:
               $ref: '#/components/schemas/identifier'
       responses:
         '204':
+          $ref: '#/components/responses/noContent'
         '400':
           $ref: '#/components/responses/badRequest'
         '422':
@@ -301,6 +302,7 @@ paths:
               $ref: '#/components/schemas/generateLinkRequest'
       responses:
         '200':
+          description: Response for reset password link generation
           content:
             application/json:
               schema:
@@ -312,18 +314,12 @@ paths:
         - password-reset
       description: Validates password reset link
       responses:
-        204:
-          description: "Successful link validation"
-        422:
-          description: "Unprocessable Entity"
-          body:
-            text/plain:
-              example: "Bad request"
-        500:
-          description: "Internal server error"
-          body:
-            text/plain:
-              example: "Internal server error"
+        '204':
+          $ref: '#/components/responses/noContent'
+        '422':
+          $ref: '#/components/responses/unprocessableEntity'
+        '500':
+          $ref: '#/components/responses/internalServerError'
 
 components:
   schemas:
@@ -374,6 +370,8 @@ components:
         - expanded_servicepoints
 
   responses:
+    noContent:
+      description: Success, no content
     badRequest:
       description: Bad request, e.g. malformed request body or query parameter
       content:
@@ -441,7 +439,7 @@ components:
       schema:
         type: array
         items:
-          $ref: IncludedField
+          $ref: '#/components/schemas/includedField'
 
     query-expand-permissions:
       in: query
