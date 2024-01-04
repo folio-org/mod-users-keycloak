@@ -1,6 +1,5 @@
 package org.folio.uk.domain.entity;
 
-import io.hypersistence.utils.hibernate.type.basic.PostgreSQLEnumType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,8 +9,8 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Data;
-import org.folio.uk.domain.dto.UserMigrationJobStatus;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Entity
@@ -30,10 +29,10 @@ public class UserMigrationJobEntity {
   /**
    * An user migration job status.
    */
-  @Type(PostgreSQLEnumType.class)
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
   @Column(name = "status", columnDefinition = "user_migration_job_status_type")
-  private UserMigrationJobStatus status;
+  private EntityUserMigrationJobStatus status;
 
   /**
    * An user migration job startup timestamp.
