@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "description": "Object containing the details of the aggregated policy.",
+  "properties": {
+    "roles": {
+      "description": "Specifies which roles are permitted by this policy. Required",
+      "type": "array",
+      "items": {
+        "$ref": "rolePolicyRole.json"
+      }
+    },
+    "logic": {
+      "description": "The logic to apply for this policy.",
+      "type": "string",
+      "enum": [
+        "positive",
+        "negative"
+      ],
+      "default": "positive"
+    }
+  },
+  "required": [
+    "roles"
+  ]
+}

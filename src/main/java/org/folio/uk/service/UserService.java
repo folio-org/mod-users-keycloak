@@ -30,7 +30,12 @@ import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
+import org.folio.uk.integration.policy.PolicyService;
+import org.folio.uk.integration.roles.UserCapabilitiesClient;
+import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
+import org.folio.uk.integration.roles.UserRolesClient;
+import org.folio.uk.integration.roles.model.CollectionResponse;
 import org.folio.uk.integration.users.UsersClient;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +51,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UsersClient usersClient;
+  private final UserRolesClient userRolesClient;
+  private final UserCapabilitySetClient userCapabilitySetClient;
+  private final UserCapabilitiesClient userCapabilitiesClient;
+  private final PolicyService policyService;
   private final ServicePointsUserClient servicePointsUserClient;
   private final ServicePointsClient servicePointsClient;
   private final KeycloakService keycloakService;
@@ -69,7 +78,7 @@ public class UserService {
     listeners = "methodLoggingRetryListener")
   public User createUserSafe(User user, String password, boolean keycloakOnly) {
     if (!keycloakOnly) {
-      findUserIdKcAttribute(user).ifPresent(userId -> user.setId(userId));
+      findUserIdKcAttribute(user).ifPresent(user::setId);
     }
 
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
@@ -119,8 +128,29 @@ public class UserService {
 
     keycloakService.deleteUser(id);
     usersClient.lookupUserById(id)
-      .ifPresentOrElse(user -> usersClient.deleteUser(id),
+      .ifPresentOrElse(user -> removeUserWithLinkedResources(id, user),
         () -> log.debug("Can not delete user cause user does not exist: userId = {}", id));
+  }
+
+  private void removeUserWithLinkedResources(UUID id, User user) {
+    usersClient.deleteUser(id);
+
+    CollectionResponse userCapabilitySet = userCapabilitySetClient.findUserCapabilitySet(id);
+    if (userCapabilitySet.getTotalRecords() > 0) {
+      userCapabilitySetClient.deleteUserCapabilitySet(id);
+    }
+    
+    CollectionResponse userCapabilities = userCapabilitiesClient.findUserCapabilities(id);
+    if (userCapabilities.getTotalRecords() > 0) {
+      userCapabilitiesClient.deleteUserCapabilities(id);
+    }
+    
+    CollectionResponse roles = userRolesClient.findUserRoles(id);
+    if (roles.getTotalRecords() > 0) {
+      userRolesClient.deleteUserRoles(id);
+    }
+
+    policyService.removePolicyByUsername(user.getUsername(), id);
   }
 
   private Optional<UUID> findUserIdKcAttribute(User user) {
