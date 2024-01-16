@@ -9,6 +9,7 @@
       "description": "Endpoint's static path / expression"
     },
     "method": {
+      "description": "Http Method",
       "$ref": "httpMethod.json"
     }
   }
