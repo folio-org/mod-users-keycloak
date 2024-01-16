@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "description": "Object containing the details of the policy.",
   "properties": {
@@ -16,15 +17,19 @@
       "type": "string"
     },
     "type": {
+      "description": "The type of policy. Required.", 
       "$ref": "policyType.json"
     },
     "userPolicy": {
+      "description": "Object containing the details of the user-based policy",
       "$ref": "userPolicy.json"
     },
     "timePolicy": {
+      "description": "Object containing the details of the user-based policy",
       "$ref": "timePolicy.json"
     },
     "rolePolicy": {
+      "description": "Object containing the details of the user-based policy",
       "$ref": "rolePolicy.json"
     },
     "metadata": {
