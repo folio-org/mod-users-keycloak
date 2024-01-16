@@ -29,7 +29,12 @@ import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.integration.policy.PolicyService;
+import org.folio.uk.integration.roles.UserCapabilitiesClient;
+import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
+import org.folio.uk.integration.roles.UserRolesClient;
+import org.folio.uk.integration.roles.model.CollectionResponse;
 import org.folio.uk.integration.users.UsersClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +57,10 @@ class UserServiceTest {
   @MockBean private ServicePointsClient servicePointsClient;
   @MockBean private KeycloakService keycloakService;
   @MockBean private UserPermissionsClient userPermissionsClient;
+  @MockBean private UserRolesClient userRolesClient;
+  @MockBean private UserCapabilitySetClient userCapabilitySetClient;
+  @MockBean private UserCapabilitiesClient userCapabilitiesClient;
+  @MockBean private PolicyService policyService;
 
   @AfterEach
   void tearDown() {
@@ -164,19 +173,61 @@ class UserServiceTest {
   }
 
   @Test
-  void deleteUser_positive_userExists() {
+  void deleteUser_positive_userExists_withResources() {
     var user = user();
     var userId = user.getId();
+    var collectionResponse = new CollectionResponse();
+    collectionResponse.setTotalRecords(1);
 
     when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
     doNothing().when(keycloakService).deleteUser(userId);
     doNothing().when(usersClient).deleteUser(userId);
+    doNothing().when(userRolesClient).deleteUserRoles(userId);
+    doNothing().when(userCapabilitySetClient).deleteUserCapabilitySet(userId);
+    doNothing().when(userCapabilitiesClient).deleteUserCapabilities(userId);
+    doNothing().when(policyService).removePolicyByUsername(user.getUsername(), userId);
+    when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
+    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
+    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
+    
+    userService.deleteUser(userId);
+
+    verify(usersClient).lookupUserById(userId);
+    verify(usersClient).deleteUser(userId);
+    verify(keycloakService).deleteUser(userId);
+    verify(userRolesClient).deleteUserRoles(userId);
+    verify(userCapabilitySetClient).deleteUserCapabilitySet(userId);
+    verify(userCapabilitiesClient).deleteUserCapabilities(userId);
+    verify(policyService).removePolicyByUsername(user.getUsername(), userId);
+  }
+
+  @Test
+  void deleteUser_positive_userExists_withoutResources() {
+    var user = user();
+    var userId = user.getId();
+    var collectionResponse = new CollectionResponse();
+    collectionResponse.setTotalRecords(0);
+
+    when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
+    doNothing().when(keycloakService).deleteUser(userId);
+    doNothing().when(usersClient).deleteUser(userId);
+    doNothing().when(userRolesClient).deleteUserRoles(userId);
+    doNothing().when(userCapabilitySetClient).deleteUserCapabilitySet(userId);
+    doNothing().when(userCapabilitiesClient).deleteUserCapabilities(userId);
+    doNothing().when(policyService).removePolicyByUsername(user.getUsername(), userId);
+    when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
+    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
+    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
 
     userService.deleteUser(userId);
 
     verify(usersClient).lookupUserById(userId);
     verify(usersClient).deleteUser(userId);
     verify(keycloakService).deleteUser(userId);
+    verify(userRolesClient, times(0)).deleteUserRoles(userId);
+    verify(userCapabilitySetClient, times(0)).deleteUserCapabilitySet(userId);
+    verify(userCapabilitiesClient, times(0)).deleteUserCapabilities(userId);
+    verify(policyService).removePolicyByUsername(user.getUsername(), userId);
   }
 
   @Test

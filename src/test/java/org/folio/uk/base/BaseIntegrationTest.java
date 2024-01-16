@@ -188,6 +188,10 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/find-system-user-by-query.json"));
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/delete-system-user.json"));
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/find-system-user-by-id.json"));
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/policy/find-policy-by-system-username.json"));
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/get-system-user-capability.json"));
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/get-system-user-capability-set.json"));
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/get-system-user-roles.json"));
 
     var tenantAttributes = new TenantAttributes().moduleFrom(TestConstants.MODULE_NAME).purge(true);
     mockMvc.perform(post("/_/tenant")

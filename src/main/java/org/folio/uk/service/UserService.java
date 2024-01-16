@@ -95,12 +95,6 @@ public class UserService {
     return usersClient.lookupUserById(id).orElseThrow(() -> new EntityNotFoundException("Not Found"));
   }
 
-  public Users queryUsers(String query, int limit) {
-    log.info("Querying users: query = {}", query);
-
-    return usersClient.query(query, limit);
-  }
-
   public CompositeUser getUserBySelfReference(List<IncludedField> include, boolean expandPermissions) {
     log.info("Retrieving user by self reference with parameters: include = {}, expandPermissions = {}",
       () -> StringUtils.join(emptyIfNull(include), ", "), () -> expandPermissions);

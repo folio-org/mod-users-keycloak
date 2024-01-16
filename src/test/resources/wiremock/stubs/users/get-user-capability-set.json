@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/users/d3958402-2f80-421b-a527-9933245a3556/capability-sets",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "totalRecords": 1,
+      "userCapabilitySets": [
+        {
+          "userId": "d3958402-2f80-421b-a527-9933245a3556",
+          "capabilitySetId": "c11e07f4-8bb0-45d1-a396-aaa72ae3121b",
+          "metadata": {
+            "createdBy": "a7189e80-0d88-4b65-9ad6-fceb4318107e",
+            "createdDate": "2023-09-04T12:00:00.000+00:00"
+          }
+        }
+      ]
+    }
+  }
+}

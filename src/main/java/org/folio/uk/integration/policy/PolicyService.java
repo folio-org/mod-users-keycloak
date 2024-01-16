@@ -19,7 +19,7 @@ public class PolicyService {
 
     Policies policyResponse = client.find(String.format("name=*%s", username), 9999, 0);
     if (policyResponse.getTotalRecords() == 0) {
-      log.debug("Can not delete user cause user does not exist: username = {}", username);
+      log.debug("Can not delete policy cause not found policies for user: username = {}", username);
       return;
     }
     
@@ -30,7 +30,7 @@ public class PolicyService {
         if (policy.getUserPolicy().getUsers().size() > 1) {
           unassignPolicy(userId, policy);
         } else {
-          client.delete(userId);
+          client.delete(policy.getId());
         }
       });
   }
