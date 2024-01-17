@@ -17,7 +17,8 @@
           "personal": {
             "lastName": "System",
             "firstName": "System user - mod-foo"
-          }
+          },
+          "customFields" : { }
         }
       }
     ]
