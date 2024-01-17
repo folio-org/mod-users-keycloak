@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.0</version>
+    <version>3.2.1</version>
     <relativePath />
   </parent>
 
@@ -30,7 +30,7 @@
     <folio-backend-common.version>1.1.0-SNAPSHOT</folio-backend-common.version>
     <folio-secret-store.version>1.1.0-SNAPSHOT</folio-secret-store.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
-    <org.json.version>20230618</org.json.version>
+    <org.json.version>20231013</org.json.version>
 
     <users-keycloak.yaml-file>${project.basedir}/src/main/resources/swagger.api/users-keycloak.yaml
     </users-keycloak.yaml-file>
@@ -41,10 +41,10 @@
 
     <!-- Plugins versions -->
     <maven-checkstyle.version>10.12.3</maven-checkstyle.version>
-    <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
+    <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <openapi-generator.version>6.4.0</openapi-generator.version>
+    <openapi-generator.version>7.2.0</openapi-generator.version>
   </properties>
 
   <dependencies>
