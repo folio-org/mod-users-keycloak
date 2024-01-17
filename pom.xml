@@ -16,13 +16,6 @@
   <description>mod-users-keycloak</description>
   <packaging>jar</packaging>
 
-  <licenses>
-    <license>
-      <name>Apache License 2.0</name>
-      <url>https://spdx.org/licenses/Apache-2.0</url>
-    </license>
-  </licenses>
-
   <properties>
     <java.version>17</java.version>
     <lombok.version>1.18.30</lombok.version>
@@ -511,20 +504,6 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <id>folio-nexus</id>
-      <name>FOLIO Maven repository</name>
-      <url>https://repository.folio.org/repository/maven-folio</url>
-    </repository>
-
-    <repository>
-      <id>index-data-nexus</id>
-      <name>FOLIO Maven repository</name>
-      <url>https://maven.indexdata.com</url>
-    </repository>
-  </repositories>
-
   <profiles>
     <profile>
       <id>coverage</id>
@@ -646,4 +625,44 @@
     </profile>
 
   </profiles>
+
+  <scm>
+    <url>https://github.com/folio-org/${project.artifactId}</url>
+    <connection>scm:git:git://github.com/folio-org/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:folio-org/${project.artifactId}.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>folio-nexus</id>
+      <name>FOLIO Maven Repository</name>
+      <url>https://repository.folio.org/repository/maven-folio</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>folio-nexus</id>
+      <name>FOLIO Release Repository</name>
+      <url>https://repository.folio.org/repository/maven-releases/</url>
+      <uniqueVersion>false</uniqueVersion>
+      <layout>default</layout>
+    </repository>
+    <snapshotRepository>
+      <id>folio-nexus</id>
+      <name>FOLIO Snapshot Repository</name>
+      <uniqueVersion>true</uniqueVersion>
+      <url>https://repository.folio.org/repository/maven-snapshots/</url>
+      <layout>default</layout>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>https://spdx.org/licenses/Apache-2.0</url>
+    </license>
+  </licenses>
+
 </project>
