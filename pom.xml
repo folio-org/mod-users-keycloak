@@ -5,23 +5,16 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.0</version>
+    <version>3.2.1</version>
     <relativePath />
   </parent>
 
   <name>mod-users-keycloak</name>
   <groupId>org.folio</groupId>
   <artifactId>mod-users-keycloak</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <description>mod-users-keycloak</description>
   <packaging>jar</packaging>
-
-  <licenses>
-    <license>
-      <name>Apache License 2.0</name>
-      <url>https://spdx.org/licenses/Apache-2.0</url>
-    </license>
-  </licenses>
 
   <properties>
     <java.version>17</java.version>
@@ -37,7 +30,7 @@
     <folio-backend-common.version>1.1.0-SNAPSHOT</folio-backend-common.version>
     <folio-secret-store.version>1.1.0-SNAPSHOT</folio-secret-store.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
-    <org.json.version>20230618</org.json.version>
+    <org.json.version>20231013</org.json.version>
 
     <users-keycloak.yaml-file>${project.basedir}/src/main/resources/swagger.api/users-keycloak.yaml
     </users-keycloak.yaml-file>
@@ -48,10 +41,10 @@
 
     <!-- Plugins versions -->
     <maven-checkstyle.version>10.12.3</maven-checkstyle.version>
-    <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
+    <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <openapi-generator.version>6.4.0</openapi-generator.version>
+    <openapi-generator.version>7.2.0</openapi-generator.version>
   </properties>
 
   <dependencies>
@@ -511,20 +504,6 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <id>folio-nexus</id>
-      <name>FOLIO Maven repository</name>
-      <url>https://repository.folio.org/repository/maven-folio</url>
-    </repository>
-
-    <repository>
-      <id>index-data-nexus</id>
-      <name>FOLIO Maven repository</name>
-      <url>https://maven.indexdata.com</url>
-    </repository>
-  </repositories>
-
   <profiles>
     <profile>
       <id>coverage</id>
@@ -646,4 +625,44 @@
     </profile>
 
   </profiles>
+
+  <scm>
+    <url>https://github.com/folio-org/${project.artifactId}</url>
+    <connection>scm:git:git://github.com/folio-org/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:folio-org/${project.artifactId}.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>folio-nexus</id>
+      <name>FOLIO Maven Repository</name>
+      <url>https://repository.folio.org/repository/maven-folio</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>folio-nexus</id>
+      <name>FOLIO Release Repository</name>
+      <url>https://repository.folio.org/repository/maven-releases/</url>
+      <uniqueVersion>false</uniqueVersion>
+      <layout>default</layout>
+    </repository>
+    <snapshotRepository>
+      <id>folio-nexus</id>
+      <name>FOLIO Snapshot Repository</name>
+      <uniqueVersion>true</uniqueVersion>
+      <url>https://repository.folio.org/repository/maven-snapshots/</url>
+      <layout>default</layout>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>https://spdx.org/licenses/Apache-2.0</url>
+    </license>
+  </licenses>
+
 </project>
