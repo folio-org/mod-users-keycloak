@@ -349,7 +349,16 @@ class UserIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/delete-user.json",
-    "/wiremock/stubs/users/get-user.json"
+    "/wiremock/stubs/users/get-user.json",
+    "/wiremock/stubs/policy/update-policy.json",
+    "/wiremock/stubs/policy/delete-policy.json",
+    "/wiremock/stubs/policy/find-policy-by-username.json",
+    "/wiremock/stubs/users/delete-user-capability.json",
+    "/wiremock/stubs/users/get-user-capability.json",
+    "/wiremock/stubs/users/delete-user-capability-set.json",
+    "/wiremock/stubs/users/get-user-capability-set.json",
+    "/wiremock/stubs/users/delete-user-roles.json",
+    "/wiremock/stubs/users/get-user-roles.json"
   })
   void delete_positive() throws Exception {
     var user = TestConstants.user("d3958402-2f80-421b-a527-9933245a3556", "delete-user", "du@mail.com");
@@ -360,7 +369,16 @@ class UserIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/delete-user.json",
-    "/wiremock/stubs/users/get-user.json"
+    "/wiremock/stubs/users/get-user.json",
+    "/wiremock/stubs/policy/delete-policy.json",
+    "/wiremock/stubs/policy/update-policy.json",
+    "/wiremock/stubs/policy/find-policy-by-username.json",
+    "/wiremock/stubs/users/delete-user-capability.json",
+    "/wiremock/stubs/users/get-user-capability.json",
+    "/wiremock/stubs/users/delete-user-capability-set.json",
+    "/wiremock/stubs/users/get-user-capability-set.json",
+    "/wiremock/stubs/users/delete-user-roles.json",
+    "/wiremock/stubs/users/get-user-roles.json"
   })
   void delete_positive_noAuthUser() throws Exception {
     doDelete("/users-keycloak/users/{id}", TestConstants.USER_ID);

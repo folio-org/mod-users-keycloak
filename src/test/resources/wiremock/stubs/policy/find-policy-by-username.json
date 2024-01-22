@@ -1,0 +1,51 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/policies",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    },
+    "queryParameters": {
+      "query": { "equalTo": "name=*ZakirBailey" },
+      "limit": { "equalTo": "9999" },
+      "offset": { "equalTo": "0" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "policies": [
+        {
+          "id": "f34f76d3-e727-42b5-a409-0ff906edf54e",
+          "name": "test policy for user: ZakirBailey",
+          "description": "policy desc",
+          "type": "USER",
+          "userPolicy": {
+            "users": [
+              "d3958402-2f80-421b-a527-9933245a3556"
+            ],
+            "logic": "positive"
+          }
+        },
+        {
+          "id": "4b0a8a5b-6c0e-4bda-a5e6-5a11331ba4af",
+          "name": "prod policy for user: ZakirBailey",
+          "description": "policy desc",
+          "type": "USER",
+          "userPolicy": {
+            "users": [
+              "d3958402-2f80-421b-a527-9933245a3556",
+              "206eaa63-1141-4846-888c-c02b3ad5017f"
+            ],
+            "logic": "positive"
+          }
+        }
+      ],
+      "totalRecords": 2
+    }
+  }
+}

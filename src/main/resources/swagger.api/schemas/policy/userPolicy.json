@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "description": "Object containing the details of the user-based policy",
+  "properties": {
+    "users": {
+      "description": "Collection of user IDs. Required.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "logic": {
+      "description": "The logic to apply for this policy.",
+      "type": "string",
+      "enum": [
+        "positive",
+        "negative"
+      ],
+      "default": "positive",
+      "examples": [
+        "positive",
+        "negative"
+      ]
+    }
+  },
+  "required": [
+    "users"
+  ],
+  "example": {
+    "id": "3f3f3f3f-3f3f-3333-3f3f-3f3f3f3f3f3f",
+    "name": "user_based_policy",
+    "description": "This policy is meant to be an example",
+    "users": [
+      "f7f7f7f7-7777-f7f7-f7f7-f7f7f7f7f7f7",
+      "7f7f7f7f-7f7f-7777-7f7f-7f7f7f7f7f7f"
+    ],
+    "logic": "positive"
+  }
+}

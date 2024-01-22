@@ -357,6 +357,10 @@ components:
       $ref: schemas/generateLinkResponse.json
     errorCode:
       $ref: schemas/common/errorCode.json
+    policy:
+      $ref: schemas/policy/policy.json
+    policies:
+      $ref: schemas/policy/policies.json
 
     includedField:
       type: string

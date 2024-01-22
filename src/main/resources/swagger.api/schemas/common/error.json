@@ -16,6 +16,7 @@
       "description": "Error message code"
     },
     "parameters": {
+      "description": "List of key/value parameters of an error",
       "$ref": "parameters.json"
     }
   }

@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "PUT",
+    "url": "/policies/4b0a8a5b-6c0e-4bda-a5e6-5a11331ba4af",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "id": "4b0a8a5b-6c0e-4bda-a5e6-5a11331ba4af",
+          "name": "prod policy for user: ZakirBailey",
+          "description": "policy desc",
+          "type": "USER",
+          "userPolicy": {
+            "users": [
+              "206eaa63-1141-4846-888c-c02b3ad5017f"
+            ],
+            "logic": "positive"
+          }
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 204
+  }
+}

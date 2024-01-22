@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/roles/users/d3958402-2f80-421b-a527-9933245a3556",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "roles": [
+        {
+          "id": "1e985e76-e9ca-401c-ad8e-0d121a11111e",
+          "name": "test role",
+          "description": "Role for test user",
+          "permissions": [
+            "some_permission"
+          ]
+        }
+      ],
+      "totalRecords" : 1
+    }
+  }
+}
