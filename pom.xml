@@ -25,10 +25,10 @@
     <apache-commons-lang3.version>3.14.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
-    <folio-spring-support.version>7.3.0-SNAPSHOT</folio-spring-support.version>
-    <folio-java-checkstyle.version>1.0.0-SNAPSHOT</folio-java-checkstyle.version>
-    <folio-backend-common.version>1.1.0-SNAPSHOT</folio-backend-common.version>
-    <folio-secret-store.version>1.1.0-SNAPSHOT</folio-secret-store.version>
+    <folio-spring-support.version>8.0.0</folio-spring-support.version>
+    <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
+    <folio-backend-common.version>1.0.0</folio-backend-common.version>
+    <folio-secret-store.version>1.0.0</folio-secret-store.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <org.json.version>20231013</org.json.version>
 
@@ -37,12 +37,12 @@
 
     <!-- Test dependencies versions -->
     <testcontainer.version>1.19.3</testcontainer.version>
-    <folio-backend-testing.version>1.1.0-SNAPSHOT</folio-backend-testing.version>
+    <folio-backend-testing.version>1.0.0</folio-backend-testing.version>
 
     <!-- Plugins versions -->
     <maven-checkstyle.version>10.12.3</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
-    <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
+    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
     <openapi-generator.version>7.2.0</openapi-generator.version>
   </properties>
@@ -636,10 +636,24 @@
   <repositories>
     <repository>
       <id>folio-nexus</id>
-      <name>FOLIO Maven Repository</name>
+      <name>FOLIO Maven repository</name>
       <url>https://repository.folio.org/repository/maven-folio</url>
     </repository>
+
+    <repository>
+      <id>index-data-nexus</id>
+      <name>FOLIO Maven repository</name>
+      <url>https://maven.indexdata.com</url>
+    </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>folio-nexus</id>
+      <name>FOLIO Maven repository</name>
+      <url>https://repository.folio.org/repository/maven-folio</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <distributionManagement>
     <repository>
