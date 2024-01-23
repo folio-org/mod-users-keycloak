@@ -7,7 +7,7 @@
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
     },
     "queryParameters": {
-      "query": { "equalTo": "name=*ZakirBailey" },
+      "query": { "equalTo": "name=*d3958402-2f80-421b-a527-9933245a3556" },
       "limit": { "equalTo": "9999" },
       "offset": { "equalTo": "0" }
     }
@@ -21,7 +21,7 @@
       "policies": [
         {
           "id": "f34f76d3-e727-42b5-a409-0ff906edf54e",
-          "name": "test policy for user: ZakirBailey",
+          "name": "test policy for user: d3958402-2f80-421b-a527-9933245a3556",
           "description": "policy desc",
           "type": "USER",
           "userPolicy": {
@@ -33,7 +33,7 @@
         },
         {
           "id": "4b0a8a5b-6c0e-4bda-a5e6-5a11331ba4af",
-          "name": "prod policy for user: ZakirBailey",
+          "name": "prod policy for user: d3958402-2f80-421b-a527-9933245a3556",
           "description": "policy desc",
           "type": "USER",
           "userPolicy": {
