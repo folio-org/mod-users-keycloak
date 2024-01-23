@@ -185,7 +185,7 @@ class UserServiceTest {
     doNothing().when(userRolesClient).deleteUserRoles(userId);
     doNothing().when(userCapabilitySetClient).deleteUserCapabilitySet(userId);
     doNothing().when(userCapabilitiesClient).deleteUserCapabilities(userId);
-    doNothing().when(policyService).removePolicyByUsername(user.getUsername(), userId);
+    doNothing().when(policyService).removePolicyByUserId(userId);
     when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
     when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
     when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
@@ -198,7 +198,7 @@ class UserServiceTest {
     verify(userRolesClient).deleteUserRoles(userId);
     verify(userCapabilitySetClient).deleteUserCapabilitySet(userId);
     verify(userCapabilitiesClient).deleteUserCapabilities(userId);
-    verify(policyService).removePolicyByUsername(user.getUsername(), userId);
+    verify(policyService).removePolicyByUserId(userId);
   }
 
   @Test
@@ -214,7 +214,7 @@ class UserServiceTest {
     doNothing().when(userRolesClient).deleteUserRoles(userId);
     doNothing().when(userCapabilitySetClient).deleteUserCapabilitySet(userId);
     doNothing().when(userCapabilitiesClient).deleteUserCapabilities(userId);
-    doNothing().when(policyService).removePolicyByUsername(user.getUsername(), userId);
+    doNothing().when(policyService).removePolicyByUserId(userId);
     when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
     when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
     when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
@@ -227,7 +227,7 @@ class UserServiceTest {
     verify(userRolesClient, times(0)).deleteUserRoles(userId);
     verify(userCapabilitySetClient, times(0)).deleteUserCapabilitySet(userId);
     verify(userCapabilitiesClient, times(0)).deleteUserCapabilities(userId);
-    verify(policyService).removePolicyByUsername(user.getUsername(), userId);
+    verify(policyService).removePolicyByUserId(userId);
   }
 
   @Test

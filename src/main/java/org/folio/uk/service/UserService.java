@@ -122,11 +122,11 @@ public class UserService {
 
     keycloakService.deleteUser(id);
     usersClient.lookupUserById(id)
-      .ifPresentOrElse(user -> removeUserWithLinkedResources(id, user),
+      .ifPresentOrElse(user -> removeUserWithLinkedResources(id),
         () -> log.debug("Can not delete user cause user does not exist: userId = {}", id));
   }
 
-  private void removeUserWithLinkedResources(UUID id, User user) {
+  private void removeUserWithLinkedResources(UUID id) {
     usersClient.deleteUser(id);
 
     CollectionResponse userCapabilitySet = userCapabilitySetClient.findUserCapabilitySet(id);
@@ -144,7 +144,7 @@ public class UserService {
       userRolesClient.deleteUserRoles(id);
     }
 
-    policyService.removePolicyByUsername(user.getUsername(), id);
+    policyService.removePolicyByUserId(id);
   }
 
   private Optional<UUID> findUserIdKcAttribute(User user) {

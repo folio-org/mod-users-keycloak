@@ -13,13 +13,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PolicyService {
 
+  public static final int LIMIT = 9999;
   private final PolicyClient client;
 
-  public void removePolicyByUsername(String username, UUID userId) {
+  public void removePolicyByUserId(UUID userId) {
 
-    Policies policyResponse = client.find(String.format("name=*%s", username), 9999, 0);
+    Policies policyResponse = client.find(String.format("name=*%s", userId), LIMIT, 0);
     if (policyResponse.getTotalRecords() == 0) {
-      log.debug("Can not delete policy cause not found policies for user: username = {}", username);
+      log.debug("Can not delete policy cause not found policies for user: userId = {}", userId);
       return;
     }
     

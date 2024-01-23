@@ -7,7 +7,7 @@
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
     },
     "queryParameters": {
-      "query": { "equalTo": "name=*master-system-user" },
+      "query": { "equalTo": "name=*83eb1e14-c657-4db8-8ba4-119670fc3552" },
       "limit": { "equalTo": "9999" },
       "offset": { "equalTo": "0" }
     }
