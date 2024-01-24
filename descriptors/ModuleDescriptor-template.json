@@ -37,7 +37,18 @@
         {
           "methods": [ "DELETE" ],
           "pathPattern": "/users-keycloak/users/{id}",
-          "permissionsRequired": [ "users.item.delete" ]
+          "permissionsRequired": [ "users.item.delete" ],
+          "permissionsDesired" : [
+            "policies.item.delete",
+            "policies.item.put",
+            "policies.collection.get",
+            "roles.users.item.get",
+            "roles.users.item.delete",
+            "user-capabilities.collection.delete",
+            "user.capabilities.collection.get",
+            "user.capability-sets.collection.get",
+            "user-capability-sets.collection.delete"
+          ]
         },
         {
           "methods" : [ "GET" ],
@@ -189,6 +200,18 @@
     },
     {
       "id": "capabilities",
+      "version": "1.0"
+    },
+    {
+      "id": "policies",
+      "version": "1.1"
+    },
+    {
+      "id": "roles-user",
+      "version": "1.0"
+    },
+    {
+      "id": "user-capability-sets",
       "version": "1.0"
     },
     {
