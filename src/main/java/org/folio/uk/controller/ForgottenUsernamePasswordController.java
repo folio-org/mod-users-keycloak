@@ -14,13 +14,13 @@ public class ForgottenUsernamePasswordController implements ForgottenUsernamePas
   private final ForgottenUsernamePasswordService service;
 
   @Override
-  public ResponseEntity<Void> recoverForgottenUsername(Identifier identifier) {
+  public ResponseEntity<String> recoverForgottenUsername(Identifier identifier) {
     service.recoverForgottenUsername(identifier);
     return ResponseEntity.noContent().build();
   }
 
   @Override
-  public ResponseEntity<Void> resetForgottenPassword(Identifier identifier) {
+  public ResponseEntity<String> resetForgottenPassword(Identifier identifier) {
     service.resetForgottenPassword(identifier);
     return ResponseEntity.noContent().build();
   }
