@@ -38,7 +38,7 @@
           "methods": [ "DELETE" ],
           "pathPattern": "/users-keycloak/users/{id}",
           "permissionsRequired": [ "users.item.delete" ],
-          "permissionsDesired" : [
+          "modulePermissions" : [
             "policies.item.delete",
             "policies.item.put",
             "policies.collection.get",
@@ -183,20 +183,6 @@
     {
       "id": "permissions-users",
       "version": "1.0"
-    }
-  ],
-  "optional" : [
-    {
-      "id": "notify",
-      "version": "2.0"
-    },
-    {
-      "id" : "service-points",
-      "version" : "3.3"
-    },
-    {
-      "id" : "service-points-users",
-      "version" : "1.0"
     },
     {
       "id": "capabilities",
@@ -217,6 +203,20 @@
     {
       "id": "user-capabilities",
       "version": "1.0"
+    }
+  ],
+  "optional" : [
+    {
+      "id": "notify",
+      "version": "2.0"
+    },
+    {
+      "id" : "service-points",
+      "version" : "3.3"
+    },
+    {
+      "id" : "service-points-users",
+      "version" : "1.0"
     },
     {
       "id": "user-tenants",
