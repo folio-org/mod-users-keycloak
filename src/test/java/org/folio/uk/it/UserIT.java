@@ -3,12 +3,15 @@ package org.folio.uk.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import static org.folio.test.TestConstants.TENANT_ID;
+import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -306,6 +309,22 @@ class UserIT extends BaseIntegrationTest {
     var user = TestConstants.user(userId, "update-user", "uu@mail.com");
     doPost("/users-keycloak/users?keycloakOnly=true", user);
     doPut("/users-keycloak/users/{id}", user, userId);
+  }
+
+  @Test
+  @WireMockStub(scripts = {
+    "/wiremock/stubs/users/update-user.json",
+  })
+  void update_with_accept_text_positive() throws Exception {
+    var userId = "202a8ef0-d07b-4626-ad41-48c2d50d9099";
+    var user = TestConstants.user(userId, "update-user", "uu@mail.com");
+    doPost("/users-keycloak/users?keycloakOnly=true", user);
+
+    mockMvc.perform(put("/users-keycloak/users/{id}", userId)
+      .headers(okapiHeaders())
+      .content(asJsonString(user))
+      .contentType(APPLICATION_JSON)
+      .accept(TEXT_PLAIN)).andExpect(status().isNoContent());
   }
 
   @Test

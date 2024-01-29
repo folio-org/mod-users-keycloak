@@ -70,6 +70,10 @@ paths:
       responses:
         '204':
           description: All selected users deleted
+          content:
+            text/plain:
+              schema:
+                type: string
         '400':
           $ref: '#/components/responses/badRequest'
         '500':
@@ -91,6 +95,10 @@ paths:
               $ref: '#/components/schemas/user'
       responses:
         '204':
+          content:
+            text/plain:
+              schema:
+                type: string
           description: User successfully updated
         '400':
           $ref: '#/components/responses/badRequest'
@@ -128,6 +136,10 @@ paths:
       responses:
         '204':
           description: User deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
         '400':
           $ref: '#/components/responses/badRequest'
         '404':
@@ -228,6 +240,10 @@ paths:
       responses:
         '204':
           description: Delete a user migration
+          content:
+            text/plain:
+              schema:
+                type: string
   /users-keycloak/forgotten/password:
     post:
       description: called when a user has forgotten a password
@@ -264,6 +280,10 @@ paths:
       responses:
         '204':
           description: "Successful call to forgotten username"
+          content:
+            text/plain:
+              schema:
+                type: string
         '400':
           $ref: '#/components/responses/badRequest'
         '422':
@@ -283,6 +303,10 @@ paths:
       responses:
         '204':
           description: "Successful password reset"
+          content:
+            text/plain:
+              schema:
+                type: string
         '400':
           $ref: '#/components/responses/badRequest'
         '422':
@@ -376,6 +400,10 @@ components:
   responses:
     noContent:
       description: Success, no content
+      content:
+        text/plain:
+          schema:
+            type: string
     badRequest:
       description: Bad request, e.g. malformed request body or query parameter
       content:

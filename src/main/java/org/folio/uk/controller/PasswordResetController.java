@@ -22,13 +22,13 @@ public class PasswordResetController implements PasswordResetApi {
   }
 
   @Override
-  public ResponseEntity<Void> passwordReset(PasswordReset passwordReset) {
+  public ResponseEntity<String> passwordReset(PasswordReset passwordReset) {
     service.resetPassword(passwordReset.getNewPassword());
     return ResponseEntity.noContent().build();
   }
 
   @Override
-  public ResponseEntity<Void> validatePasswordResetLink() {
+  public ResponseEntity<String> validatePasswordResetLink() {
     service.validateLink();
     return ResponseEntity.noContent().build();
   }

@@ -27,7 +27,7 @@ public class MigrationController implements MigrationApi {
   }
 
   @Override
-  public ResponseEntity<Void> deleteMigration(UUID id) {
+  public ResponseEntity<String> deleteMigration(UUID id) {
     service.deleteMigrationById(id);
     return ResponseEntity.status(NO_CONTENT).build();
   }

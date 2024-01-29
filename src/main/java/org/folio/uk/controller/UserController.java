@@ -36,13 +36,13 @@ public class UserController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<Void> updateUser(UUID id, User user) {
+  public ResponseEntity<String> updateUser(UUID id, User user) {
     service.updateUser(id, user);
     return ResponseEntity.status(NO_CONTENT).build();
   }
 
   @Override
-  public ResponseEntity<Void> deleteUser(UUID id) {
+  public ResponseEntity<String> deleteUser(UUID id) {
     service.deleteUser(id);
     return ResponseEntity.status(NO_CONTENT).build();
   }
