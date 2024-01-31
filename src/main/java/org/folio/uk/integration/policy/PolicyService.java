@@ -20,7 +20,7 @@ public class PolicyService {
 
     Policies policyResponse = client.find(String.format("name=*%s", userId), LIMIT, 0);
     if (policyResponse.getTotalRecords() == 0) {
-      log.warn("Can not delete policy cause not found policies for user: userId = {}", userId);
+      log.debug("Can not delete policy cause not found policies for user: userId = {}", userId);
       return;
     }
     
@@ -31,7 +31,7 @@ public class PolicyService {
         if (policy.getUserPolicy().getUsers().size() > 1) {
           unassignPolicy(userId, policy);
         } else {
-          log.warn("Delete policy: userId = {}, policyId = {}", userId, policy.getId());
+          log.debug("Delete policy: userId = {}, policyId = {}", userId, policy.getId());
           client.delete(policy.getId());
         }
       });
@@ -40,7 +40,7 @@ public class PolicyService {
   private void unassignPolicy(UUID userId, Policy policy) {
     policy.getUserPolicy().getUsers()
       .remove(userId);
-    log.warn("Unassign policy for user: policyId = {}, userId = {}", policy.getId(), userId);
+    log.debug("Unassign policy for user: policyId = {}, userId = {}", policy.getId(), userId);
     client.update(policy.getId(), policy);
   }
 }
