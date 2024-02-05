@@ -33,14 +33,15 @@ public class TestConstants {
   public static final String PERMISSION = "foo.bar";
 
   public static User user() {
-    return user(USER_ID.toString(), USER_NAME, "new9@new.com");
+    return user(USER_ID.toString(), USER_NAME, "new9@new.com", "newUser@folio.com");
   }
 
-  public static User user(String id, String username, String email) {
+  public static User user(String id, String username, String email, String externalSystemId) {
     return new User().id(UUID.fromString(id))
       .username(username)
       .barcode("12359")
       .active(true)
+      .externalSystemId(externalSystemId)
       .patronGroup(USER_PATRON_GROUP_ID)
       .enrollmentDate(USER_ENROLLMENT_DATE)
       .expirationDate(USER_EXPIRATION_DATE)

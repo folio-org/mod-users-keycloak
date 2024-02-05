@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import feign.FeignException;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -28,8 +30,11 @@ import org.folio.test.extensions.impl.KafkaTestExecutionListener;
 import org.folio.test.extensions.impl.KeycloakExecutionListener;
 import org.folio.test.extensions.impl.WireMockAdminClient;
 import org.folio.test.extensions.impl.WireMockExecutionListener;
+import org.folio.uk.domain.dto.User;
+import org.folio.uk.integration.keycloak.KeycloakClient;
 import org.folio.uk.integration.keycloak.TokenService;
 import org.folio.uk.integration.keycloak.model.KeycloakRole;
+import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,6 +77,8 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   protected static WireMockAdminClient wmAdminClient;
 
   @Autowired protected CacheManager cacheManager;
+  @Autowired protected KeycloakClient keycloakClient;
+  @Autowired protected TokenService tokenService;
 
   @BeforeEach
   void setUp() {
@@ -204,6 +211,19 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
     assertThat(wmAdminClient.unmatchedRequests().getRequests()).isEmpty();
     wmAdminClient.resetAll();
+  }
+
+  protected void verifyKeyCloakUser(User user) {
+    var authToken = tokenService.issueToken();
+    List<KeycloakUser> keycloakUsers =
+      keycloakClient.findUsersByUsername(TestConstants.TENANT_NAME, user.getUsername(), false, authToken);
+    KeycloakUser keycloakUser = keycloakUsers.get(0);
+
+    assertThat(keycloakUser.getEmail()).isEqualTo(user.getPersonal().getEmail());
+
+    Map<String, List<String>> attributes = keycloakUser.getAttributes();
+    assertThat(attributes.get(KeycloakUser.USER_ID_ATTR)).contains(user.getId().toString());
+    assertThat(attributes.get(KeycloakUser.USER_EXTERNAL_SYSTEM_ID_ATTR)).contains(user.getExternalSystemId());
   }
 
   @TestConfiguration

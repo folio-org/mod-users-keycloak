@@ -23,6 +23,7 @@ public class KeycloakUser implements Serializable {
 
   public static final String USER_ID_ATTR = "user_id";
   public static final String USER_TENANT_ATTR = "tenant_name";
+  public static final String USER_EXTERNAL_SYSTEM_ID_ATTR = "external_system_id";
 
   @Serial
   private static final long serialVersionUID = 3279142822765797425L;
@@ -54,6 +55,15 @@ public class KeycloakUser implements Serializable {
       attributes.remove(USER_TENANT_ATTR);
     } else {
       attributes.put(USER_TENANT_ATTR, userTenants);
+    }
+  }
+
+  @JsonIgnore
+  public void setUserExternalSystemIdAttr(String externalSystemId) {
+    if (externalSystemId == null) {
+      attributes.remove(USER_EXTERNAL_SYSTEM_ID_ATTR);
+    } else {
+      attributes.put(USER_EXTERNAL_SYSTEM_ID_ATTR, List.of(externalSystemId));
     }
   }
 
