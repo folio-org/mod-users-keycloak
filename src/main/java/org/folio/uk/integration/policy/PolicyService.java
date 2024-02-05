@@ -31,6 +31,7 @@ public class PolicyService {
         if (policy.getUserPolicy().getUsers().size() > 1) {
           unassignPolicy(userId, policy);
         } else {
+          log.debug("Delete policy: userId = {}, policyId = {}", userId, policy.getId());
           client.delete(policy.getId());
         }
       });
@@ -39,6 +40,7 @@ public class PolicyService {
   private void unassignPolicy(UUID userId, Policy policy) {
     policy.getUserPolicy().getUsers()
       .remove(userId);
+    log.debug("Unassign policy for user: policyId = {}, userId = {}", policy.getId(), userId);
     client.update(policy.getId(), policy);
   }
 }

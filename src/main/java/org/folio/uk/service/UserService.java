@@ -120,10 +120,11 @@ public class UserService {
   public void deleteUser(UUID id) {
     log.info("Deleting user with: id = {}", id);
 
-    keycloakService.deleteUser(id);
     usersClient.lookupUserById(id)
       .ifPresentOrElse(user -> removeUserWithLinkedResources(id),
         () -> log.debug("Can not delete user cause user does not exist: userId = {}", id));
+
+    keycloakService.deleteUser(id);
   }
 
   private void removeUserWithLinkedResources(UUID id) {
