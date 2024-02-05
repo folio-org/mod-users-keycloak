@@ -14,10 +14,13 @@ import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
 import org.folio.uk.base.KeycloakTestClient;
+import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserMigrationJob;
 import org.folio.uk.domain.dto.UserMigrationJobStatus;
+import org.folio.uk.domain.dto.Users;
 import org.folio.uk.integration.keycloak.TokenService;
 import org.folio.uk.support.TestConstants;
+import org.folio.uk.support.TestValues;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -58,6 +61,10 @@ class UserMigrationIT extends BaseIntegrationTest {
     var status = await().atMost(Duration.ofSeconds(10))
       .until(() -> getJobStatusById(resp.getId()), equalTo(UserMigrationJobStatus.FINISHED));
     assertThat(status).isEqualTo(UserMigrationJobStatus.FINISHED);
+
+    Users users = TestValues.readValue("json/user/search-users-migration.json", Users.class);
+    User migratedUser = users.getUsers().get(0);
+    verifyKeyCloakUser(migratedUser);
   }
 
   @Test

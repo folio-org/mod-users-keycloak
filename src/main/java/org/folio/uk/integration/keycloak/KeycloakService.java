@@ -317,6 +317,7 @@ public class KeycloakService {
     }
 
     result.setUserIdAttr(user.getId());
+    result.setUserExternalSystemIdAttr(user.getExternalSystemId());
 
     return result;
   }

@@ -1,0 +1,40 @@
+{
+  "users": [
+    {
+      "username": "username:21041",
+      "id": "08038099-4d36-4a67-b2a4-b87f1fc82471",
+      "externalSystemId": "externalsystemid:21041",
+      "barcode": "0000021041",
+      "active": true,
+      "type": "",
+      "patronGroup": "12e7bc63-f1b6-40e4-a309-9fc86e71bce9",
+      "departments": [ ],
+      "proxyFor": [ ],
+      "personal": {
+        "lastName": "John",
+        "firstName": "Doe",
+        "preferredFirstName": "",
+        "email": "folio.hosting@folio.org",
+        "mobilePhone": "",
+        "dateOfBirth": "1975-02-04T00:00:00.000+00:00",
+        "preferredContactTypeId": "001"
+      },
+      "expirationDate": "2024-12-31T23:59:59.000+00:00",
+      "createdDate": "2023-12-07T10:53:38.100+00:00",
+      "updatedDate": "2022-12-07T10:53:38.100+00:00",
+      "metadata": {
+        "createdDate": "2022-12-07T10:53:38.096+00:00",
+        "createdByUserId": "02a78e5f-b14f-45df-a106-76978126d819",
+        "updatedDate": "2022-12-07T10:53:38.096+00:00",
+        "updatedByUserId": "02a78e5f-b14f-45df-a106-76978126d819"
+      },
+      "customFields": { }
+    }
+  ],
+  "totalRecords": 1210,
+  "resultInfo": {
+    "totalRecords": 1210,
+    "facets": [ ],
+    "diagnostics": [ ]
+  }
+}

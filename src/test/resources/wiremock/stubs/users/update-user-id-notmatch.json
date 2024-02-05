@@ -11,6 +11,7 @@
         "equalToJson": {
           "username": "ZakirBailey",
           "id": "d3958402-2f80-421b-a527-9933245a3556",
+          "externalSystemId": "newUser@folio.com",
           "barcode": "12359",
           "active": true,
           "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
