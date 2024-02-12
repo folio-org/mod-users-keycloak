@@ -30,7 +30,7 @@
     <folio-backend-common.version>1.1.0</folio-backend-common.version>
     <folio-secret-store.version>1.1.0</folio-secret-store.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
-    <org.json.version>20231013</org.json.version>
+    <org.json.version>20240205</org.json.version>
 
     <users-keycloak.yaml-file>${project.basedir}/src/main/resources/swagger.api/users-keycloak.yaml
     </users-keycloak.yaml-file>
