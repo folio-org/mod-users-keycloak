@@ -36,7 +36,7 @@
     </users-keycloak.yaml-file>
 
     <!-- Test dependencies versions -->
-    <testcontainer.version>1.19.4</testcontainer.version>
+    <testcontainer.version>1.19.5</testcontainer.version>
     <folio-backend-testing.version>1.1.0</folio-backend-testing.version>
 
     <!-- Plugins versions -->
