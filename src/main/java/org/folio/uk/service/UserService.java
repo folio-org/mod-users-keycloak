@@ -134,12 +134,12 @@ public class UserService {
     if (userCapabilitySet.getTotalRecords() > 0) {
       userCapabilitySetClient.deleteUserCapabilitySet(id);
     }
-    
+
     CollectionResponse userCapabilities = userCapabilitiesClient.findUserCapabilities(id);
     if (userCapabilities.getTotalRecords() > 0) {
       userCapabilitiesClient.deleteUserCapabilities(id);
     }
-    
+
     CollectionResponse roles = userRolesClient.findUserRoles(id);
     if (roles.getTotalRecords() > 0) {
       userRolesClient.deleteUserRoles(id);
@@ -192,7 +192,7 @@ public class UserService {
   }
 
   private PermissionUser fetchPermissionUser(UUID userId) {
-    var perms = emptyIfNull(userPermissionsClient.getPermissionsForUser(userId, true, true)
+    var perms = emptyIfNull(userPermissionsClient.getPermissionsForUser(userId, false, true)
       .getPermissions());
     return new PermissionUser()
       .permissions(perms)
