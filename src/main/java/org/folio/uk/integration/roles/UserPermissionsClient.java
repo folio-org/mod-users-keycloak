@@ -11,6 +11,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface UserPermissionsClient {
 
   @GetMapping("/users/{id}")
-  UserPermissions getPermissionsForUser(@PathVariable("id") UUID id, @RequestParam Boolean onlyVisible,
-                                        @RequestParam Boolean expand);
+  UserPermissions getPermissionsForUser(@PathVariable("id") UUID id, @RequestParam("onlyVisible") Boolean onlyVisible);
 }

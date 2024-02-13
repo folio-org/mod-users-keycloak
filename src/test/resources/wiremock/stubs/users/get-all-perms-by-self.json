@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/permissions/users/ac6767c3-1325-5205-89d5-c578c991a45a?onlyVisible=true",
+    "url": "/permissions/users/ac6767c3-1325-5205-89d5-c578c991a45a?onlyVisible=false",
     "headers": {
       "x-okapi-tenant": {
         "equalTo": "test"
@@ -16,7 +16,8 @@
     "jsonBody": {
       "userId": "ac6767c3-1325-5205-89d5-c578c991a45a",
       "permissions": [
-        "ui.all"
+        "ui.all",
+        "be.all"
       ]
     }
   }

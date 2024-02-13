@@ -30,6 +30,7 @@ import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.policy.PolicyService;
+import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
 import org.folio.uk.integration.roles.UserCapabilitiesClient;
 import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
@@ -61,6 +62,7 @@ class UserServiceTest {
   @MockBean private UserCapabilitySetClient userCapabilitySetClient;
   @MockBean private UserCapabilitiesClient userCapabilitiesClient;
   @MockBean private PolicyService policyService;
+  @MockBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
 
   @AfterEach
   void tearDown() {
@@ -189,7 +191,7 @@ class UserServiceTest {
     when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
     when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
     when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
-    
+
     userService.deleteUser(userId);
 
     verify(usersClient).lookupUserById(userId);

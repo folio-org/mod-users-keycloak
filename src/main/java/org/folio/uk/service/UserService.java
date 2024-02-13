@@ -31,11 +31,11 @@ import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.policy.PolicyService;
+import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
 import org.folio.uk.integration.roles.UserCapabilitiesClient;
 import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
 import org.folio.uk.integration.roles.UserRolesClient;
-import org.folio.uk.integration.roles.model.CollectionResponse;
 import org.folio.uk.integration.users.UsersClient;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +60,7 @@ public class UserService {
   private final KeycloakService keycloakService;
   private final UserPermissionsClient userPermissionsClient;
   private final FolioExecutionContext folioExecutionContext;
+  private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
 
   public User createUser(User user, boolean keycloakOnly) {
     return createUser(user, null, keycloakOnly);
@@ -130,17 +131,17 @@ public class UserService {
   private void removeUserWithLinkedResources(UUID id) {
     usersClient.deleteUser(id);
 
-    CollectionResponse userCapabilitySet = userCapabilitySetClient.findUserCapabilitySet(id);
+    var userCapabilitySet = userCapabilitySetClient.findUserCapabilitySet(id);
     if (userCapabilitySet.getTotalRecords() > 0) {
       userCapabilitySetClient.deleteUserCapabilitySet(id);
     }
-    
-    CollectionResponse userCapabilities = userCapabilitiesClient.findUserCapabilities(id);
+
+    var userCapabilities = userCapabilitiesClient.findUserCapabilities(id);
     if (userCapabilities.getTotalRecords() > 0) {
       userCapabilitiesClient.deleteUserCapabilities(id);
     }
-    
-    CollectionResponse roles = userRolesClient.findUserRoles(id);
+
+    var roles = userRolesClient.findUserRoles(id);
     if (roles.getTotalRecords() > 0) {
       userRolesClient.deleteUserRoles(id);
     }
@@ -192,8 +193,10 @@ public class UserService {
   }
 
   private PermissionUser fetchPermissionUser(UUID userId) {
-    var perms = emptyIfNull(userPermissionsClient.getPermissionsForUser(userId, true, true)
-      .getPermissions());
+    var includeOnlyVisiblePermissions = rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions();
+    var userPermissions = userPermissionsClient.getPermissionsForUser(userId, includeOnlyVisiblePermissions);
+    var perms = emptyIfNull(userPermissions.getPermissions());
+
     return new PermissionUser()
       .permissions(perms)
       .userId(userId.toString());
