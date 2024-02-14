@@ -62,6 +62,8 @@ management:
 
 application:
   environment: ${ENV:folio}
+  mod-roles-keycloak:
+    include-only-visible-permissions: ${INCLUDE_ONLY_VISIBLE_PERMISSIONS:true}
   system-user:
     username-template: ${SYSTEM_USER_USERNAME_TEMPLATE:{tenantId}-system-user}
     email-template: ${SYSTEM_USER_EMAIL_TEMPLATE:{tenantId}-system-user@ebsco.com}
