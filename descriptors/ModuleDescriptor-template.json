@@ -60,7 +60,7 @@
           "pathPattern": "/users-keycloak/migrations",
           "permissionsRequired": [ "users-keycloak.migrations.post" ],
           "modulePermissions": [
-            "users-keycloak.collection.get",
+            "users.collection.get",
             "perms.users"
           ]
         },
