@@ -123,7 +123,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
-  public void shouldGenerateAndSendPasswordNotificationForTokenInQueryParams() throws Exception {
+  void shouldGenerateAndSendPasswordNotificationForTokenInQueryParams() throws Exception {
     var expectedLink = MOCK_FOLIO_UI_HOST + DEFAULT_UI_URL
       + "?resetToken=" + RESET_PASSWORD_TOKEN
       + "&tenant=" + TEST_TENANT;
