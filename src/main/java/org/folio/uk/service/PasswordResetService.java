@@ -1,5 +1,6 @@
 package org.folio.uk.service;
 
+import static java.lang.Boolean.parseBoolean;
 import static org.folio.uk.domain.dto.ErrorCode.LINK_EXPIRED;
 import static org.folio.uk.domain.dto.ErrorCode.LINK_INVALID;
 import static org.folio.uk.domain.dto.ErrorCode.USER_ABSENT_USERNAME;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.model.ExpirationTimeUnit;
 import org.folio.uk.exception.UnprocessableEntityException;
@@ -37,6 +39,7 @@ public class PasswordResetService {
   private static final String UI_PATH_CONFIG_KEY = "RESET_PASSWORD_UI_PATH";
   private static final String LINK_EXPIRATION_TIME_CONFIG_KEY = "RESET_PASSWORD_LINK_EXPIRATION_TIME";
   private static final String LINK_EXPIRATION_UNIT_OF_TIME_CONFIG_KEY = "RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME";
+  private static final String PUT_TOKEN_IN_QUERY_PARAMS_CONFIG_KEY = "PUT_RESET_TOKEN_IN_QUERY_PARAMS";
   private static final Set<String> GENERATE_LINK_REQUIRED_CONFIGURATION = Collections.emptySet();
   private static final String LINK_EXPIRATION_TIME_DEFAULT = "24";
   private static final String FOLIO_HOST_DEFAULT = "http://localhost:3000";
@@ -54,6 +57,7 @@ public class PasswordResetService {
   private final LoginService actionService;
   private final UsersClient usersClient;
   private final LoginService loginService;
+  private final FolioExecutionContext folioExecutionContext;
 
   @Value("${reset-password.ui-path.default:/reset-password}")
   private String resetPasswordUiPathDefault;
@@ -118,7 +122,10 @@ public class PasswordResetService {
   private String getGeneratedLink(Map<String, String> configMap, String token) {
     var linkHost = configMap.getOrDefault(FOLIO_HOST_CONFIG_KEY, FOLIO_HOST_DEFAULT);
     var linkPath = configMap.getOrDefault(UI_PATH_CONFIG_KEY, resetPasswordUiPathDefault);
-    return linkHost + linkPath + '/' + token;
+    var putTokenInQueryParams = parseBoolean(configMap.getOrDefault(PUT_TOKEN_IN_QUERY_PARAMS_CONFIG_KEY, "false"));
+    var tenantId = folioExecutionContext.getTenantId();
+    var template = putTokenInQueryParams ? "%s%s?resetToken=%s&tenant=%s" : "%s%s/%s?tenant=%s";
+    return String.format(template, linkHost, linkPath, token, tenantId);
   }
 
   private User lookupAndValidateUser(UUID userId) {

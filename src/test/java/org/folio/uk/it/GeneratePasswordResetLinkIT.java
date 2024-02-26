@@ -82,7 +82,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
   void generatePasswordResetLink_positive_resetPasswordWithDefaultExpirationTime() throws Exception {
-    var expectedLink = MOCK_FOLIO_UI_HOST + DEFAULT_UI_URL + '/' + RESET_PASSWORD_TOKEN;
+    var expectedLink = getExpectedPasswordResetLink();
 
     callGeneratePasswordResetLink()
       .andExpectAll(status().isOk(),
@@ -109,7 +109,24 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-non-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
   void generatePasswordResetLink_positive_createPasswordWithDefaultExpirationTime() throws Exception {
-    var expectedLink = MOCK_FOLIO_UI_HOST + DEFAULT_UI_URL + '/' + RESET_PASSWORD_TOKEN;
+    var expectedLink = getExpectedPasswordResetLink();
+
+    callGeneratePasswordResetLink()
+      .andExpectAll(status().isOk(),
+        jsonPath("$.link", is(expectedLink)));
+
+    verify(notificationClient).sendNotification(any());
+  }
+
+  @Test
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset-extended.json")
+  @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
+  @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
+  @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
+  void shouldGenerateAndSendPasswordNotificationForTokenInQueryParams() throws Exception {
+    var expectedLink = MOCK_FOLIO_UI_HOST + DEFAULT_UI_URL
+      + "?resetToken=" + RESET_PASSWORD_TOKEN
+      + "&tenant=" + TEST_TENANT;
 
     callGeneratePasswordResetLink()
       .andExpectAll(status().isOk(),
@@ -176,7 +193,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   @SneakyThrows
   private void generateAndSendResetPasswordNotificationWhenPasswordExistsWith(
     String expectedExpirationTime, String expectedExpirationTimeOfUnit) {
-    var expectedLink = MOCK_FOLIO_UI_HOST + DEFAULT_UI_URL + '/' + RESET_PASSWORD_TOKEN;
+    var expectedLink = getExpectedPasswordResetLink();
 
     callGeneratePasswordResetLink()
       .andExpectAll(status().isOk(), jsonPath("$.link", is(expectedLink)));
@@ -194,6 +211,10 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
       .withText(StringUtils.EMPTY);
 
     verify(notificationClient).sendNotification(eq(expectedNotification));
+  }
+
+  private static String getExpectedPasswordResetLink() {
+    return MOCK_FOLIO_UI_HOST + DEFAULT_UI_URL + '/' + RESET_PASSWORD_TOKEN + "?tenant=" + TEST_TENANT;
   }
 
   @SneakyThrows
