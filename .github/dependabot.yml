@@ -13,3 +13,28 @@ updates:
       prefix: fix
       prefix-development: chore
       include: scope
+    groups:
+      dev-folio-deps:
+        patterns:
+          - "folio-*"
+        exclude-patterns:
+          - "folio-backend-testing"
+      dev-deps:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "folio-*"
+          - "spring*test"
+          - "awaitility"
+          - "folio-backend-testing"
+          - "*testcontainers*"
+          - "instancio*"
+          - "kryo"
+      test-deps:
+        patterns:
+          - "spring*test"
+          - "awaitility"
+          - "folio-backend-testing"
+          - "*testcontainers*"
+          - "instancio*"
+          - "kryo"
