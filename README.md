@@ -129,6 +129,38 @@ Keycloak all configuration properties: https://www.keycloak.org/server/all-confi
 | KC_HOSTNAME_STRICT | Disables dynamically resolving the hostname from request headers. Should always be set to true in production, unless proxy verifies the Host header.                       |
 | KC_HOSTNAME_PORT   | The port used by the proxy when exposing the hostname. Set this option if the proxy uses a port other than the default HTTP and HTTPS ports. Defaults to -1.               |
 
+
+### mod-configuration properties
+
+Configuration properties must be created for a module: `USERSBL`
+
+Request example:
+
+```HTTP
+POST /configurations/entries HTTP/1.1
+Host: <gateway>
+x-okapi-tenant: <tenant_name>
+x-okapi-token: <auth-token>
+
+{
+  "module": "USERSBL",
+  "configName": "validation_rules",
+  "code": "FOLIO_HOST",
+  "description": "Host value for password reset",
+  "default": true,
+  "enabled": true,
+  "value": "https://ui-host:3000"
+}
+```
+
+| Name                                        |     Default value     | Description                                                                                                                                       |
+|:--------------------------------------------|:---------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------|
+| FOLIO_HOST                                  | http://localhost:3000 | Folio host used to generate password reset link                                                                                                   |
+| RESET_PASSWORD_UI_PATH                      |    /reset-password    | UI path, added to the folio host, took value firstly from `mod-configuration`, then from application property `reset-password.ui-path.default`    |
+| RESET_PASSWORD_LINK_EXPIRATION_TIME         |          24           | A duration value when the reset password token will be expired                                                                                    |
+| RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME |         hours         | A duration unit when the reset password token will be expired                                                                                     |
+| PUT_RESET_TOKEN_IN_QUERY_PARAMS             |         false         | Defines if reset token will be included in the path (if value is not set or set as `false`) or as a query parameter (if value is set to a `true`) |
+
 ## Loading of client IDs/secrets
 
 The module pulls client_secret for client_id from AWS Parameter store, Vault or other reliable secret storages when they
