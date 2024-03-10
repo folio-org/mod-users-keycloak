@@ -29,7 +29,7 @@
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
     <application-poc-tools.version>1.3.0</application-poc-tools.version>    
     <coffee-boots.version>4.0.0</coffee-boots.version>
-    <org.json.version>20240205</org.json.version>
+    <org.json.version>20240303</org.json.version>
 
     <users-keycloak.yaml-file>${project.basedir}/src/main/resources/swagger.api/users-keycloak.yaml
     </users-keycloak.yaml-file>
