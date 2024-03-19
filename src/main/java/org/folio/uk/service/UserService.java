@@ -115,7 +115,10 @@ public class UserService {
     log.info("Updating user: id = {}", id);
 
     usersClient.updateUser(id, user);
-    keycloakService.updateUser(id, user);
+    Optional.ofNullable(keycloakService.findKeycloakUserWithUserIdAttr(id))
+      .ifPresentOrElse(
+        existingUser -> keycloakService.updateUser(id, user),
+        () -> keycloakService.createUser(user, null));
   }
 
   public void deleteUser(UUID id) {
