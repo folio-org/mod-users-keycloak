@@ -79,6 +79,10 @@ application:
       client-name-suffix: ${KC_LOGIN_CLIENT_SUFFIX:-login-application}
     password-reset:
       client-id: ${KC_PASSWORD_RESET_CLIENT_ID:password-reset-client}
+    tls:
+      enabled: ${KC_CLIENT_TLS_ENABLED:false}
+      trust-store-path: ${KC_CLIENT_TLS_TRUSTSTORE_PATH:}
+      trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
   secret-store:
     type: ${SECRET_STORE_TYPE}
     aws-ssm:
