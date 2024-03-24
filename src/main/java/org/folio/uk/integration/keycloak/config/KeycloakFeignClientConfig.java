@@ -13,7 +13,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -36,12 +38,16 @@ public class KeycloakFeignClientConfig {
   private static okhttp3.OkHttpClient sslClient(okhttp3.OkHttpClient.Builder clientBuilder,
     KeycloakTlsProperties properties)
     throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException, KeyManagementException {
+    log.debug("Creating OkHttpClient with SSL enabled...");
     var keyStore = initKeyStore(properties);
     var trustManager = trustManager(keyStore);
 
     var sslSocketFactory = sslContext(trustManager).getSocketFactory();
 
-    return clientBuilder.sslSocketFactory(sslSocketFactory, trustManager).build();
+    return clientBuilder
+      .sslSocketFactory(sslSocketFactory, trustManager)
+      .hostnameVerifier(NoopHostnameVerifier.INSTANCE)
+      .build();
   }
 
   private static KeyStore initKeyStore(KeycloakTlsProperties properties)
@@ -53,16 +59,16 @@ public class KeycloakFeignClientConfig {
     try (var is = new FileInputStream(getFile(trustStorePath))) {
       trustStore.load(is, trustStorePassword.toCharArray());
     }
+    log.debug("Keystore initialized from file: keyStoreType = {}, file = {}", trustStore.getType(), trustStorePath);
 
     return trustStore;
   }
 
   private static X509TrustManager trustManager(KeyStore keyStore) throws NoSuchAlgorithmException, KeyStoreException {
-    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-      TrustManagerFactory.getDefaultAlgorithm());
-    trustManagerFactory.init(keyStore);
+    TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+    tmf.init(keyStore);
 
-    TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+    TrustManager[] trustManagers = tmf.getTrustManagers();
     if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
       throw new IllegalStateException("Unexpected default trust managers:"
         + Arrays.toString(trustManagers));
@@ -75,7 +81,23 @@ public class KeycloakFeignClientConfig {
     throws NoSuchAlgorithmException, KeyManagementException {
     var sslContext = SSLContext.getInstance("TLS");
     sslContext.init(null, new TrustManager[] {trustManager}, null);
+    log.debug("SSL context initialized: protocol = {}", sslContext.getProtocol());
 
     return sslContext;
+  }
+
+  private static final class NoopHostnameVerifier implements HostnameVerifier {
+
+    static final NoopHostnameVerifier INSTANCE = new NoopHostnameVerifier();
+
+    @Override
+    public boolean verify(final String s, final SSLSession sslSession) {
+      return true;
+    }
+
+    @Override
+    public String toString() {
+      return "NO_OP";
+    }
   }
 }
