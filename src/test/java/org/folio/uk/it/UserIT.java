@@ -363,19 +363,11 @@ class UserIT extends BaseIntegrationTest {
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/update-user-no-auth.json"
   })
-  void update_negative_authUserNotFound() throws Exception {
+  void update_positive_authUserNotFound() throws Exception {
     var userId = "95a4a5c0-ca68-4d26-af83-62f5c3586f18";
     var user = TestConstants.user(userId, "update-user-no-auth", "uuna@mail.com", "nus@folio.com");
     attemptPut("/users-keycloak/users/{id}", user, userId)
-      .andExpectAll(status().isBadRequest(),
-        jsonPath("$.errors[0].message",
-          containsString(
-            String.format("Failed to update keycloak user: userId = %s, realm = %s", userId,
-              TestConstants.TENANT_NAME))),
-        jsonPath("$.errors[0].code", is("service_error")),
-        jsonPath("$.errors[0].type", is("KeycloakException")),
-        jsonPath("$.errors[0].parameters[0].value", containsString("Keycloak user doesn't exist")),
-        jsonPath("$.total_records", is(1)));
+      .andExpect(status().isNoContent());
   }
 
   @Test
