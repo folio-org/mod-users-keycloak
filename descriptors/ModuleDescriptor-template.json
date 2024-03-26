@@ -162,7 +162,7 @@
   "requires" : [
     {
       "id" : "users",
-      "version" : "16.0"
+      "version" : "16.1"
     },
     {
       "id": "permissions",
@@ -170,7 +170,7 @@
     },
     {
       "id" : "login",
-      "version" : "7.1"
+      "version" : "7.3"
     },
     {
       "id": "configuration",
