@@ -23,7 +23,7 @@ import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.folio.test.base.BaseBackendIntegrationTest;
 import org.folio.test.extensions.EnableKafka;
-import org.folio.test.extensions.EnableKeycloak;
+import org.folio.test.extensions.EnableKeycloakTlsMode;
 import org.folio.test.extensions.EnablePostgres;
 import org.folio.test.extensions.EnableWireMock;
 import org.folio.test.extensions.impl.KafkaTestExecutionListener;
@@ -38,6 +38,7 @@ import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.keycloak.representations.idm.authorization.RolePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.RolePolicyRepresentation.RoleDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @Log4j2
 @EnableKafka
 @EnableWireMock
-@EnableKeycloak
+@EnableKeycloakTlsMode
 @EnablePostgres
 @EnableRetry
 @EnableAsync
@@ -81,7 +82,8 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   @Autowired protected TokenService tokenService;
 
   @BeforeEach
-  void setUp() {
+  void setUp(TestInfo testInfo) {
+    log.info("Running test: {}", testInfo.getDisplayName());
     evictAllCaches();
   }
 

@@ -14,6 +14,11 @@ spring:
 
 application:
   environment: it-test
+  keycloak:
+    tls:
+      enabled: true
+      trust-store-path: classpath:certificates/test.truststore.jks
+      trust-store-password: secretpassword
   secret-store:
     type: EPHEMERAL
     ephemeral:
