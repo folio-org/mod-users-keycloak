@@ -86,11 +86,13 @@ public class KeycloakFeignClientConfig {
     return sslContext;
   }
 
+  @SuppressWarnings("java:S6548")
   private static final class NoopHostnameVerifier implements HostnameVerifier {
 
     static final NoopHostnameVerifier INSTANCE = new NoopHostnameVerifier();
 
     @Override
+    @SuppressWarnings("java:S5527")
     public boolean verify(final String s, final SSLSession sslSession) {
       return true;
     }
