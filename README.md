@@ -114,20 +114,23 @@ Required when `SECRET_STORE_STORE_TYPE=VAULT`
 
 Keycloak all configuration properties: https://www.keycloak.org/server/all-config
 
-| Name               | Description                                                                                                                                                                |
-|:-------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| KC_HOSTNAME        | Keycloak hostname, will be added to returned endpoints, for example for openid-configuration                                                                               |
-| KC_ADMIN           | Initial admin username                                                                                                                                                     |
-| KC_ADMIN_PASSWORD  | Initial admin password                                                                                                                                                     |
-| KC_DB              | Database type                                                                                                                                                              |
-| KC_DB_URL_DATABASE | Sets the database name of the default JDBC URL of the chosen vendor. If the DB_URL option is set, this option is ignored.                                                  |
-| KC_DB_URL_HOST     | Sets the hostname of the default JDBC URL of the chosen vendor. If the DB_URL option is set, this option is ignored.                                                       |
-| KC_DB_URL_PORT     | Sets the port of the default JDBC URL of the chosen vendor. If the DB_URL option is set, this option is ignored.                                                           |
-| KC_DB_USERNAME     | Database Username                                                                                                                                                          |
-| KC_DB_PASSWORD     | Database Password                                                                                                                                                          |
-| KC_PROXY           | The proxy address forwarding mode if the server is behind a reverse proxy. Possible values are: edge, reencrypt, passthrough. https://www.keycloak.org/server/reverseproxy |
-| KC_HOSTNAME_STRICT | Disables dynamically resolving the hostname from request headers. Should always be set to true in production, unless proxy verifies the Host header.                       |
-| KC_HOSTNAME_PORT   | The port used by the proxy when exposing the hostname. Set this option if the proxy uses a port other than the default HTTP and HTTPS ports. Defaults to -1.               |
+| Name                              | Description                                                                                                                                                                |
+|:----------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| KC_HOSTNAME                       | Keycloak hostname, will be added to returned endpoints, for example for openid-configuration                                                                               |
+| KC_ADMIN                          | Initial admin username                                                                                                                                                     |
+| KC_ADMIN_PASSWORD                 | Initial admin password                                                                                                                                                     |
+| KC_DB                             | Database type                                                                                                                                                              |
+| KC_DB_URL_DATABASE                | Sets the database name of the default JDBC URL of the chosen vendor. If the DB_URL option is set, this option is ignored.                                                  |
+| KC_DB_URL_HOST                    | Sets the hostname of the default JDBC URL of the chosen vendor. If the DB_URL option is set, this option is ignored.                                                       |
+| KC_DB_URL_PORT                    | Sets the port of the default JDBC URL of the chosen vendor. If the DB_URL option is set, this option is ignored.                                                           |
+| KC_DB_USERNAME                    | Database Username                                                                                                                                                          |
+| KC_DB_PASSWORD                    | Database Password                                                                                                                                                          |
+| KC_PROXY                          | The proxy address forwarding mode if the server is behind a reverse proxy. Possible values are: edge, reencrypt, passthrough. https://www.keycloak.org/server/reverseproxy |
+| KC_HOSTNAME_STRICT                | Disables dynamically resolving the hostname from request headers. Should always be set to true in production, unless proxy verifies the Host header.                       |
+| KC_HOSTNAME_PORT                  | The port used by the proxy when exposing the hostname. Set this option if the proxy uses a port other than the default HTTP and HTTPS ports. Defaults to -1.               |
+| KC_CLIENT_TLS_ENABLED             | Enables TLS for keycloak clients.                                                                                                                                          |
+| KC_CLIENT_TLS_TRUSTSTORE_PATH     | Truststore file path for keycloak clients.                                                                                                                                 |
+| KC_CLIENT_TLS_TRUSTSTORE_PASSWORD | Truststore password for keycloak clients.                                                                                                                                  |
 
 
 ### mod-configuration properties
