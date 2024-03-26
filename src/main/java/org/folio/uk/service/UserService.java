@@ -115,7 +115,13 @@ public class UserService {
     log.info("Updating user: id = {}", id);
 
     usersClient.updateUser(id, user);
-    keycloakService.updateUser(id, user);
+    var kcUser = keycloakService.findKeycloakUserWithUserIdAttr(id);
+    if (kcUser != null) {
+      keycloakService.updateUser(id, user);
+    } else {
+      log.info("User was not found in keycloak by user_id attribute: id = {}", id);
+      keycloakService.createUser(user, null);
+    }
   }
 
   public void deleteUser(UUID id) {
@@ -231,7 +237,7 @@ public class UserService {
   }
 
   private User createUserPrivate(User user, boolean keycloakOnly,
-    Function<User, User> modUsersMethodCall, Consumer<User> keycloakMethodCall) {
+                                 Function<User, User> modUsersMethodCall, Consumer<User> keycloakMethodCall) {
     log.info("Creating user: id = {}, username = {}", user.getId(), user.getUsername());
     var created = user;
     if (!keycloakOnly) {

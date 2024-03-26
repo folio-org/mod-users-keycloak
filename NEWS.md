@@ -1,4 +1,5 @@
 ## Version `v1.3.0` (in progress)
+* Added eventual consistency for user update (MODUSERSKC-28).
 
 ---
 ## Version `v1.2.0` (27.02.2024)
