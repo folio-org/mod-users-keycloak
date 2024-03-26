@@ -38,6 +38,7 @@ import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.keycloak.representations.idm.authorization.RolePolicyRepresentation;
 import org.keycloak.representations.idm.authorization.RolePolicyRepresentation.RoleDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,8 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   @Autowired protected TokenService tokenService;
 
   @BeforeEach
-  void setUp() {
+  void setUp(TestInfo testInfo) {
+    log.info("Running test: {}", testInfo.getDisplayName());
     evictAllCaches();
   }
 
