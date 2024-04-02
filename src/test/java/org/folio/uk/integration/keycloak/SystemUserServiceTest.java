@@ -90,7 +90,7 @@ class SystemUserServiceTest {
 
     var capturedPassword = passwordCaptor.getValue();
     assertThat(passwordCaptor.getValue()).hasSize(userConfiguration.getPasswordLength());
-    assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(user());
+    assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(systemUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
 
     verify(secureStore).set(SYSTEM_USER_STORE_KEY, capturedPassword);
@@ -191,7 +191,7 @@ class SystemUserServiceTest {
   @Test
   void delete_positive() {
     var userId = CAPABILITY_ID;
-    var user = user().id(userId);
+    var user = systemUser().id(userId);
 
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
     when(userService.findUsers("username==test-system-user", 1)).thenReturn(new Users().addUsersItem(user));
@@ -227,10 +227,11 @@ class SystemUserServiceTest {
     return keycloakUser;
   }
 
-  private static User user() {
+  private static User systemUser() {
     return new User()
       .username(USERNAME)
       .active(true)
+      .type("staff")
       .personal(new Personal()
         .firstName("System User")
         .lastName(SYSTEM_ROLE)
