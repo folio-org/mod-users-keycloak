@@ -28,7 +28,7 @@
       {
         "matchesJsonPath": {
           "expression": "$.personal.email",
-          "equalTo": "master-system-user@ebsco.com"
+          "equalTo": "master-system-user@folio.org"
         }
       }
     ]
@@ -45,7 +45,7 @@
       "personal": {
         "firstName": "System User",
         "lastName": "System",
-        "email": "master-system-user@ebsco.com"
+        "email": "master-system-user@folio.org"
       }
     }
   }
