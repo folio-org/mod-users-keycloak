@@ -37,7 +37,7 @@ public class SystemUserService {
   public void create() {
     var username = generateValueByTemplate(systemUserConfiguration.getUsernameTemplate());
     var systemUserEmail = generateValueByTemplate(systemUserConfiguration.getEmailTemplate());
-    var createdSystemUser = createUser(username, "System User", systemUserEmail, "staff");
+    var createdSystemUser = createUser(username, "System User", systemUserEmail, "system");
     checkAndUpdateSystemUserRole(createdSystemUser.getUsername());
   }
 

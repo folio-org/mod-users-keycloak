@@ -222,7 +222,7 @@ class SystemUserServiceTest {
     keycloakUser.setUserName(USERNAME);
     keycloakUser.setFirstName("Global User");
     keycloakUser.setLastName(SYSTEM_ROLE);
-    keycloakUser.setEmail("test-system-user@ebsco.com");
+    keycloakUser.setEmail("test-system-user@folio.org");
     keycloakUser.setEnabled(true);
     return keycloakUser;
   }
@@ -231,11 +231,11 @@ class SystemUserServiceTest {
     return new User()
       .username(USERNAME)
       .active(true)
-      .type("staff")
+      .type("system")
       .personal(new Personal()
         .firstName("System User")
         .lastName(SYSTEM_ROLE)
-        .email("test-system-user@ebsco.com"));
+        .email("test-system-user@folio.org"));
   }
 
   private static User moduleUser() {

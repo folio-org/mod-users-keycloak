@@ -222,7 +222,7 @@ class UserIT extends BaseIntegrationTest {
 
   @Test
   void create_positive_keycloakOnly() throws Exception {
-    var user = TestConstants.user(UUID.randomUUID().toString(), "keycloakOnlyUser", "kc@mail.com", "nus@folio.com");
+    var user = TestConstants.user(UUID.randomUUID().toString(), "keycloakOnlyUser", "kc@mail.com", "nus@folio.org");
     var mvcResult = doPost("/users-keycloak/users?keycloakOnly=true", user).andReturn();
     var resp = parseResponse(mvcResult, User.class);
 
@@ -267,7 +267,7 @@ class UserIT extends BaseIntegrationTest {
   })
   void create_positive_kc_only_authUserExists() throws Exception {
     var userId = "d24b7b4a-00ed-416e-a810-981b003bd158";
-    var user = TestConstants.user(userId, "create-user-auth-exist", "au_exist@mail.com", "nus@folio.com");
+    var user = TestConstants.user(userId, "create-user-auth-exist", "au_exist@mail.com", "nus@folio.org");
     doPost("/users-keycloak/users?keycloakOnly=true", user);
 
     mockMvc.perform(post("/users-keycloak/users")
@@ -286,7 +286,7 @@ class UserIT extends BaseIntegrationTest {
   })
   void create_positive_authUserExists() throws Exception {
     var userId = "d24b7b4a-00ed-416e-a810-981b003bd158";
-    var user = TestConstants.user(userId, "create-user-auth-exist", "au_exist@mail.com", "nus@folio.com");
+    var user = TestConstants.user(userId, "create-user-auth-exist", "au_exist@mail.com", "nus@folio.org");
     doPost("/users-keycloak/users?keycloakOnly=false", user);
 
     mockMvc.perform(post("/users-keycloak/users")
@@ -314,7 +314,7 @@ class UserIT extends BaseIntegrationTest {
   })
   void update_positive() throws Exception {
     var userId = "202a8ef0-d07b-4626-ad41-48c2d50d9099";
-    var user = TestConstants.user(userId, "update-user", "uu@mail.com", "nus@folio.com");
+    var user = TestConstants.user(userId, "update-user", "uu@mail.com", "nus@folio.org");
     doPost("/users-keycloak/users?keycloakOnly=true", user);
     doPut("/users-keycloak/users/{id}", user, userId);
 
@@ -327,7 +327,7 @@ class UserIT extends BaseIntegrationTest {
   })
   void update_with_accept_text_positive() throws Exception {
     var userId = "202a8ef0-d07b-4626-ad41-48c2d50d9099";
-    var user = TestConstants.user(userId, "update-user", "uu@mail.com", "nus@folio.com");
+    var user = TestConstants.user(userId, "update-user", "uu@mail.com", "nus@folio.org");
     doPost("/users-keycloak/users?keycloakOnly=true", user);
 
     mockMvc.perform(put("/users-keycloak/users/{id}", userId)
@@ -343,7 +343,7 @@ class UserIT extends BaseIntegrationTest {
   @WireMockStub(scripts = "/wiremock/stubs/users/update-user-notfound.json")
   void update_negative_userNotFound() throws Exception {
     var user = TestConstants.user("f4b05750-bd6c-427b-a651-7ba2191d24a3", "update-user-notfound", "uunf@mail.com",
-      "nus@folio.com");
+      "nus@folio.org");
     attemptPut("/users-keycloak/users/{id}", user, user.getId())
       .andExpectAll(notFoundWithMsg("Not found"));
   }
@@ -365,7 +365,7 @@ class UserIT extends BaseIntegrationTest {
   })
   void update_positive_authUserNotFound() throws Exception {
     var userId = "95a4a5c0-ca68-4d26-af83-62f5c3586f18";
-    var user = TestConstants.user(userId, "update-user-no-auth", "uuna@mail.com", "nus@folio.com");
+    var user = TestConstants.user(userId, "update-user-no-auth", "uuna@mail.com", "nus@folio.org");
     attemptPut("/users-keycloak/users/{id}", user, userId)
       .andExpect(status().isNoContent());
   }
@@ -386,7 +386,7 @@ class UserIT extends BaseIntegrationTest {
   })
   void delete_positive() throws Exception {
     var user = TestConstants.user("d3958402-2f80-421b-a527-9933245a3556", "delete-user", "du@mail.com",
-      "nus@folio.com");
+      "nus@folio.org");
     doPost("/users-keycloak/users?keycloakOnly=true", user);
     doDelete("/users-keycloak/users/{id}", user.getId());
   }
@@ -415,7 +415,7 @@ class UserIT extends BaseIntegrationTest {
   })
   void delete_positive_noUser() throws Exception {
     var user = TestConstants.user("d3958402-2f80-421b-a527-9933245a3556", "delete-user", "du@mail.com",
-      "nus@folio.com");
+      "nus@folio.org");
     doPost("/users-keycloak/users?keycloakOnly=true", user);
     doDelete("/users-keycloak/users/{id}", user.getId());
   }

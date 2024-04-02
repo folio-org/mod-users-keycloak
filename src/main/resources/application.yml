@@ -66,7 +66,7 @@ application:
     include-only-visible-permissions: ${INCLUDE_ONLY_VISIBLE_PERMISSIONS:true}
   system-user:
     username-template: ${SYSTEM_USER_USERNAME_TEMPLATE:{tenantId}-system-user}
-    email-template: ${SYSTEM_USER_EMAIL_TEMPLATE:{tenantId}-system-user@folio.com}
+    email-template: ${SYSTEM_USER_EMAIL_TEMPLATE:{tenantId}-system-user@folio.org}
     system-user-role: ${SYSTEM_USER_ROLE:System}
     password-length: ${SYSTEM_USER_PASSWORD_LENGTH:32}
     retry-attempts: ${SYSTEM_USER_RETRY_COUNT:10}

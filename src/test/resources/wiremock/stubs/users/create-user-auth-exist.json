@@ -15,7 +15,7 @@
     "jsonBody": {
       "username": "create-user-auth-exist",
       "id": "d24b7b4a-00ed-416e-a810-981b003bd158",
-      "externalSystemId": "nus@folio.com",
+      "externalSystemId": "nus@folio.org",
       "barcode": "12359",
       "active": true,
       "type": "",
