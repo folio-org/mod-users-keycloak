@@ -2,6 +2,7 @@ package org.folio.uk.service;
 
 import static java.lang.String.format;
 import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.toStream;
@@ -14,7 +15,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -134,6 +134,28 @@ public class UserService {
     keycloakService.deleteUser(id);
   }
 
+  /**
+   * Resolves permissions for user. If user has permission with wildcard, then all permissions that match the wildcard.
+   * Example: user has permission ["users.item.get", "users.item.post", "users.collection.put"] and requested
+   * permissions are ["users.item.*"] then resolved permissions will be ["users.item.get", "users.item.post"].
+   *
+   * @param userId - user id
+   * @param userPermissions - list of permissions should be resolved
+   * @return list of resolved permissions
+   */
+  public List<String> resolvePermissions(UUID userId, List<String> userPermissions) {
+    var allUserPermissions = userPermissionsClient.getPermissionsForUser(userId, false);
+    return toStream(allUserPermissions.getPermissions())
+      .filter(s1 -> toStream(userPermissions).anyMatch(s2 -> match(s1, s2)))
+      .collect(toList());
+  }
+
+  private static boolean match(String s1, String s2) {
+    return s2.endsWith(".*")
+      ? s1.startsWith(s2.substring(0, s2.length() - 1))
+      : s1.equals(s2);
+  }
+
   private void removeUserWithLinkedResources(UUID id) {
     usersClient.deleteUser(id);
 
@@ -191,7 +213,7 @@ public class UserService {
       .map(spId -> servicePointsClient.getServicePoint(fromString(spId)))
       .filter(Optional::isPresent)
       .map(Optional::get)
-      .collect(Collectors.toList());
+      .collect(toList());
 
     var servicePointUser = servicePointUsers.getServicePointsUsers().get(0);
     servicePointUser.setServicePoints(servicePoints);

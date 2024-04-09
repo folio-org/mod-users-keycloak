@@ -3,6 +3,7 @@ package org.folio.uk.service;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doNothing;
@@ -20,8 +21,10 @@ import feign.FeignException.UnprocessableEntity;
 import feign.Request;
 import feign.Request.HttpMethod;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
@@ -36,9 +39,13 @@ import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
 import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.roles.model.CollectionResponse;
+import org.folio.uk.integration.roles.model.UserPermissions;
 import org.folio.uk.integration.users.UsersClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -245,6 +252,32 @@ class UserServiceTest {
     verify(usersClient).lookupUserById(userId);
     verify(usersClient, times(0)).deleteUser(userId);
     verify(keycloakService).deleteUser(userId);
+  }
+
+  @ParameterizedTest(name = "request: {0}, user's perms: {1}, resolved perms: {2}")
+  @MethodSource("permissionsProvider")
+  void resolvePermissions(List<String> request, List<String> userPerms, List<String> resolvedPerms) {
+    var userId = UUID.randomUUID();
+    var userPermissions = new UserPermissions();
+    userPermissions.setPermissions(userPerms);
+
+    when(userPermissionsClient.getPermissionsForUser(userId, false)).thenReturn(userPermissions);
+
+    var result = userService.resolvePermissions(userId, request);
+
+    assertThat(result).containsExactlyInAnyOrderElementsOf(resolvedPerms);
+    verify(userPermissionsClient).getPermissionsForUser(userId, false);
+  }
+
+  //permissionsToResolve : userPermissions : resolvedPermissions
+  static Stream<Arguments> permissionsProvider() {
+    return Stream.of(
+      Arguments.of(of("ui.all", "be.all"), of("ui.all", "users.all"), of("ui.all")),
+      Arguments.of(of("be.*"), of("ui.all", "be.get", "be.post"), of("be.get", "be.post")),
+      Arguments.of(of("be.it.*", "ui.all"), of("be.all", "be.it.get", "be.it.post"), of("be.it.get", "be.it.post")),
+      Arguments.of(of("be.it.*", "ui.all"), of(), of()),
+      Arguments.of(of("be.it.*", "ui.all"), of("be.all", "users.item.all"), of())
+      );
   }
 
   private static User user() {

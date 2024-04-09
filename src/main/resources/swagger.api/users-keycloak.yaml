@@ -147,6 +147,35 @@ paths:
         '500':
           $ref: '#/components/responses/internalServerError'
 
+  /users-keycloak/users/{id}/resolve-permissions:
+    post:
+      operationId: resolvePermissions
+      description: Resolve permissions for a user. Returns permissions that are granted to the user
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      requestBody:
+        required: true
+        description: Permissions to resolve
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/permissionsContainer'
+      responses:
+        '200':
+          description: Returns resolved permissions for a user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/permissionsContainer'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '404':
+          $ref: '#/components/responses/entityNotFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
   /users-keycloak/_self:
     get:
       operationId: getUserBySelfReference
@@ -385,6 +414,8 @@ components:
       $ref: schemas/policy/policy.json
     policies:
       $ref: schemas/policy/policies.json
+    permissionsContainer:
+      $ref: schemas/user_permissions/permissions.json
 
     includedField:
       type: string

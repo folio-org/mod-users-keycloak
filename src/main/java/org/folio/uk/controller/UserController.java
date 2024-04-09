@@ -8,6 +8,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.folio.uk.domain.dto.CompositeUser;
 import org.folio.uk.domain.dto.IncludedField;
+import org.folio.uk.domain.dto.PermissionsContainer;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.rest.resource.UsersApi;
 import org.folio.uk.service.UserService;
@@ -45,5 +46,12 @@ public class UserController implements UsersApi {
   public ResponseEntity<String> deleteUser(UUID id) {
     service.deleteUser(id);
     return ResponseEntity.status(NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<PermissionsContainer> resolvePermissions(UUID userId, PermissionsContainer userPermissions) {
+    var resolvedPermissions = service.resolvePermissions(userId, userPermissions.getPermissions());
+    var result = new PermissionsContainer().permissions(resolvedPermissions);
+    return ResponseEntity.ok(result);
   }
 }

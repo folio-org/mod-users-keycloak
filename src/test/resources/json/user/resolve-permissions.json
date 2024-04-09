@@ -1,0 +1,7 @@
+{
+  "permissions": [
+    "ui.all",
+    "inventory.collection.get",
+    "inventory.collection.post"
+  ]
+}
