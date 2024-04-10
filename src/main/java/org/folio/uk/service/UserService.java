@@ -146,12 +146,6 @@ public class UserService {
     return permissions.getPermissions();
   }
 
-  private static boolean match(String s1, String s2) {
-    return s2.endsWith(".*")
-      ? s1.startsWith(s2.substring(0, s2.length() - 1))
-      : s1.equals(s2);
-  }
-
   private void removeUserWithLinkedResources(UUID id) {
     usersClient.deleteUser(id);
 
