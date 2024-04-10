@@ -49,8 +49,8 @@ public class UserController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<PermissionsContainer> resolvePermissions(UUID userId, PermissionsContainer userPermissions) {
-    var resolvedPermissions = service.resolvePermissions(userId, userPermissions.getPermissions());
+  public ResponseEntity<PermissionsContainer> findPermissions(UUID userId, List<String> permissions) {
+    var resolvedPermissions = service.resolvePermissions(userId, permissions);
     var result = new PermissionsContainer().permissions(resolvedPermissions);
     return ResponseEntity.ok(result);
   }

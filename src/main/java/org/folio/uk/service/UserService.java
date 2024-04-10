@@ -135,19 +135,15 @@ public class UserService {
   }
 
   /**
-   * Resolves permissions for user. If user has permission with wildcard, then all permissions that match the wildcard.
-   * Example: user has permission ["users.item.get", "users.item.post", "users.collection.put"] and requested
-   * permissions are ["users.item.*"] then resolved permissions will be ["users.item.get", "users.item.post"].
+   * Resolves user permissions.
    *
    * @param userId - user id
    * @param userPermissions - list of permissions should be resolved
    * @return list of resolved permissions
    */
   public List<String> resolvePermissions(UUID userId, List<String> userPermissions) {
-    var allUserPermissions = userPermissionsClient.getPermissionsForUser(userId, false);
-    return toStream(allUserPermissions.getPermissions())
-      .filter(s1 -> toStream(userPermissions).anyMatch(s2 -> match(s1, s2)))
-      .collect(toList());
+    var permissions = userPermissionsClient.getPermissionsForUser(userId, false, userPermissions);
+    return permissions.getPermissions();
   }
 
   private static boolean match(String s1, String s2) {
@@ -222,7 +218,7 @@ public class UserService {
 
   private PermissionUser fetchPermissionUser(UUID userId) {
     var includeOnlyVisiblePermissions = rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions();
-    var userPermissions = userPermissionsClient.getPermissionsForUser(userId, includeOnlyVisiblePermissions);
+    var userPermissions = userPermissionsClient.getPermissionsForUser(userId, includeOnlyVisiblePermissions, null);
     var perms = emptyIfNull(userPermissions.getPermissions());
 
     return new PermissionUser()

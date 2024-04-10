@@ -6,6 +6,7 @@ import static org.folio.test.TestConstants.TENANT_ID;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
 import static org.folio.test.TestUtils.readString;
+import static org.folio.uk.support.TestConstants.USER_ID;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -42,7 +43,7 @@ class UserIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/users/get-user.json")
   void get_positive() throws Exception {
-    doGet("/users-keycloak/users/{id}", TestConstants.USER_ID)
+    doGet("/users-keycloak/users/{id}", USER_ID)
       .andExpect(json("user/get-user-response.json"));
   }
 
@@ -409,7 +410,7 @@ class UserIT extends BaseIntegrationTest {
     "/wiremock/stubs/users/get-user-roles.json"
   })
   void delete_positive_noAuthUser() throws Exception {
-    doDelete("/users-keycloak/users/{id}", TestConstants.USER_ID);
+    doDelete("/users-keycloak/users/{id}", USER_ID);
   }
 
   @Test
@@ -430,7 +431,8 @@ class UserIT extends BaseIntegrationTest {
   void resolvePermissions_positive() throws Exception {
     var request = new Permissions().permissions(List.of("ui.all", "users.item.get", "inventory.collection.*"));
 
-    attemptPost("/users-keycloak/users/{id}/resolve-permissions", request, TestConstants.USER_ID)
+    attemptGet("/users-keycloak/users/{id}/permissions?desiredPermissions=ui.all&desiredPermissions=users.item.*",
+      USER_ID)
       .andExpect(status().isOk())
       .andExpect(content().json(readString("json/user/resolve-permissions.json")));
   }

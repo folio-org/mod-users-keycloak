@@ -143,6 +143,11 @@
             "users.item.get",
             "login.password-reset-action.get"
           ]
+        },
+        {
+          "methods" : [ "GET" ],
+          "pathPattern" : "/users-keycloak/users/{id}/permissions",
+          "permissionsRequired" : []
         }
       ]
     },
