@@ -5,6 +5,8 @@ import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import static org.folio.test.TestConstants.TENANT_ID;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
+import static org.folio.test.TestUtils.readString;
+import static org.folio.uk.support.TestConstants.USER_ID;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -12,6 +14,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,6 +25,7 @@ import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
 import org.folio.uk.domain.dto.CompositeUser;
+import org.folio.uk.domain.dto.Permissions;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.support.TestConstants;
@@ -39,7 +43,7 @@ class UserIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/users/get-user.json")
   void get_positive() throws Exception {
-    doGet("/users-keycloak/users/{id}", TestConstants.USER_ID)
+    doGet("/users-keycloak/users/{id}", USER_ID)
       .andExpect(json("user/get-user-response.json"));
   }
 
@@ -406,7 +410,7 @@ class UserIT extends BaseIntegrationTest {
     "/wiremock/stubs/users/get-user-roles.json"
   })
   void delete_positive_noAuthUser() throws Exception {
-    doDelete("/users-keycloak/users/{id}", TestConstants.USER_ID);
+    doDelete("/users-keycloak/users/{id}", USER_ID);
   }
 
   @Test
@@ -418,5 +422,18 @@ class UserIT extends BaseIntegrationTest {
       "nus@folio.org");
     doPost("/users-keycloak/users?keycloakOnly=true", user);
     doDelete("/users-keycloak/users/{id}", user.getId());
+  }
+
+  @Test
+  @WireMockStub(scripts = {
+    "/wiremock/stubs/users/get-perms-resolve-permissions.json"
+  })
+  void resolvePermissions_positive() throws Exception {
+    var request = new Permissions().permissions(List.of("ui.all", "users.item.get", "inventory.collection.*"));
+
+    attemptGet("/users-keycloak/users/{id}/permissions?desiredPermissions=ui.all&desiredPermissions=users.item.*",
+      USER_ID)
+      .andExpect(status().isOk())
+      .andExpect(content().json(readString("json/user/resolve-permissions.json")));
   }
 }

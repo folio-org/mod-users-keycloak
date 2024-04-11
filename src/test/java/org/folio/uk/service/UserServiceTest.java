@@ -3,6 +3,7 @@ package org.folio.uk.service;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doNothing;
@@ -36,6 +37,7 @@ import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
 import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.roles.model.CollectionResponse;
+import org.folio.uk.integration.roles.model.UserPermissions;
 import org.folio.uk.integration.users.UsersClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -245,6 +247,22 @@ class UserServiceTest {
     verify(usersClient).lookupUserById(userId);
     verify(usersClient, times(0)).deleteUser(userId);
     verify(keycloakService).deleteUser(userId);
+  }
+
+  @Test
+  void resolvePermissions() {
+    var userId = UUID.randomUUID();
+    var request = of("user.item.*");
+    var response = of("user.item.get", "user.item.post", "user.item.put");
+    var userPermissions = new UserPermissions();
+    userPermissions.setPermissions(response);
+
+    when(userPermissionsClient.getPermissionsForUser(userId, false, request)).thenReturn(userPermissions);
+
+    var result = userService.resolvePermissions(userId, request);
+
+    assertThat(result).containsExactlyInAnyOrderElementsOf(response);
+    verify(userPermissionsClient).getPermissionsForUser(userId, false, request);
   }
 
   private static User user() {

@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/permissions/users/d3958402-2f80-421b-a527-9933245a3556?onlyVisible=false&desiredPermissions=ui.all&desiredPermissions=users.item.%2A",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "master"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "userId": "d3958402-2f80-421b-a527-9933245a3556",
+      "permissions": [
+        "ui.all", "users.item.post", "users.item.get"
+      ]
+    }
+  }
+}
+

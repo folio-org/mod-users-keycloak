@@ -147,6 +147,29 @@ paths:
         '500':
           $ref: '#/components/responses/internalServerError'
 
+  /users-keycloak/users/{id}/permissions:
+    get:
+      operationId: findPermissions
+      description: Finds user permissions by filter. desiredPermissions query parameter is required. Wildcard (*) is supported.
+      tags:
+        - users
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+        - $ref: '#/components/parameters/desired-permissions'
+      responses:
+        '200':
+          description: Returns resolved permissions for a user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/permissionsContainer'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '404':
+          $ref: '#/components/responses/entityNotFound'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+
   /users-keycloak/_self:
     get:
       operationId: getUserBySelfReference
@@ -385,6 +408,8 @@ components:
       $ref: schemas/policy/policy.json
     policies:
       $ref: schemas/policy/policies.json
+    permissionsContainer:
+      $ref: schemas/user_permissions/permissions.json
 
     includedField:
       type: string
@@ -496,4 +521,15 @@ components:
       schema:
         type: boolean
         default: false
+    desired-permissions:
+      in: query
+      required: true
+      name: desiredPermissions
+      description: Permissions of permission prefix to filter by
+      schema:
+        type: array
+        items:
+          type: string
+      example: [ "users.collection.get", "users.item.*" ]
+
 

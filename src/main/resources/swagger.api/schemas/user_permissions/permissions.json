@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Permissions container",
+  "properties": {
+    "permissions": {
+      "type": "array",
+      "description": "Permissions array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
