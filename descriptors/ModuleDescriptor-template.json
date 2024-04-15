@@ -147,7 +147,10 @@
         {
           "methods" : [ "GET" ],
           "pathPattern" : "/users-keycloak/users/{id}/permissions",
-          "permissionsRequired" : []
+          "permissionsRequired" : ["users-keycloak.users.permissions.collection.get"],
+          "modulePermissions" : [
+            "permissions.users.item.get"
+          ]
         }
       ]
     },
@@ -293,6 +296,10 @@
       "description": "Read restricted",
       "displayName": "Users (keycloak) - read restricted",
       "permissionName": "users-keycloak.read.restricted"
+    },    {
+      "description": "User permissions read",
+      "displayName": "Users (keycloak) - find permissions for user",
+      "permissionName": "users-keycloak.users.permissions.collection.get"
     },
     {
       "description": "All permissions for user operations",
@@ -311,7 +318,8 @@
         "users-keycloak.password-reset-link.reset",
         "users-keycloak.password-reset-link.validate",
         "users-keycloak.read.restricted",
-        "users-keycloak.read.basic"
+        "users-keycloak.read.basic",
+        "users-keycloak.users.permissions.collection.get"
       ]
     }
   ],
