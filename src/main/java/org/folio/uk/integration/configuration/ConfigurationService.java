@@ -1,5 +1,8 @@
 package org.folio.uk.integration.configuration;
 
+import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
+import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.uk.domain.dto.ErrorCode.NOT_FOUND_ERROR;
 
 import java.util.Collection;
@@ -7,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.uk.exception.UnprocessableEntityException;
 import org.folio.uk.integration.configuration.model.Config;
 import org.folio.uk.integration.configuration.model.Configurations;
@@ -41,10 +45,15 @@ public class ConfigurationService {
     return convertConfigsToMap(configurations);
   }
 
-  private Map<String, String> convertConfigsToMap(Configurations configurations) {
-    return configurations.getConfigs().stream()
-      .filter(Config::getEnabled)
-      .collect(Collectors.toMap(Config::getCode, Config::getValue));
+  private static Map<String, String> convertConfigsToMap(Configurations configurations) {
+    var configs = configurations.getConfigs();
+    if (CollectionUtils.isEmpty(configs)) {
+      return emptyMap();
+    }
+
+    return toStream(configurations.getConfigs())
+      .filter(config -> config.getCode() != null && config.getValue() != null)
+      .collect(toMap(Config::getCode, Config::getValue, (o1, o2) -> o2));
   }
 
   private boolean containsCodes(Configurations configurations, Collection<String> requiredCodes) {
