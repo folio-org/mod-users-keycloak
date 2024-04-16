@@ -1,12 +1,16 @@
 package org.folio.uk.exception;
 
 import java.io.Serializable;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.folio.uk.domain.dto.ErrorCode;
 
 /**
  * Model describing reason of {@link UnprocessableEntityException}.
  */
+@Getter
+@EqualsAndHashCode
 public class UnprocessableEntityMessage implements Serializable {
 
   private String code;
@@ -20,14 +24,6 @@ public class UnprocessableEntityMessage implements Serializable {
   public UnprocessableEntityMessage(String code, String message) {
     this.code = code;
     this.message = message;
-  }
-
-  public String getCode() {
-    return code;
-  }
-
-  public String getMessage() {
-    return message;
   }
 
   @Override

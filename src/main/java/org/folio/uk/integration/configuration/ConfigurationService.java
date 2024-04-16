@@ -1,5 +1,7 @@
 package org.folio.uk.integration.configuration;
 
+import static java.util.stream.Collectors.toMap;
+import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.uk.domain.dto.ErrorCode.NOT_FOUND_ERROR;
 
 import java.util.Collection;
@@ -41,10 +43,10 @@ public class ConfigurationService {
     return convertConfigsToMap(configurations);
   }
 
-  private Map<String, String> convertConfigsToMap(Configurations configurations) {
-    return configurations.getConfigs().stream()
-      .filter(Config::getEnabled)
-      .collect(Collectors.toMap(Config::getCode, Config::getValue));
+  private static Map<String, String> convertConfigsToMap(Configurations configurations) {
+    return toStream(configurations.getConfigs())
+      .filter(config -> config.getCode() != null && config.getValue() != null)
+      .collect(toMap(Config::getCode, Config::getValue, (o1, o2) -> o2));
   }
 
   private boolean containsCodes(Configurations configurations, Collection<String> requiredCodes) {
