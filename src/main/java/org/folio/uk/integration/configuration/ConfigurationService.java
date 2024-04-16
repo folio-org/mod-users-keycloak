@@ -46,11 +46,6 @@ public class ConfigurationService {
   }
 
   private static Map<String, String> convertConfigsToMap(Configurations configurations) {
-    var configs = configurations.getConfigs();
-    if (CollectionUtils.isEmpty(configs)) {
-      return emptyMap();
-    }
-
     return toStream(configurations.getConfigs())
       .filter(config -> config.getCode() != null && config.getValue() != null)
       .collect(toMap(Config::getCode, Config::getValue, (o1, o2) -> o2));
