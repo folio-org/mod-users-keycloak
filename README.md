@@ -77,7 +77,7 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | Name                              | Default value                    | Required | Description                                                            |
 |:----------------------------------|:---------------------------------|:--------:|:-----------------------------------------------------------------------|
 | SYSTEM_USER_USERNAME_TEMPLATE     | {tenantId}-system-user           |  false   | System user username template, used to generate system user `username` |
-| SYSTEM_USER_EMAIL_TEMPLATE        | {tenantId}-system-user@ebsco.com |  false   | System user email template, used to generate system user `email`.      |
+| SYSTEM_USER_EMAIL_TEMPLATE        | {tenantId}-system-user@folio.org |  false   | System user email template, used to generate system user `email`.      |
 | SYSTEM_USER_ROLE                  | System                           |  false   | System user role name. It will be assigned on tenant initialization    |
 | SYSTEM_USER_PASSWORD_LENGTH       | 32                               |  false   | Batch size for user migration. Max value is 50                         |
 | SYSTEM_USER_RETRY_COUNT           | 10                               |  false   | Number of retry attempts to create a system user                       |

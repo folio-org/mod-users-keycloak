@@ -2,6 +2,7 @@ package org.folio.uk.service;
 
 import static java.lang.String.format;
 import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.toStream;
@@ -14,7 +15,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -134,6 +134,18 @@ public class UserService {
     keycloakService.deleteUser(id);
   }
 
+  /**
+   * Resolves user permissions.
+   *
+   * @param userId - user id
+   * @param userPermissions - list of permissions should be resolved
+   * @return list of resolved permissions
+   */
+  public List<String> resolvePermissions(UUID userId, List<String> userPermissions) {
+    var permissions = userPermissionsClient.getPermissionsForUser(userId, false, userPermissions);
+    return permissions.getPermissions();
+  }
+
   private void removeUserWithLinkedResources(UUID id) {
     usersClient.deleteUser(id);
 
@@ -191,7 +203,7 @@ public class UserService {
       .map(spId -> servicePointsClient.getServicePoint(fromString(spId)))
       .filter(Optional::isPresent)
       .map(Optional::get)
-      .collect(Collectors.toList());
+      .collect(toList());
 
     var servicePointUser = servicePointUsers.getServicePointsUsers().get(0);
     servicePointUser.setServicePoints(servicePoints);
@@ -200,7 +212,7 @@ public class UserService {
 
   private PermissionUser fetchPermissionUser(UUID userId) {
     var includeOnlyVisiblePermissions = rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions();
-    var userPermissions = userPermissionsClient.getPermissionsForUser(userId, includeOnlyVisiblePermissions);
+    var userPermissions = userPermissionsClient.getPermissionsForUser(userId, includeOnlyVisiblePermissions, null);
     var perms = emptyIfNull(userPermissions.getPermissions());
 
     return new PermissionUser()
