@@ -156,6 +156,8 @@ x-okapi-token: <auth-token>
 }
 ```
 
+> **_NOTE:_** Fields `code` and `value` are mandatory, if any of them are not specified - default value will be used.
+
 | Name                                        |     Default value     | Description                                                                                                                                       |
 |:--------------------------------------------|:---------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------|
 | FOLIO_HOST                                  | http://localhost:3000 | Folio host used to generate password reset link                                                                                                   |
