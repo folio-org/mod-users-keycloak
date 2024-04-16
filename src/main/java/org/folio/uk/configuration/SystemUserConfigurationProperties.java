@@ -31,7 +31,7 @@ public class SystemUserConfigurationProperties {
    * </ul>
    * </p>
    */
-  private String emailTemplate = "{tenantId}-system-user@ebsco.com";
+  private String emailTemplate = "{tenantId}-system-user@folio.org";
 
   /**
    * System user role name.

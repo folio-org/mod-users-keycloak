@@ -1,0 +1,5 @@
+{
+  "permissions": [
+    "ui.all", "users.item.post", "users.item.get"
+  ]
+}

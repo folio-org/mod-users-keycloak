@@ -1,5 +1,6 @@
 package org.folio.uk.integration.roles;
 
+import java.util.List;
 import java.util.UUID;
 import org.folio.uk.integration.roles.model.UserPermissions;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -11,5 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface UserPermissionsClient {
 
   @GetMapping("/users/{id}")
-  UserPermissions getPermissionsForUser(@PathVariable("id") UUID id, @RequestParam("onlyVisible") Boolean onlyVisible);
+  UserPermissions getPermissionsForUser(@PathVariable("id") UUID id, @RequestParam("onlyVisible") Boolean onlyVisible,
+    @RequestParam("desiredPermissions") List<String> desiredPermissions);
 }

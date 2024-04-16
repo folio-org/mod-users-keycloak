@@ -11,7 +11,7 @@
         "equalToJson": {
           "username": "update-user-no-auth",
           "id": "95a4a5c0-ca68-4d26-af83-62f5c3586f18",
-          "externalSystemId": "nus@folio.com",
+          "externalSystemId": "nus@folio.org",
           "barcode": "12359",
           "active": true,
           "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
