@@ -14,9 +14,12 @@
           "id": "${json-unit.any-string}",
           "active": true,
           "type": "module",
+          "departments": [ ],
+          "proxyFor": [ ],
           "personal": {
             "lastName": "System",
-            "firstName": "System user - mod-foo"
+            "firstName": "System user - mod-foo",
+            "addresses": [ ]
           },
           "customFields" : { }
         }
