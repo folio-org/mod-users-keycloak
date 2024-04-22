@@ -15,10 +15,13 @@
           "barcode": "12359",
           "active": true,
           "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+          "departments": [ ],
+          "proxyFor": [ ],
           "personal": {
             "lastName": "Zakir",
             "firstName": "Bailey",
-            "email": "uunf@mail.com"
+            "email": "uunf@mail.com",
+            "addresses": [ ]
           },
           "enrollmentDate": "2020-10-07T04:00:00.000+00:00",
           "expirationDate": "2023-02-28T23:59:59.000+00:00",
