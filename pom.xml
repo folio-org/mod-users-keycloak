@@ -20,7 +20,7 @@
     <java.version>17</java.version>
     <lombok.version>1.18.32</lombok.version>
     <mapstruct.version>1.5.5.Final</mapstruct.version>
-    <hypersistence-utils-hibernate-63.version>3.7.4</hypersistence-utils-hibernate-63.version>
+    <hypersistence-utils-hibernate-63.version>3.7.5</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.21</swagger-annotations.version>
     <apache-commons-lang3.version>3.14.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
@@ -38,7 +38,7 @@
     <testcontainer.version>1.19.8</testcontainer.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>10.15.0</maven-checkstyle.version>
+    <maven-checkstyle.version>10.16.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
