@@ -1,4 +1,4 @@
-## Version `v1.5.0` (in progress)
+## Version `v1.5.0` (25.05.2024)
 ### Changes:
 * Added profile picture link to user personal (EUREKA-95)
 
