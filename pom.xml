@@ -25,9 +25,9 @@
     <apache-commons-lang3.version>3.14.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
-    <folio-spring-support.version>8.1.0</folio-spring-support.version>
+    <folio-spring-support.version>8.1.1</folio-spring-support.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
-    <application-poc-tools.version>1.4.1</application-poc-tools.version>
+    <application-poc-tools.version>1.5.0</application-poc-tools.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <org.json.version>20240303</org.json.version>
 
