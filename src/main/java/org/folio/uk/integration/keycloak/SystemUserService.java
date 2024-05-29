@@ -1,8 +1,10 @@
 package org.folio.uk.integration.keycloak;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.folio.common.configuration.properties.FolioEnvironment.getFolioEnvName;
 import static org.folio.tools.store.utils.SecretGenerator.generateSecret;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -51,19 +53,31 @@ public class SystemUserService {
     var firstName = "System user - " + username;
     var user = createUser(username, firstName, null, event.getType());
     var permissions = event.getPermissions();
-    if (CollectionUtils.isEmpty(permissions)) {
+    if (isEmpty(permissions)) {
       return;
     }
     assignCapabilities(user, permissions);
   }
 
+  public void updateOnEvent(SystemUserEvent event) {
+    if (isEmpty(event.getPermissions())) {
+      return;
+    }
+    findUserByContext().ifPresent(user -> assignCapabilities(user, event.getPermissions()));
+  }
+
   public void delete() {
+    findUserByContext().ifPresent(user -> userService.deleteUserById(user.getId()));
+  }
+
+  private Optional<User> findUserByContext() {
     var username = generateValueByTemplate(systemUserConfiguration.getUsernameTemplate());
     var users = userService.findUsers("username==" + username, 1).getUsers();
     if (CollectionUtils.isNotEmpty(users)) {
-      var user = users.get(0);
-      userService.deleteUser(user.getId());
+      return Optional.of(users.get(0));
     }
+    log.debug("User not found by username: {}", username);
+    return Optional.empty();
   }
 
   private void assignCapabilities(User user, Set<String> permissions) {

@@ -9,7 +9,7 @@
     },
     "queryParameters": {
       "query": {
-        "contains": "permission==(\"foo.bar\" or \"foo.bar1\")"
+        "contains": "permission==(\"foo.bar\")"
       }
     }
   },
@@ -23,10 +23,6 @@
         {
           "id": "b190defd-8e0e-4a04-ba14-448091f76b3f",
           "permission": "foo.bar"
-        },
-        {
-          "id": "b190defd-8e0e-4a04-ba14-448091f76b5f",
-          "permission": "foo.bar1"
         }
       ],
       "total_records": 1

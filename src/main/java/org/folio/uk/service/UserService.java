@@ -134,6 +134,12 @@ public class UserService {
     keycloakService.deleteUser(id);
   }
 
+  public void deleteUserById(UUID id) {
+    log.info("Deleting user with: id = {}", id);
+    removeUserWithLinkedResources(id);
+    keycloakService.deleteUser(id);
+  }
+
   /**
    * Resolves user permissions.
    *

@@ -1,0 +1,20 @@
+{
+  "type": "UPDATE",
+  "tenant": "master",
+  "resourceName": "System user",
+  "new": {
+    "name": "mod-foo",
+    "type": "module",
+    "permissions": [
+      "foo.bar",
+      "foo.bar1"
+    ]
+  },
+  "old": {
+    "name": "mod-foo",
+    "type": "module",
+    "permissions": [
+      "foo.bar"
+    ]
+  }
+}

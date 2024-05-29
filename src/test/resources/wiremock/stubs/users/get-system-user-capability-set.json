@@ -3,8 +3,7 @@
     "method": "GET",
     "url": "/users/83eb1e14-c657-4db8-8ba4-119670fc3552/capability-sets",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" },
-      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+      "x-okapi-tenant": { "equalTo": "master" }
     }
   },
   "response": {

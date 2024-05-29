@@ -63,6 +63,14 @@ public class TestConstants {
     return TestValues.readValue("json/kafka/system-user-event.json", ResourceEvent.class);
   }
 
+  public static ResourceEvent systemUserResourceDeleteEvent() {
+    return TestValues.readValue("json/kafka/system-user-delete-event.json", ResourceEvent.class);
+  }
+
+  public static ResourceEvent systemUserResourceUpdateEvent() {
+    return TestValues.readValue("json/kafka/system-user-update-event.json", ResourceEvent.class);
+  }
+
   public static List<String> systemUserPermissions() {
     return TestValues.readValue("json/capability/permissions.json", List.class);
   }

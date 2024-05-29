@@ -1,0 +1,12 @@
+{
+  "type": "DELETE",
+  "tenant": "master",
+  "resourceName": "System user",
+  "old": {
+    "name": "mod-foo",
+    "type": "module",
+    "permissions": [
+      "foo.bar"
+    ]
+  }
+}
