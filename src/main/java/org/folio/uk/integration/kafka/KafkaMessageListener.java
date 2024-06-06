@@ -14,7 +14,6 @@ import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.uk.integration.configuration.OkapiConfigurationProperties;
 import org.folio.uk.integration.kafka.model.ResourceEvent;
-import org.folio.uk.integration.kafka.model.ResourceEventType;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
 import org.springframework.core.task.TaskExecutor;
@@ -44,24 +43,22 @@ public class KafkaMessageListener {
     topicPattern = "#{folioKafkaProperties.listener['system-user'].topicPattern}")
   public void handleSystemUserEvent(ResourceEvent event) {
     log.info("System user event received: {}", event);
-    var eventType = event.getType();
 
-    if (eventType != ResourceEventType.CREATE) {
-      return;
-    }
-
-    var folioHeaders = prepareFolioHeaders(event);
-    try (var ignored = new FolioExecutionContextSetter(metadata, folioHeaders)) {
-      var sysUserEvent = objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class);
-      asyncTaskExecutor.execute(getRunnableWithCurrentFolioContext(
-        () -> systemUserService.createOnEvent(sysUserEvent)));
+    switch (event.getType()) {
+      case UPDATE -> executeWithContext(event,
+        () -> systemUserService.updateOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class)));
+      case CREATE -> executeWithContext(event,
+        () -> systemUserService.createOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class)));
+      case DELETE -> executeWithContext(event, systemUserService::delete);
+      default -> log.warn("Received system user event is not handled: {}", event);
     }
   }
 
-  private Map<String, Collection<String>> prepareFolioHeaders(ResourceEvent event) {
-    return Map.of(
-      TENANT, List.of(event.getTenant()),
-      URL, List.of(okapiProperties.getUrl())
-    );
+  private void executeWithContext(ResourceEvent event, Runnable task) {
+    Map<String, Collection<String>> headers =
+      Map.of(TENANT, List.of(event.getTenant()), URL, List.of(okapiProperties.getUrl()));
+    try (var ignored = new FolioExecutionContextSetter(metadata, headers)) {
+      asyncTaskExecutor.execute(getRunnableWithCurrentFolioContext(task));
+    }
   }
 }

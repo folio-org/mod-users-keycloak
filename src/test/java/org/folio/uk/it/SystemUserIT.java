@@ -2,6 +2,7 @@ package org.folio.uk.it;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.folio.test.TestUtils.readString;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 
@@ -15,6 +16,7 @@ import org.folio.uk.domain.dto.UserCapabilitiesRequest;
 import org.folio.uk.integration.keycloak.KeycloakClient;
 import org.folio.uk.integration.keycloak.TokenService;
 import org.folio.uk.integration.roles.UserCapabilitiesClient;
+import org.folio.uk.integration.users.UsersClient;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,13 +29,16 @@ import org.springframework.kafka.core.KafkaTemplate;
 class SystemUserIT extends BaseIntegrationTest {
 
   private static final UUID USER_ID = UUID.fromString("de5bb75d-e696-4d43-9df8-289f39367079");
+  private static final UUID USER_ID1 = UUID.fromString("83eb1e14-c657-4db8-8ba4-119670fc3552");
   private static final UUID CAPABILITY_ID = UUID.fromString("b190defd-8e0e-4a04-ba14-448091f76b3f");
+  private static final UUID CAPABILITY_ID1 = UUID.fromString("b190defd-8e0e-4a04-ba14-448091f76b5f");
 
   @Autowired private TokenService tokenService;
   @Autowired private KeycloakClient keycloakClient;
   @Autowired private KafkaTemplate<String, Object> kafkaTemplate;
 
   @SpyBean private UserCapabilitiesClient userCapabilitiesClient;
+  @SpyBean private UsersClient usersClient;
 
   @BeforeAll
   static void beforeAll(@Autowired KeycloakTestClient client, @Autowired TokenService tokenService) {
@@ -50,20 +55,44 @@ class SystemUserIT extends BaseIntegrationTest {
   }
 
   @Test
-  void checkSystemUser() {
-    var authToken = tokenService.issueToken();
-    var systemUsersList =
-      keycloakClient.findUsersByUsername(TestConstants.TENANT_NAME, "master-system-user", true, authToken);
-    assertThat(systemUsersList).hasSize(1);
-    var systemUser = systemUsersList.get(0);
-    assertThat(systemUser.getFirstName()).isEqualTo("System User");
-    assertThat(systemUser.getLastName()).isEqualTo("System");
+  @WireMockStub(scripts = {
+    "/wiremock/stubs/users/find-system-user-by-query.json",
+    "/wiremock/stubs/users/delete-system-user.json",
+    "/wiremock/stubs/users/get-system-user-capability-set.json",
+    "/wiremock/stubs/users/get-system-user-capability.json",
+    "/wiremock/stubs/users/get-system-user-roles.json",
+    "/wiremock/stubs/policy/find-policy-by-system-username.json"
+  })
+  void deleteOnEvent() {
+    kafkaTemplate.send(FOLIO_SYSTEM_USER_TOPIC, TestConstants.systemUserResourceDeleteEvent());
+
+    await().atMost(Durations.FIVE_SECONDS).untilAsserted(() -> verify(usersClient).deleteUser(USER_ID1));
+
+    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/create-system-user.json"));
   }
 
   @Test
-  @WireMockStub(scripts = "/wiremock/stubs/users/create-module-system-user.json")
-  @WireMockStub(scripts = "/wiremock/stubs/capabilities/query-capabilities-by-permissions.json")
-  @WireMockStub(scripts = "/wiremock/stubs/capabilities/assign-system-user-capabilities.json")
+  @WireMockStub(scripts = {
+    "/wiremock/stubs/users/find-system-user-by-query.json",
+    "/wiremock/stubs/capabilities/query-capabilities-by-permissions.json",
+    "/wiremock/stubs/capabilities/assign-system-user-capabilities.json"
+  })
+  void updateOnEvent() {
+    kafkaTemplate.send(FOLIO_SYSTEM_USER_TOPIC, TestConstants.systemUserResourceUpdateEvent());
+
+    var expectedRequest = new UserCapabilitiesRequest().userId(USER_ID1).addCapabilityIdsItem(CAPABILITY_ID)
+      .addCapabilityIdsItem(CAPABILITY_ID1);
+
+    await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
+      verify(userCapabilitiesClient, only()).assignUserCapabilities(USER_ID1, expectedRequest));
+  }
+
+  @Test
+  @WireMockStub(scripts = {
+    "/wiremock/stubs/users/create-module-system-user.json",
+    "/wiremock/stubs/capabilities/query-capabilities-by-permission.json",
+    "/wiremock/stubs/capabilities/assign-system-user-capability.json"
+  })
   void createOnEvent() {
     kafkaTemplate.send(FOLIO_SYSTEM_USER_TOPIC, TestConstants.systemUserResourceEvent());
 

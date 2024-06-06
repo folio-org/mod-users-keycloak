@@ -250,6 +250,32 @@ class UserServiceTest {
   }
 
   @Test
+  void deleteUserById_positive_withResources() {
+    var userId = UUID.randomUUID();
+    var collectionResponse = new CollectionResponse();
+    collectionResponse.setTotalRecords(1);
+
+    doNothing().when(keycloakService).deleteUser(userId);
+    doNothing().when(usersClient).deleteUser(userId);
+    doNothing().when(userRolesClient).deleteUserRoles(userId);
+    doNothing().when(userCapabilitySetClient).deleteUserCapabilitySet(userId);
+    doNothing().when(userCapabilitiesClient).deleteUserCapabilities(userId);
+    doNothing().when(policyService).removePolicyByUserId(userId);
+    when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
+    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
+    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
+
+    userService.deleteUserById(userId);
+
+    verify(usersClient).deleteUser(userId);
+    verify(keycloakService).deleteUser(userId);
+    verify(userRolesClient).deleteUserRoles(userId);
+    verify(userCapabilitySetClient).deleteUserCapabilitySet(userId);
+    verify(userCapabilitiesClient).deleteUserCapabilities(userId);
+    verify(policyService).removePolicyByUserId(userId);
+  }
+
+  @Test
   void resolvePermissions() {
     var userId = UUID.randomUUID();
     var request = of("user.item.*");

@@ -3,8 +3,7 @@
     "method": "GET",
     "urlPath": "/users",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" },
-      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+      "x-okapi-tenant": { "equalTo": "master" }
     },
     "queryParameters": {
       "query": { "equalTo": "username==master-system-user" },

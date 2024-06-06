@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.uk.support.TestConstants.systemUserEvent;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -189,6 +190,27 @@ class SystemUserServiceTest {
   }
 
   @Test
+  void updateOnEvent_positive() {
+    var user = systemUser().id(CAPABILITY_ID);
+
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
+    when(userService.findUsers("username==test-system-user", 1)).thenReturn(new Users().addUsersItem(user));
+
+    systemUserService.updateOnEvent(systemUserEvent(Set.of(PERMISSION)));
+
+    verify(capabilitiesService).assignCapabilitiesByPermissions(user, Set.of(PERMISSION));
+  }
+
+  @Test
+  void updateOnEvent_positive_emptyPermissions() {
+    systemUserService.updateOnEvent(systemUserEvent(Set.of()));
+
+    verify(folioExecutionContext, never()).getTenantId();
+    verify(userService, never()).findUsers(any(), anyInt());
+    verify(capabilitiesService, never()).assignCapabilitiesByPermissions(any(), any());
+  }
+
+  @Test
   void delete_positive() {
     var userId = CAPABILITY_ID;
     var user = systemUser().id(userId);
@@ -198,7 +220,7 @@ class SystemUserServiceTest {
 
     systemUserService.delete();
 
-    verify(userService).deleteUser(userId);
+    verify(userService).deleteUserById(userId);
   }
 
   @Test
