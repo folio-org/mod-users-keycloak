@@ -1,10 +1,9 @@
 {
   "request": {
     "method": "GET",
-    "url": "/roles/users/83eb1e14-c657-4db8-8ba4-119670fc3552",
+    "url": "/roles/users/de5bb75d-e696-4d43-9df8-289f39367079",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" },
-      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+      "x-okapi-tenant": { "equalTo": "master" }
     }
   },
   "response": {

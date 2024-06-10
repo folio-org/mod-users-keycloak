@@ -63,15 +63,26 @@ public class SystemUserService {
     if (isEmpty(event.getPermissions())) {
       return;
     }
-    findUserByContext().ifPresent(user -> assignCapabilities(user, event.getPermissions()));
+    String username = event.getName();
+    findUserByUsername(username).ifPresentOrElse(
+      user -> assignCapabilities(user, event.getPermissions()), () -> createOnEvent(event));
+  }
+
+  public void deleteOnEvent(SystemUserEvent event) {
+    var username = event.getName();
+    findUserByUsername(username).ifPresent(user -> userService.deleteUserById(user.getId()));
   }
 
   public void delete() {
-    findUserByContext().ifPresent(user -> userService.deleteUserById(user.getId()));
+    var username = generateValueByTemplate(systemUserConfiguration.getUsernameTemplate());
+    var users = userService.findUsers("username==" + username, 1).getUsers();
+    if (CollectionUtils.isNotEmpty(users)) {
+      var user = users.get(0);
+      userService.deleteUser(user.getId());
+    }
   }
 
-  private Optional<User> findUserByContext() {
-    var username = generateValueByTemplate(systemUserConfiguration.getUsernameTemplate());
+  private Optional<User> findUserByUsername(String username) {
     var users = userService.findUsers("username==" + username, 1).getUsers();
     if (CollectionUtils.isNotEmpty(users)) {
       return Optional.of(users.get(0));
@@ -103,7 +114,7 @@ public class SystemUserService {
   }
 
   private void checkAndUpdateSystemUserRole(String username) {
-    var foundSystemUser = findUserByUsername(username);
+    var foundSystemUser = findKeycloakUserByUsername(username);
     var keycloakUserId = foundSystemUser.getId();
     var systemRoleName = systemUserConfiguration.getSystemUserRole();
     if (keycloakService.hasRole(keycloakUserId, systemRoleName)) {
@@ -114,7 +125,7 @@ public class SystemUserService {
     keycloakService.assignRole(keycloakUserId, systemRoleName);
   }
 
-  private KeycloakUser findUserByUsername(String username) {
+  private KeycloakUser findKeycloakUserByUsername(String username) {
     return keycloakService.findUserByUsername(username)
       .orElseThrow(() -> new KeycloakException("Failed to find a system user by username: " + username));
   }

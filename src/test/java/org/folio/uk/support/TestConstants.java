@@ -30,7 +30,6 @@ public class TestConstants {
   public static final String TOKEN_CACHE_KEY = "admin-cli-token";
 
   public static final String MODULE_NAME = "mod-users-keycloak";
-  public static final String PERMISSION = "foo.bar";
 
   public static User user() {
     return user(USER_ID.toString(), USER_NAME, "new9@new.com", "newUser@folio.org");
