@@ -19,6 +19,7 @@ application:
       enabled: true
       trust-store-path: classpath:certificates/test.truststore.jks
       trust-store-password: secretpassword
+      trust-store-type: JKS
   secret-store:
     type: EPHEMERAL
     ephemeral:
