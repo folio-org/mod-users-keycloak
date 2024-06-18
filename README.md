@@ -131,6 +131,7 @@ Keycloak all configuration properties: https://www.keycloak.org/server/all-confi
 | KC_CLIENT_TLS_ENABLED             | Enables TLS for keycloak clients.                                                                                                                                          |
 | KC_CLIENT_TLS_TRUSTSTORE_PATH     | Truststore file path for keycloak clients.                                                                                                                                 |
 | KC_CLIENT_TLS_TRUSTSTORE_PASSWORD | Truststore password for keycloak clients.                                                                                                                                  |
+| KC_CLIENT_TLS_TRUSTSTORE_TYPE     | Truststore file type for keycloak clients.                                                                                                                                 |
 
 
 ### mod-configuration properties
