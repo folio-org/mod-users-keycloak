@@ -28,8 +28,8 @@ spring:
     security:
       protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
     ssl:
-      key-store-password: ${KAFKA_SSL_KEYSTORE_PASSWORD}
-      key-store-location: ${KAFKA_SSL_KEYSTORE_LOCATION}
+#      key-store-password: ${KAFKA_SSL_KEYSTORE_PASSWORD}
+#      key-store-location: ${KAFKA_SSL_KEYSTORE_LOCATION}
       trust-store-password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
       trust-store-location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
     consumer:
