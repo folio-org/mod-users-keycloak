@@ -1,3 +1,10 @@
+## Version `v1.5.1` (20.06.2024)
+### Changes:
+Fetched module system user instead of common system user for update and delete events (MODUSERSKC-11)
+Applied OkHttpClient creation from lib with support of keystore custom type and public trusted certs (APPPOCTOOL-20)
+Packed application into Docker Image and save to Image Store (RANCHER-1515)
+Added handling of delete and update system user events (MODUSERSKC-11)
+
 ## Version `v1.5.0` (25.05.2024)
 ### Changes:
 * Added profile picture link to user personal (EUREKA-95)
