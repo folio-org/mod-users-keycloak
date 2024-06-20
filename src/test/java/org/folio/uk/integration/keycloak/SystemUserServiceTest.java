@@ -6,6 +6,7 @@ import static org.folio.uk.support.TestConstants.systemUserEvent;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -16,13 +17,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import org.folio.common.utils.CqlQuery;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.test.types.UnitTest;
 import org.folio.tools.store.SecureStore;
 import org.folio.uk.configuration.SystemUserConfigurationProperties;
-import org.folio.uk.domain.dto.Capabilities;
-import org.folio.uk.domain.dto.Capability;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
@@ -148,9 +146,6 @@ class SystemUserServiceTest {
 
   @Test
   void createOnEvent_positive_freshSetup() {
-    var query = CqlQuery.exactMatchAny("permission", List.of(PERMISSION)).toString();
-    var capabilities = new Capabilities()
-      .capabilities(List.of(new Capability().id(CAPABILITY_ID).permission(PERMISSION)));
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
     when(secureStore.lookup(MODULE_SYSTEM_USER_STORE_KEY)).thenReturn(Optional.empty());
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
@@ -190,15 +185,29 @@ class SystemUserServiceTest {
   }
 
   @Test
-  void updateOnEvent_positive() {
+  void updateOnEvent_positive_userFound() {
     var user = systemUser().id(CAPABILITY_ID);
-
-    when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    when(userService.findUsers("username==test-system-user", 1)).thenReturn(new Users().addUsersItem(user));
+    when(userService.findUsers("username==mod-foo", 1)).thenReturn(new Users().addUsersItem(user));
 
     systemUserService.updateOnEvent(systemUserEvent(Set.of(PERMISSION)));
 
     verify(capabilitiesService).assignCapabilitiesByPermissions(user, Set.of(PERMISSION));
+    verify(folioExecutionContext, never()).getTenantId();
+  }
+
+  @Test
+  void updateOnEvent_positive_userNotFoundThenCreate() {
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
+    when(secureStore.lookup(MODULE_SYSTEM_USER_STORE_KEY)).thenReturn(Optional.empty());
+    when(userService.findUsers("username==mod-foo", 1)).thenReturn(new Users());
+    when(userService.createUserSafe(userCaptor.capture(), any(), eq(false))).then(firstArg());
+    doNothing().when(secureStore).set(any(), any());
+
+    systemUserService.updateOnEvent(systemUserEvent(Set.of(PERMISSION)));
+
+    assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
+    assertThat(userCaptor.getValue().getId()).isNotNull();
+    verify(capabilitiesService).assignCapabilitiesByPermissions(any(User.class), eq(Set.of(PERMISSION)));
   }
 
   @Test
@@ -211,6 +220,26 @@ class SystemUserServiceTest {
   }
 
   @Test
+  void deleteOnEvent_positive() {
+    var userId = CAPABILITY_ID;
+    var user = systemUser().id(userId);
+    when(userService.findUsers("username==mod-foo", 1)).thenReturn(new Users().addUsersItem(user));
+
+    systemUserService.deleteOnEvent(systemUserEvent(Set.of()));
+
+    verify(userService).deleteUserById(userId);
+  }
+
+  @Test
+  void deleteOnEvent_positive_userNotFound() {
+    when(userService.findUsers("username==mod-foo", 1)).thenReturn(new Users());
+
+    systemUserService.deleteOnEvent(systemUserEvent(Set.of()));
+
+    verify(userService, never()).deleteUserById(any());
+  }
+
+  @Test
   void delete_positive() {
     var userId = CAPABILITY_ID;
     var user = systemUser().id(userId);
@@ -220,7 +249,7 @@ class SystemUserServiceTest {
 
     systemUserService.delete();
 
-    verify(userService).deleteUserById(userId);
+    verify(userService).deleteUser(userId);
   }
 
   @Test

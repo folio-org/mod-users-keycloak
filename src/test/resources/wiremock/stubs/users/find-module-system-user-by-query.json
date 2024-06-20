@@ -3,11 +3,10 @@
     "method": "GET",
     "urlPath": "/users",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" },
-      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+      "x-okapi-tenant": { "equalTo": "master" }
     },
     "queryParameters": {
-      "query": { "equalTo": "username==master-system-user" },
+      "query": { "equalTo": "username==mod-foo" },
       "limit": { "equalTo": "1" }
     }
   },
@@ -20,13 +19,13 @@
       "totalRecords": 1,
       "users": [
         {
-          "id": "83eb1e14-c657-4db8-8ba4-119670fc3552",
-          "username": "master-system-user",
+          "id": "de5bb75d-e696-4d43-9df8-289f39367079",
+          "username": "mod-foo",
           "active": true,
           "personal": {
-            "firstName": "System User",
+            "firstName": "System user - mod-foo",
             "lastName": "System",
-            "email": "master-system-user@folio.org"
+            "email": "mod-foo@folio.org"
           }
         }
       ]

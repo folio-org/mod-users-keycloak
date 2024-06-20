@@ -29,7 +29,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 class SystemUserIT extends BaseIntegrationTest {
 
   private static final UUID USER_ID = UUID.fromString("de5bb75d-e696-4d43-9df8-289f39367079");
-  private static final UUID USER_ID1 = UUID.fromString("83eb1e14-c657-4db8-8ba4-119670fc3552");
   private static final UUID CAPABILITY_ID = UUID.fromString("b190defd-8e0e-4a04-ba14-448091f76b3f");
   private static final UUID CAPABILITY_ID1 = UUID.fromString("b190defd-8e0e-4a04-ba14-448091f76b5f");
 
@@ -56,42 +55,42 @@ class SystemUserIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = {
-    "/wiremock/stubs/users/find-system-user-by-query.json",
-    "/wiremock/stubs/users/delete-system-user.json",
-    "/wiremock/stubs/users/get-system-user-capability-set.json",
-    "/wiremock/stubs/users/get-system-user-capability.json",
-    "/wiremock/stubs/users/get-system-user-roles.json",
-    "/wiremock/stubs/policy/find-policy-by-system-username.json"
+    "/wiremock/stubs/users/find-module-system-user-by-query.json",
+    "/wiremock/stubs/users/delete-module-system-user.json",
+    "/wiremock/stubs/users/get-module-system-user-capability-set.json",
+    "/wiremock/stubs/users/get-module-system-user-capability.json",
+    "/wiremock/stubs/users/get-module-system-user-roles.json",
+    "/wiremock/stubs/policy/find-policy-by-module-system-username.json"
   })
   void deleteOnEvent() {
     kafkaTemplate.send(FOLIO_SYSTEM_USER_TOPIC, TestConstants.systemUserResourceDeleteEvent());
 
-    await().atMost(Durations.FIVE_SECONDS).untilAsserted(() -> verify(usersClient).deleteUser(USER_ID1));
+    await().atMost(Durations.FIVE_SECONDS).untilAsserted(() -> verify(usersClient).deleteUser(USER_ID));
 
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/create-system-user.json"));
   }
 
   @Test
   @WireMockStub(scripts = {
-    "/wiremock/stubs/users/find-system-user-by-query.json",
+    "/wiremock/stubs/users/find-module-system-user-by-query.json",
     "/wiremock/stubs/capabilities/query-capabilities-by-permissions.json",
-    "/wiremock/stubs/capabilities/assign-system-user-capabilities.json"
+    "/wiremock/stubs/capabilities/assign-module-system-user-capabilities.json"
   })
   void updateOnEvent() {
     kafkaTemplate.send(FOLIO_SYSTEM_USER_TOPIC, TestConstants.systemUserResourceUpdateEvent());
 
-    var expectedRequest = new UserCapabilitiesRequest().userId(USER_ID1).addCapabilityIdsItem(CAPABILITY_ID)
+    var expectedRequest = new UserCapabilitiesRequest().userId(USER_ID).addCapabilityIdsItem(CAPABILITY_ID)
       .addCapabilityIdsItem(CAPABILITY_ID1);
 
     await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
-      verify(userCapabilitiesClient, only()).assignUserCapabilities(USER_ID1, expectedRequest));
+      verify(userCapabilitiesClient, only()).assignUserCapabilities(USER_ID, expectedRequest));
   }
 
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/create-module-system-user.json",
     "/wiremock/stubs/capabilities/query-capabilities-by-permission.json",
-    "/wiremock/stubs/capabilities/assign-system-user-capability.json"
+    "/wiremock/stubs/capabilities/assign-module-system-user-capability.json"
   })
   void createOnEvent() {
     kafkaTemplate.send(FOLIO_SYSTEM_USER_TOPIC, TestConstants.systemUserResourceEvent());

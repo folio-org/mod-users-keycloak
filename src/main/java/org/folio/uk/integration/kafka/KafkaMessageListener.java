@@ -49,7 +49,8 @@ public class KafkaMessageListener {
         () -> systemUserService.updateOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class)));
       case CREATE -> executeWithContext(event,
         () -> systemUserService.createOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class)));
-      case DELETE -> executeWithContext(event, systemUserService::delete);
+      case DELETE -> executeWithContext(event,
+        () -> systemUserService.deleteOnEvent(objectMapper.convertValue(event.getOldValue(), SystemUserEvent.class)));
       default -> log.warn("Received system user event is not handled: {}", event);
     }
   }

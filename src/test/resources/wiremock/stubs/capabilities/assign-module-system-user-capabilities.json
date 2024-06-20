@@ -10,7 +10,7 @@
     "bodyPatterns": [
       {
         "equalToJson": {
-          "userId": "83eb1e14-c657-4db8-8ba4-119670fc3552",
+          "userId": "de5bb75d-e696-4d43-9df8-289f39367079",
           "capabilityIds": [
             "b190defd-8e0e-4a04-ba14-448091f76b3f",
             "b190defd-8e0e-4a04-ba14-448091f76b5f"
