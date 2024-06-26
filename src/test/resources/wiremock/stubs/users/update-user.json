@@ -3,7 +3,7 @@
     "method": "PUT",
     "url": "/users/202a8ef0-d07b-4626-ad41-48c2d50d9099",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-tenant": { "equalTo": "testtenant" },
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
     },
     "bodyPatterns": [

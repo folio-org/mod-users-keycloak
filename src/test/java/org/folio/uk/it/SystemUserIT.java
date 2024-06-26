@@ -3,6 +3,8 @@ package org.folio.uk.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.folio.test.TestUtils.readString;
+import static org.folio.test.extensions.impl.KeycloakContainerExtension.getKeycloakAdminClient;
+import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 
@@ -11,7 +13,6 @@ import org.awaitility.Durations;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
-import org.folio.uk.base.KeycloakTestClient;
 import org.folio.uk.domain.dto.UserCapabilitiesRequest;
 import org.folio.uk.integration.keycloak.KeycloakClient;
 import org.folio.uk.integration.keycloak.TokenService;
@@ -40,17 +41,19 @@ class SystemUserIT extends BaseIntegrationTest {
   @SpyBean private UsersClient usersClient;
 
   @BeforeAll
-  static void beforeAll(@Autowired KeycloakTestClient client, @Autowired TokenService tokenService) {
-    enableTenant(TestConstants.TENANT_NAME, tokenService, client);
+  static void beforeAll() {
+    enableTenant(TENANT_NAME);
   }
 
   @AfterAll
   static void afterAll(@Autowired KeycloakClient client, @Autowired TokenService tokenService) {
-    removeTenant(TestConstants.TENANT_NAME);
+    removeTenant(TENANT_NAME, false);
 
     var authToken = tokenService.issueToken();
-    var usersByUsername = client.findUsersByUsername(TestConstants.TENANT_NAME, "master-system-user", true, authToken);
+    var usersByUsername = client.findUsersByUsername(TENANT_NAME, TENANT_NAME + "-system-user", true, authToken);
     assertThat(usersByUsername).isEmpty();
+
+    getKeycloakAdminClient().realm(TENANT_NAME).remove();
   }
 
   @Test
@@ -102,7 +105,7 @@ class SystemUserIT extends BaseIntegrationTest {
     );
 
     var authToken = tokenService.issueToken();
-    var systemUsersList = keycloakClient.findUsersByUsername(TestConstants.TENANT_NAME, "mod-foo", true, authToken);
+    var systemUsersList = keycloakClient.findUsersByUsername(TENANT_NAME, "mod-foo", true, authToken);
 
     assertThat(systemUsersList).hasSize(1);
     var systemUser = systemUsersList.get(0);

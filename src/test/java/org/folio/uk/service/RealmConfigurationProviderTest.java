@@ -48,15 +48,11 @@ class RealmConfigurationProviderTest {
   private static final String PASSWORD_RESET_ID = "password-reset-client";
   private static final String PASSWORD_RESET_KEY = String.format("test_%s_%s", TENANT_ID, PASSWORD_RESET_ID);
 
-  @Autowired
-  private RealmConfigurationProvider realmConfigurationProvider;
-  @Autowired
-  private CacheManager cacheManager;
-  @MockBean
-  private SecureStore secureStore;
-  @MockBean
-  private KeycloakProperties keycloakConfigurationProperties;
+  @Autowired private CacheManager cacheManager;
+  @Autowired private RealmConfigurationProvider realmConfigurationProvider;
+  @MockBean private SecureStore secureStore;
   @MockBean private FolioEnvironment folioEnvironment;
+  @MockBean private KeycloakProperties keycloakConfigurationProperties;
 
   @AfterEach
   void tearDown() {
@@ -64,7 +60,7 @@ class RealmConfigurationProviderTest {
   }
 
   @Test
-  void getRealmConfiguration_positive() throws Exception {
+  void getRealmConfiguration_positive() {
     when(keycloakConfigurationProperties.getClientId()).thenReturn(CLIENT_ID);
     when(folioEnvironment.getEnvironment()).thenReturn("test");
     when(secureStore.get(KEY)).thenReturn(SECRET);
@@ -80,7 +76,7 @@ class RealmConfigurationProviderTest {
   }
 
   @Test
-  void getRealmConfiguration_clientSecretNotFound() throws Exception {
+  void getRealmConfiguration_clientSecretNotFound() {
     when(keycloakConfigurationProperties.getClientId()).thenReturn(CLIENT_ID);
     when(folioEnvironment.getEnvironment()).thenReturn("test");
     when(secureStore.get(KEY)).thenThrow(new NotFoundException("not found"));

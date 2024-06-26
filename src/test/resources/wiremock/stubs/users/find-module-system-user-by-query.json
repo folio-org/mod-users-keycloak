@@ -3,7 +3,7 @@
     "method": "GET",
     "urlPath": "/users",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" }
+      "x-okapi-tenant": { "equalTo": "testtenant" }
     },
     "queryParameters": {
       "query": { "equalTo": "username==mod-foo" },

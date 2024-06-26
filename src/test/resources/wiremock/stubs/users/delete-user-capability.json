@@ -3,7 +3,7 @@
     "method": "DELETE",
     "url": "/users/d3958402-2f80-421b-a527-9933245a3556/capabilities",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-tenant": { "equalTo": "testtenant" },
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
     }
   },

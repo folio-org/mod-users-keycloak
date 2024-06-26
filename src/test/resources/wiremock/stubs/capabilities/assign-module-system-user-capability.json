@@ -4,7 +4,7 @@
     "urlPattern": "/users/.*/capabilities",
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "master"
+        "equalTo": "testtenant"
       }
     },
     "bodyPatterns": [

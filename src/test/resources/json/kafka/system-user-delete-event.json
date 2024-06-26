@@ -1,6 +1,6 @@
 {
   "type": "DELETE",
-  "tenant": "master",
+  "tenant": "testtenant",
   "resourceName": "System user",
   "old": {
     "name": "mod-foo",

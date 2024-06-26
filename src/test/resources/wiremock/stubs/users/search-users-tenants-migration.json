@@ -4,7 +4,7 @@
     "urlPath": "/user-tenants",
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "master"
+        "equalTo": "testtenant"
       },
       "x-okapi-token": {
         "equalTo": "X-Okapi-Token test value"
@@ -33,7 +33,7 @@
           "id": "adf434c7-4ab8-4c90-ae53-9bf8c925e4f2",
           "userId": "adf434c7-4ab8-4c90-ae53-9bf8c925e4f2",
           "externalSystemId": "externalsystemid:54001",
-          "tenantId": "master"
+          "tenantId": "testtenant"
         }
       ],
       "totalRecords": 2

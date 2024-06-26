@@ -2,10 +2,10 @@ package org.folio.uk.it;
 
 import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.uk.support.TestConstants.TENANT_NAME;
 
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
-import org.folio.uk.base.KeycloakTestClient;
 import org.folio.uk.integration.keycloak.TokenService;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.AfterAll;
@@ -20,13 +20,13 @@ class TokenServiceIT extends BaseIntegrationTest {
   @Autowired private TokenService tokenService;
 
   @BeforeAll
-  static void beforeAll(@Autowired KeycloakTestClient client, @Autowired TokenService tokenService) {
-    enableTenant(TestConstants.TENANT_NAME, tokenService, client);
+  static void beforeAll() {
+    enableTenant(TENANT_NAME);
   }
 
   @AfterAll
   static void afterAll() {
-    removeTenant(TestConstants.TENANT_NAME);
+    removeTenant(TENANT_NAME);
   }
 
   @Test
