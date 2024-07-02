@@ -1,9 +1,16 @@
 package org.folio.uk.base;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.spring.integration.XOkapiHeaders.TENANT;
+import static org.folio.spring.integration.XOkapiHeaders.URL;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.readString;
 import static org.folio.test.extensions.impl.KeycloakContainerExtension.getKeycloakAdminClient;
+import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_EXTERNAL_SYSTEM_ID_ATTR;
+import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_ID_ATTR;
+import static org.folio.uk.support.TestConstants.MODULE_NAME;
+import static org.folio.uk.support.TestConstants.OKAPI_AUTH_TOKEN;
+import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -12,10 +19,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import feign.FeignException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -33,14 +36,11 @@ import org.folio.test.extensions.impl.WireMockExecutionListener;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.integration.keycloak.KeycloakClient;
 import org.folio.uk.integration.keycloak.TokenService;
-import org.folio.uk.integration.keycloak.model.KeycloakRole;
-import org.folio.uk.integration.keycloak.model.KeycloakUser;
-import org.folio.uk.support.TestConstants;
+import org.folio.uk.support.TestValues;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-import org.keycloak.representations.idm.authorization.RolePolicyRepresentation;
-import org.keycloak.representations.idm.authorization.RolePolicyRepresentation.RoleDefinition;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -140,60 +140,41 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
   protected static HttpHeaders okapiHeaders() {
     var headers = new HttpHeaders();
-    headers.add(XOkapiHeaders.URL, wmAdminClient.getWireMockUrl());
-    headers.add(XOkapiHeaders.TOKEN, TestConstants.OKAPI_AUTH_TOKEN);
-    headers.add(XOkapiHeaders.TENANT, TestConstants.TENANT_NAME);
+    headers.add(URL, wmAdminClient.getWireMockUrl());
+    headers.add(XOkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN);
+    headers.add(TENANT, TENANT_NAME);
     return headers;
   }
 
   @SneakyThrows
-  protected static void enableTenant(String tenant, TokenService tokenService, KeycloakTestClient keycloakTestClient) {
+  @SuppressWarnings("SameParameterValue")
+  protected static void enableTenant(String tenantId) {
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/create-system-user.json"));
 
-    createKeycloakPasswordResetPolicy();
-    createKeycloakSystemRole(tokenService, keycloakTestClient);
+    var realmFile = "json/keycloak/" + tenantId + "-realm.json";
+    var tenantRealmRepresentation = TestValues.readValue(realmFile, RealmRepresentation.class);
+    getKeycloakAdminClient().realms().create(tenantRealmRepresentation);
 
-    var tenantAttributes = new TenantAttributes().moduleTo(TestConstants.MODULE_NAME);
+    var tenantAttributes = new TenantAttributes().moduleTo(MODULE_NAME);
     mockMvc.perform(post("/_/tenant")
         .content(asJsonString(tenantAttributes))
         .contentType(APPLICATION_JSON)
-        .header(XOkapiHeaders.TENANT, tenant)
-        .header(XOkapiHeaders.URL, wmAdminClient.getWireMockUrl())
-        .header(XOkapiHeaders.TOKEN, TestConstants.OKAPI_AUTH_TOKEN))
+        .header(TENANT, tenantId)
+        .header(URL, wmAdminClient.getWireMockUrl())
+        .header(XOkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isNoContent());
 
     assertThat(wmAdminClient.unmatchedRequests().getRequests()).isEmpty();
     wmAdminClient.resetAll();
   }
 
-  private static void createKeycloakPasswordResetPolicy() {
-    log.info("Setting up Password Reset policy");
-    var realm = getKeycloakAdminClient().realm("master");
-    var cliId = realm.clients()
-      .findByClientId("master-login-application").get(0).getId();
-    log.info("master login client id {}", cliId);
-
-    var rolePolicy = new RolePolicyRepresentation();
-    rolePolicy.setName("Password Reset policy");
-    rolePolicy.setRoles(Set.of(new RoleDefinition("Password Reset", false)));
-    realm.clients().get(cliId).authorization().policies().role().create(rolePolicy).close();
-  }
-
-  private static void createKeycloakSystemRole(TokenService tokenService, KeycloakTestClient client) {
-    var keycloakRole = new KeycloakRole();
-    keycloakRole.setName("System");
-    keycloakRole.setComposite(false);
-    keycloakRole.setDescription("System role");
-
-    try {
-      client.create(TestConstants.TENANT_NAME, tokenService.issueToken(), keycloakRole);
-    } catch (FeignException.Conflict e) {
-      log.debug("Role is already created");
-    }
+  @SneakyThrows
+  protected static void removeTenant(String tenantId) {
+    removeTenant(tenantId, true);
   }
 
   @SneakyThrows
-  protected static void removeTenant(String tenantId) {
+  protected static void removeTenant(String tenantId, boolean removeRealm) {
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/find-system-user-by-query.json"));
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/delete-system-user.json"));
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/find-system-user-by-id.json"));
@@ -202,30 +183,33 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/get-system-user-capability-set.json"));
     wmAdminClient.addStubMapping(readString("wiremock/stubs/users/get-system-user-roles.json"));
 
-    var tenantAttributes = new TenantAttributes().moduleFrom(TestConstants.MODULE_NAME).purge(true);
+    var tenantAttributes = new TenantAttributes().moduleFrom(MODULE_NAME).purge(true);
     mockMvc.perform(post("/_/tenant")
         .content(asJsonString(tenantAttributes))
         .contentType(APPLICATION_JSON)
-        .header(XOkapiHeaders.TENANT, tenantId)
-        .header(XOkapiHeaders.URL, wmAdminClient.getWireMockUrl())
-        .header(XOkapiHeaders.TOKEN, TestConstants.OKAPI_AUTH_TOKEN))
+        .header(TENANT, tenantId)
+        .header(URL, wmAdminClient.getWireMockUrl())
+        .header(XOkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isNoContent());
 
     assertThat(wmAdminClient.unmatchedRequests().getRequests()).isEmpty();
     wmAdminClient.resetAll();
+
+    if (removeRealm) {
+      getKeycloakAdminClient().realm(tenantId).remove();
+    }
   }
 
   protected void verifyKeyCloakUser(User user) {
     var authToken = tokenService.issueToken();
-    List<KeycloakUser> keycloakUsers =
-      keycloakClient.findUsersByUsername(TestConstants.TENANT_NAME, user.getUsername(), false, authToken);
-    KeycloakUser keycloakUser = keycloakUsers.get(0);
+    var keycloakUsers = keycloakClient.findUsersByUsername(TENANT_NAME, user.getUsername(), false, authToken);
+    var keycloakUser = keycloakUsers.get(0);
 
     assertThat(keycloakUser.getEmail()).isEqualTo(user.getPersonal().getEmail());
 
-    Map<String, List<String>> attributes = keycloakUser.getAttributes();
-    assertThat(attributes.get(KeycloakUser.USER_ID_ATTR)).contains(user.getId().toString());
-    assertThat(attributes.get(KeycloakUser.USER_EXTERNAL_SYSTEM_ID_ATTR)).contains(user.getExternalSystemId());
+    var attributes = keycloakUser.getAttributes();
+    assertThat(attributes.get(USER_ID_ATTR)).contains(user.getId().toString());
+    assertThat(attributes.get(USER_EXTERNAL_SYSTEM_ID_ATTR)).contains(user.getExternalSystemId());
   }
 
   @TestConfiguration

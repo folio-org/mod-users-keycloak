@@ -3,6 +3,8 @@ package org.folio.uk.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.folio.test.TestUtils.parseResponse;
+import static org.folio.uk.support.TestConstants.TENANT_NAME;
+import static org.folio.uk.support.TestValues.readValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -13,18 +15,12 @@ import java.util.UUID;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
-import org.folio.uk.base.KeycloakTestClient;
-import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserMigrationJob;
 import org.folio.uk.domain.dto.UserMigrationJobStatus;
 import org.folio.uk.domain.dto.Users;
-import org.folio.uk.integration.keycloak.TokenService;
-import org.folio.uk.support.TestConstants;
-import org.folio.uk.support.TestValues;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 
 @IntegrationTest
@@ -33,13 +29,13 @@ class UserMigrationIT extends BaseIntegrationTest {
   private static final String JOB_ID = "9971c946-c449-46b6-968b-77b66280b044";
 
   @BeforeAll
-  static void beforeAll(@Autowired KeycloakTestClient client, @Autowired TokenService tokenService) {
-    enableTenant(TestConstants.TENANT_NAME, tokenService, client);
+  static void beforeAll() {
+    enableTenant(TENANT_NAME);
   }
 
   @AfterAll
   static void afterAll() {
-    removeTenant(TestConstants.TENANT_NAME);
+    removeTenant(TENANT_NAME);
   }
 
   @Test
@@ -62,8 +58,8 @@ class UserMigrationIT extends BaseIntegrationTest {
       .until(() -> getJobStatusById(resp.getId()), equalTo(UserMigrationJobStatus.FINISHED));
     assertThat(status).isEqualTo(UserMigrationJobStatus.FINISHED);
 
-    Users users = TestValues.readValue("json/user/search-users-migration.json", Users.class);
-    User migratedUser = users.getUsers().get(0);
+    var users = readValue("json/user/search-users-migration.json", Users.class);
+    var migratedUser = users.getUsers().get(0);
     verifyKeyCloakUser(migratedUser);
   }
 

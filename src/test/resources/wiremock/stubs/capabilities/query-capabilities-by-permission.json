@@ -4,7 +4,7 @@
     "urlPathPattern": "/capabilities",
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "master"
+        "equalTo": "testtenant"
       }
     },
     "queryParameters": {

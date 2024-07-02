@@ -3,7 +3,7 @@
     "method": "GET",
     "url": "/users/de5bb75d-e696-4d43-9df8-289f39367079/capabilities",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" }
+      "x-okapi-tenant": { "equalTo": "testtenant" }
     }
   },
   "response": {

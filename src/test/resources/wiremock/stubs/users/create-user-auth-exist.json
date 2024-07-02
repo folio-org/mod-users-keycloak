@@ -3,7 +3,7 @@
     "method": "POST",
     "url": "/users",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-tenant": { "equalTo": "testtenant" },
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
     }
   },

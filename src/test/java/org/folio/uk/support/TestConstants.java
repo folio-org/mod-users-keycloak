@@ -1,6 +1,8 @@
 package org.folio.uk.support;
 
-import java.time.OffsetDateTime;
+import static java.time.OffsetDateTime.parse;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -20,12 +22,10 @@ public class TestConstants {
   public static final UUID USER_ID = UUID.fromString("d3958402-2f80-421b-a527-9933245a3556");
   public static final String USER_NAME = "ZakirBailey";
   public static final UUID USER_PATRON_GROUP_ID = UUID.fromString("503a81cd-6c26-400f-b620-14c08943697c");
-  public static final Date USER_ENROLLMENT_DATE =
-    Date.from(OffsetDateTime.parse("2020-10-07T04:00:00.000+00:00").toInstant());
-  public static final Date USER_EXPIRATION_DATE =
-    Date.from(OffsetDateTime.parse("2023-02-28T23:59:59.000+00:00").toInstant());
+  public static final Date USER_ENROLLMENT_DATE = Date.from(parse("2020-10-07T04:00:00.000+00:00").toInstant());
+  public static final Date USER_EXPIRATION_DATE = Date.from(parse("2023-02-28T23:59:59.000+00:00").toInstant());
 
-  public static final String TENANT_NAME = "master";
+  public static final String TENANT_NAME = "testtenant";
   public static final String TOKEN_CACHE = "token";
   public static final String TOKEN_CACHE_KEY = "admin-cli-token";
 
@@ -71,6 +71,6 @@ public class TestConstants {
   }
 
   public static List<String> systemUserPermissions() {
-    return TestValues.readValue("json/capability/permissions.json", List.class);
+    return TestValues.readValue("json/capability/permissions.json", new TypeReference<>() {});
   }
 }

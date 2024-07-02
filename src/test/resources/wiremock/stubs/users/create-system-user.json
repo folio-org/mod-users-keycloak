@@ -3,14 +3,14 @@
     "method": "POST",
     "url": "/users",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "master" },
+      "x-okapi-tenant": { "equalTo": "testtenant" },
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
     },
     "bodyPatterns": [
       {
         "matchesJsonPath": {
           "expression": "$.username",
-          "equalTo": "master-system-user"
+          "equalTo": "testtenant-system-user"
         }
       },
       {
@@ -28,7 +28,7 @@
       {
         "matchesJsonPath": {
           "expression": "$.personal.email",
-          "equalTo": "master-system-user@folio.org"
+          "equalTo": "testtenant-system-user@folio.org"
         }
       }
     ]
@@ -40,12 +40,12 @@
     },
     "jsonBody": {
       "id": "83eb1e14-c657-4db8-8ba4-119670fc3552",
-      "username": "master-system-user",
+      "username": "testtenant-system-user",
       "active": true,
       "personal": {
         "firstName": "System User",
         "lastName": "System",
-        "email": "master-system-user@folio.org"
+        "email": "testtenant-system-user@folio.org"
       }
     }
   }

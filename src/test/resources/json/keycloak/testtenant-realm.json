@@ -1,22 +1,30 @@
 {
+  "realm": "testtenant",
+  "enabled": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": true,
   "roles": {
     "realm": [
       {
         "name": "Password Reset",
-        "description": "",
+        "description": "A role with access to password reset endpoints",
         "composite": false,
         "clientRole": false,
-        "attributes": {}
+        "attributes": { }
       },
       {
         "name": "System",
         "description": "System role for module-to-module communication",
         "composite": false,
         "clientRole": false,
-        "attributes": {}
+        "attributes": { }
       }
     ]
   },
+  "groups": [ ],
+  "localizationTexts": { },
+  "users": [ ],
   "clients": [
     {
       "clientId": "folio-backend-admin-client",
@@ -30,7 +38,7 @@
     },
     {
       "id": "425d6b74-4dbd-41af-af37-54d5754914ab",
-      "clientId": "master-login-application",
+      "clientId": "testtenant-login-application",
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "supersecret",
@@ -54,28 +62,50 @@
         "resources": [
           {
             "name": "/users-keycloak/password-reset/reset",
-            "displayName": "",
-            "uris": [],
             "scopes": [
               {
                 "name": "POST"
               }
-            ],
-            "icon_uri": ""
+            ]
           },
           {
             "name": "/users-keycloak/password-reset/validate",
-            "displayName": "",
-            "uris": [],
             "scopes": [
               {
                 "name": "POST"
               }
-            ],
-            "icon_uri": ""
+            ]
           }
         ],
         "policies": [
+          {
+            "name": "System role policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "roles": "[{\"id\":\"System\",\"required\":false}]"
+            }
+          },
+          {
+            "name": "Password Reset policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "roles": "[{\"id\":\"Password Reset\",\"required\":false}]"
+            }
+          },
+          {
+            "name": "System role permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "scopes": "[\"GET\",\"POST\",\"PUT\",\"PATCH\",\"OPTIONS\",\"DELETE\"]",
+              "applyPolicies": "[\"System role policy\"]"
+            }
+          }
         ],
         "scopes": [
           {
@@ -142,23 +172,17 @@
       }
     }
   ],
-  "users": [
-    {
-      "username": "service-account-folio-backend-admin-client",
-      "enabled": true,
-      "serviceAccountClientId": "folio-backend-admin-client",
-      "realmRoles": [
-        "admin",
-        "create-realm"
-      ]
-    },
-    {
-      "username": "service-account-password-reset-client",
-      "enabled": true,
-      "serviceAccountClientId": "password-reset-client",
-      "realmRoles": [
-        "Password Reset"
-      ]
-    }
-  ]
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "subComponents": { },
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}],\"unmanagedAttributePolicy\":\"ENABLED\"}"
+          ]
+        }
+      }
+    ]
+  }
 }

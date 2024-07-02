@@ -1,5 +1,6 @@
 package org.folio.uk.integration.keycloak;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +38,7 @@ class KeycloakServiceTest {
 
   private static final String AUTH_TOKEN = "dGVzdC10b2tlbg==";
   private static final String ROLE = "test-role";
-  private static final String LOGIN_CLIENT = "master-login-applications";
+  private static final String LOGIN_CLIENT = TENANT_NAME + "-login-applications";
   private static final UUID LOGIN_CLIENT_KC_ID = UUID.randomUUID();
   private static final String LOGIN_CLIENT_SUFFIX = "-login-applications";
 
@@ -57,7 +58,7 @@ class KeycloakServiceTest {
 
     var result = keycloakService.findUserByUsername(USER_NAME);
 
-    assertThat(result).isPresent().get().isEqualTo(keycloakUser());
+    assertThat(result).isPresent().contains(keycloakUser());
   }
 
   @Test
@@ -119,7 +120,7 @@ class KeycloakServiceTest {
 
     assertThatThrownBy(() -> keycloakService.hasRole(userId, ROLE))
       .isInstanceOf(KeycloakException.class)
-      .hasMessage(String.format("Failed to find user roles for user [role: %s, userId: %s]", ROLE, userId));
+      .hasMessage(format("Failed to find user roles for user [role: %s, userId: %s]", ROLE, userId));
   }
 
   @Test
@@ -162,7 +163,7 @@ class KeycloakServiceTest {
 
     assertThatThrownBy(() -> keycloakService.assignRole(userId, ROLE))
       .isInstanceOf(KeycloakException.class)
-      .hasMessage(String.format("Failed to assign a role to user [userId: %s, role: %s]", userId, ROLE));
+      .hasMessage(format("Failed to assign a role to user [userId: %s, role: %s]", userId, ROLE));
   }
 
   @Test
@@ -210,7 +211,7 @@ class KeycloakServiceTest {
 
     assertThatThrownBy(() -> keycloakService.createScopePermission("policy", "/foo/bar", List.of("POST")))
       .isInstanceOf(KeycloakException.class)
-      .hasMessage(String.format("Keycloak client is not found by clientId: %s", LOGIN_CLIENT));
+      .hasMessage(format("Keycloak client is not found by clientId: %s", LOGIN_CLIENT));
   }
 
   @Test
@@ -219,16 +220,13 @@ class KeycloakServiceTest {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
     when(loginClientProperties.getClientNameSuffix()).thenReturn(LOGIN_CLIENT_SUFFIX);
 
-    when(keycloakClient.findClientsByClientId(TENANT_NAME, LOGIN_CLIENT, AUTH_TOKEN)).thenReturn(
-      List.of(keycloakClient()));
-
-    doThrow(FeignException.class).when(keycloakClient)
-      .createScopePermission(any(), any(), any(), any());
+    var clients = List.of(keycloakClient());
+    when(keycloakClient.findClientsByClientId(TENANT_NAME, LOGIN_CLIENT, AUTH_TOKEN)).thenReturn(clients);
+    doThrow(FeignException.class).when(keycloakClient).createScopePermission(any(), any(), any(), any());
 
     assertThatThrownBy(() -> keycloakService.createScopePermission("policy", "/foo/bar", List.of("POST")))
       .isInstanceOf(KeycloakException.class)
-      .hasMessage(
-        String.format("Failed to create a permission [resource: [%s], policies: [%s]]", "/foo/bar", "policy"));
+      .hasMessage(format("Failed to create a permission [resource: [%s], policies: [%s]]", "/foo/bar", "policy"));
   }
 
   @Test
@@ -252,7 +250,7 @@ class KeycloakServiceTest {
 
     assertThatThrownBy(() -> keycloakService.findClientWithClientId(TENANT_NAME, LOGIN_CLIENT))
       .isInstanceOf(KeycloakException.class)
-      .hasMessage(String.format("Keycloak client is not found by clientId: %s", LOGIN_CLIENT));
+      .hasMessage(format("Keycloak client is not found by clientId: %s", LOGIN_CLIENT));
   }
 
   @Test
@@ -265,7 +263,7 @@ class KeycloakServiceTest {
 
     assertThatThrownBy(() -> keycloakService.findClientWithClientId(TENANT_NAME, LOGIN_CLIENT))
       .isInstanceOf(KeycloakException.class)
-      .hasMessage(String.format("Keycloak client is not found by clientId: %s", LOGIN_CLIENT));
+      .hasMessage(format("Keycloak client is not found by clientId: %s", LOGIN_CLIENT));
   }
 
   @Test
@@ -277,7 +275,7 @@ class KeycloakServiceTest {
 
     assertThatThrownBy(() -> keycloakService.findClientWithClientId(TENANT_NAME, LOGIN_CLIENT))
       .isInstanceOf(KeycloakException.class)
-      .hasMessage(String.format("Too many keycloak clients with clientId: %s", LOGIN_CLIENT));
+      .hasMessage(format("Too many keycloak clients with clientId: %s", LOGIN_CLIENT));
   }
 
   @Test
@@ -288,7 +286,7 @@ class KeycloakServiceTest {
 
     assertThatThrownBy(() -> keycloakService.findClientWithClientId(TENANT_NAME, LOGIN_CLIENT))
       .isInstanceOf(KeycloakException.class)
-      .hasMessage(String.format("Failed to find a keycloak client with clientId: %s", LOGIN_CLIENT));
+      .hasMessage(format("Failed to find a keycloak client with clientId: %s", LOGIN_CLIENT));
   }
 
   private static ScopePermission scopePermission() {

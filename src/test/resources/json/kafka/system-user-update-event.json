@@ -1,6 +1,6 @@
 {
   "type": "UPDATE",
-  "tenant": "master",
+  "tenant": "testtenant",
   "resourceName": "System user",
   "new": {
     "name": "mod-foo",

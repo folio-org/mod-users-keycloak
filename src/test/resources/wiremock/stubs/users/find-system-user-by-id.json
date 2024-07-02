@@ -4,7 +4,7 @@
     "urlPath": "/users/83eb1e14-c657-4db8-8ba4-119670fc3552",
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "master"
+        "equalTo": "testtenant"
       },
       "x-okapi-token": {
         "equalTo": "X-Okapi-Token test value"
@@ -18,12 +18,12 @@
     },
     "jsonBody": {
       "id": "83eb1e14-c657-4db8-8ba4-119670fc3552",
-      "username": "master-system-user",
+      "username": "testtenant-system-user",
       "active": true,
       "personal": {
         "firstName": "System User",
         "lastName": "System",
-        "email": "master-system-user@folio.org"
+        "email": "testtenant-system-user@folio.org"
       }
     }
   }

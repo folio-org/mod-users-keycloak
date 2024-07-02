@@ -6,6 +6,7 @@ import static org.folio.test.TestConstants.TENANT_ID;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
 import static org.folio.test.TestUtils.readString;
+import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.folio.uk.support.TestConstants.USER_ID;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -25,32 +26,44 @@ import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
 import org.folio.uk.domain.dto.CompositeUser;
-import org.folio.uk.domain.dto.Permissions;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.support.TestConstants;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @IntegrationTest
 @SuppressWarnings("squid:S2699")
 class UserIT extends BaseIntegrationTest {
+
   private static final String TOKEN_WITH_USER_ID =
     "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidHlwZSI6ImxlZ2FjeS1hY2Nlc3MiLCJ1c2VyX"
       + "2lkIjoiYWM2NzY3YzMtMTMyNS01MjA1LTg5ZDUtYzU3OGM5OTFhNDVhIiwiaWF0IjoxNjg4NzAzNTM3LCJ0ZW5hbnQiOiJkaWt1In0"
       + ".9MDZuCHjKcG4YTHtGsnaYNej5ZqBRm7Wo-OcvPfTGU4";
   private static final UUID USER_ID_FROM_TOKEN = UUID.fromString("ac6767c3-1325-5205-89d5-c578c991a45a");
 
+  @BeforeAll
+  static void beforeAll() {
+    enableTenant(TENANT_NAME);
+  }
+
+  @AfterAll
+  static void afterAll() {
+    removeTenant(TENANT_NAME);
+  }
+
   @Test
-  @WireMockStub(scripts = "/wiremock/stubs/users/get-user.json")
+  @WireMockStub("/wiremock/stubs/users/get-user.json")
   void get_positive() throws Exception {
     doGet("/users-keycloak/users/{id}", USER_ID)
       .andExpect(json("user/get-user-response.json"));
   }
 
   @Test
-  @WireMockStub(scripts = "/wiremock/stubs/users/get-user-notfound.json")
+  @WireMockStub("/wiremock/stubs/users/get-user-notfound.json")
   void get_negative_notFoundById() throws Exception {
-    UUID userId = UUID.randomUUID();
+    var userId = UUID.randomUUID();
 
     attemptGet("/users-keycloak/users/{id}", userId)
       .andExpectAll(notFoundWithMsg("Not Found"));
@@ -202,9 +215,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/users/create-user.json"
-  })
+  @WireMockStub("/wiremock/stubs/users/create-user.json")
   void create_positive() throws Exception {
     var user = TestConstants.user();
     var mvcResult = doPost("/users-keycloak/users", user).andReturn();
@@ -252,7 +263,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = "/wiremock/stubs/users/create-user-patron-group-not-found.json")
+  @WireMockStub("/wiremock/stubs/users/create-user-patron-group-not-found.json")
   void create_negative_patronGroupNotFound() throws Exception {
     mockMvc.perform(post("/users-keycloak/users")
       .headers(okapiHeaders())
@@ -266,9 +277,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/users/create-user-auth-exist.json"
-  })
+  @WireMockStub("/wiremock/stubs/users/create-user-auth-exist.json")
   void create_positive_kc_only_authUserExists() throws Exception {
     var userId = "d24b7b4a-00ed-416e-a810-981b003bd158";
     var user = TestConstants.user(userId, "create-user-auth-exist", "au_exist@mail.com", "nus@folio.org");
@@ -285,9 +294,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/users/create-user-auth-exist.json"
-  })
+  @WireMockStub("/wiremock/stubs/users/create-user-auth-exist.json")
   void create_positive_authUserExists() throws Exception {
     var userId = "d24b7b4a-00ed-416e-a810-981b003bd158";
     var user = TestConstants.user(userId, "create-user-auth-exist", "au_exist@mail.com", "nus@folio.org");
@@ -313,9 +320,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/users/update-user.json",
-  })
+  @WireMockStub("/wiremock/stubs/users/update-user.json")
   void update_positive() throws Exception {
     var userId = "202a8ef0-d07b-4626-ad41-48c2d50d9099";
     var user = TestConstants.user(userId, "update-user", "uu@mail.com", "nus@folio.org");
@@ -326,9 +331,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/users/update-user.json",
-  })
+  @WireMockStub("/wiremock/stubs/users/update-user.json")
   void update_with_accept_text_positive() throws Exception {
     var userId = "202a8ef0-d07b-4626-ad41-48c2d50d9099";
     var user = TestConstants.user(userId, "update-user", "uu@mail.com", "nus@folio.org");
@@ -344,7 +347,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = "/wiremock/stubs/users/update-user-notfound.json")
+  @WireMockStub("/wiremock/stubs/users/update-user-notfound.json")
   void update_negative_userNotFound() throws Exception {
     var user = TestConstants.user("f4b05750-bd6c-427b-a651-7ba2191d24a3", "update-user-notfound", "uunf@mail.com",
       "nus@folio.org");
@@ -364,9 +367,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/users/update-user-no-auth.json"
-  })
+  @WireMockStub("/wiremock/stubs/users/update-user-no-auth.json")
   void update_positive_authUserNotFound() throws Exception {
     var userId = "95a4a5c0-ca68-4d26-af83-62f5c3586f18";
     var user = TestConstants.user(userId, "update-user-no-auth", "uuna@mail.com", "nus@folio.org");
@@ -414,9 +415,7 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/users/get-user-notfound.json"
-  })
+  @WireMockStub("/wiremock/stubs/users/get-user-notfound.json")
   void delete_positive_noUser() throws Exception {
     var user = TestConstants.user("d3958402-2f80-421b-a527-9933245a3556", "delete-user", "du@mail.com",
       "nus@folio.org");
@@ -425,14 +424,10 @@ class UserIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/users/get-perms-resolve-permissions.json"
-  })
+  @WireMockStub("/wiremock/stubs/users/get-perms-resolve-permissions.json")
   void resolvePermissions_positive() throws Exception {
-    var request = new Permissions().permissions(List.of("ui.all", "users.item.get", "inventory.collection.*"));
-
-    attemptGet("/users-keycloak/users/{id}/permissions?desiredPermissions=ui.all&desiredPermissions=users.item.*",
-      USER_ID)
+    var url = "/users-keycloak/users/{id}/permissions?desiredPermissions=ui.all&desiredPermissions=users.item.*";
+    attemptGet(url, USER_ID)
       .andExpect(status().isOk())
       .andExpect(content().json(readString("json/user/resolve-permissions.json")));
   }
