@@ -85,7 +85,7 @@ public class KeycloakService {
     var found = keycloakClient.getUsersWithAttrs(getRealm(), query, true, getToken());
 
     if (isEmpty(found)) {
-      return null;
+      return Optional.empty();
     }
 
     if (found.size() != 1) {
