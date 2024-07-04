@@ -63,7 +63,6 @@ public class AuthUserControllerTest {
     verify(userService, times(1)).createUser(user, true);
   }
 
-
   @Test
   public void createAuthUser_hasNoUsername() throws Exception {
     UUID userId = UUID.randomUUID();
