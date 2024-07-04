@@ -80,7 +80,7 @@ public class KeycloakService {
       () -> buildUsersErrorMessage("Failed to delete keycloak user", id));
   }
 
-  public KeycloakUser findKeycloakUserWithUserIdAttr(UUID id) {
+  public Optional<KeycloakUser> findKeycloakUserWithUserIdAttr(UUID id) {
     var query = USER_ID_ATTR + ":" + id;
     var found = keycloakClient.getUsersWithAttrs(getRealm(), query, true, getToken());
 
@@ -93,7 +93,7 @@ public class KeycloakService {
         String.format("Too many keycloak users with '%s' attribute: %s", USER_ID_ATTR, id));
     }
 
-    return found.get(0);
+    return Optional.of(found.get(0));
   }
 
   /**
@@ -268,12 +268,8 @@ public class KeycloakService {
 
   private Runnable update(UUID userId, KeycloakUser kcUser) {
     return () -> {
-      var existing = findKeycloakUserWithUserIdAttr(userId);
-
-      if (existing == null) {
-        throw new KeycloakException(
-          String.format("Keycloak user doesn't exist with the given '%s' attribute: %s", USER_ID_ATTR, userId));
-      }
+      var existing = findKeycloakUserWithUserIdAttr(userId).orElseThrow(() -> new KeycloakException(
+        String.format("Keycloak user doesn't exist with the given '%s' attribute: %s", USER_ID_ATTR, userId)));
 
       kcUser.setId(existing.getId());
       kcUser.setCreatedTimestamp(existing.getCreatedTimestamp());
@@ -287,8 +283,8 @@ public class KeycloakService {
     return () -> {
       var kcUser = findKeycloakUserWithUserIdAttr(id);
 
-      if (kcUser != null) {
-        keycloakClient.deleteUser(getRealm(), kcUser.getId(), getToken());
+      if (kcUser.isPresent()) {
+        keycloakClient.deleteUser(getRealm(), kcUser.get().getId(), getToken());
       } else {
         log.debug("Keycloak user is not found: userId = {}", id);
       }

@@ -90,10 +90,10 @@ public class UserService {
     return usersClient.query(query, limit);
   }
 
-  public User getUser(UUID id) {
+  public Optional<User> getUser(UUID id) {
     log.info("Retrieving user with: id = {}", id);
 
-    return usersClient.lookupUserById(id).orElseThrow(() -> new EntityNotFoundException("Not Found"));
+    return usersClient.lookupUserById(id);
   }
 
   public CompositeUser getUserBySelfReference(List<IncludedField> include, boolean expandPermissions) {
@@ -116,7 +116,7 @@ public class UserService {
 
     usersClient.updateUser(id, user);
     var kcUser = keycloakService.findKeycloakUserWithUserIdAttr(id);
-    if (kcUser != null) {
+    if (kcUser.isPresent()) {
       keycloakService.updateUser(id, user);
     } else {
       log.info("User was not found in keycloak by user_id attribute: id = {}", id);

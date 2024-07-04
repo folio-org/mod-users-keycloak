@@ -151,6 +151,19 @@
           "modulePermissions" : [
             "permissions.users.item.get"
           ]
+        },
+        {
+          "methods" : [ "GET" ],
+          "pathPattern" : "/users-keycloak/auth-users/{userId}",
+          "permissionsRequired" : ["users-keycloak.auth-users.item.get"]
+        },
+        {
+          "methods" : [ "POST" ],
+          "pathPattern" : "/users-keycloak/auth-users/{userId}",
+          "permissionsRequired" : ["users-keycloak.auth-users.item.post"],
+          "modulePermissions" : [
+            "permissions.users.item.get"
+          ]
         }
       ]
     },

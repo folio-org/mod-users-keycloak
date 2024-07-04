@@ -367,6 +367,35 @@ paths:
           $ref: '#/components/responses/unprocessableEntity'
         '500':
           $ref: '#/components/responses/internalServerError'
+  /users-keycloak/auth-users/{userId}:
+    get:
+      operationId: checkIfExistsAuthUserById
+      tags:
+        - auth-user
+      description: Check if AuthUser exists for the specified user ID
+      parameters:
+        - $ref: '#/components/parameters/path-entity-userId'
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+        '404':
+          $ref: '#/components/responses/entityNotFound'
+    post:
+      operationId: createAuthUser
+      tags:
+        - auth-user
+      description: Check if AuthUser exists for the specified user ID
+      parameters:
+        - $ref: '#/components/parameters/path-entity-userId'
+      responses:
+        '201':
+          $ref: '#/components/responses/created'
+        '204':
+          $ref: '#/components/responses/noContent'
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '500':
+          $ref: '#/components/responses/internalServerError'
 
 components:
   schemas:
@@ -531,5 +560,11 @@ components:
         items:
           type: string
       example: [ "users.collection.get", "users.item.*" ]
-
-
+    path-entity-userId:
+      in: path
+      required: true
+      name: userId
+      description: User ID
+      schema:
+        type: string
+        format: uuid
