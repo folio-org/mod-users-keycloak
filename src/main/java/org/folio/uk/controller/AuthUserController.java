@@ -26,7 +26,7 @@ public class AuthUserController implements AuthUserApi {
     }
 
     return userService.getUser(userId).map(this::createKeycloakUser)
-      .orElseGet(() -> ResponseEntity.noContent().build());
+      .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   private ResponseEntity<Void> createKeycloakUser(User user) {

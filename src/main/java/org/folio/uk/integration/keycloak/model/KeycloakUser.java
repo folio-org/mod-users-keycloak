@@ -13,12 +13,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class KeycloakUser implements Serializable {
 
   public static final String USER_ID_ATTR = "user_id";
