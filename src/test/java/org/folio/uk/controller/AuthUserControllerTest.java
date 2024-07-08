@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @UnitTest
 @WebMvcTest(AuthUserController.class)
 @Import({AuthUserController.class})
-public class AuthUserControllerTest {
+class AuthUserControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @MockBean private KeycloakService keycloakService;
