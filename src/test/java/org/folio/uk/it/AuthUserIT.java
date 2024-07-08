@@ -40,14 +40,14 @@ public class AuthUserIT extends BaseIntegrationTest {
   }
 
   @Test
-  public void verify_negative_nonExistingKeycloakUser() throws Exception {
+  void verify_negative_nonExistingKeycloakUser() throws Exception {
     mockMvc.perform(get("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
       .headers(okapiHeaders())
       .contentType(APPLICATION_JSON)).andExpectAll(status().isNotFound());
   }
 
   @Test
-  public void verify_positive_existingKeycloakUser() throws Exception {
+  void verify_positive_existingKeycloakUser() throws Exception {
     createKeycloakUser();
     mockMvc.perform(get("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
       .headers(okapiHeaders())
@@ -56,7 +56,7 @@ public class AuthUserIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = {"/wiremock/stubs/users/get-user.json"})
-  public void createKeycloakUser_positive_noKeycloakUser() throws Exception {
+  void createKeycloakUser_positive_noKeycloakUser() throws Exception {
     mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
       .headers(okapiHeaders())
       .contentType(APPLICATION_JSON)).andExpectAll(status().isCreated());
@@ -64,7 +64,7 @@ public class AuthUserIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = {"/wiremock/stubs/users/get-user.json"})
-  public void createKeycloakUser_positive_keycloakUserAlreadyExists() throws Exception {
+  void createKeycloakUser_positive_keycloakUserAlreadyExists() throws Exception {
     createKeycloakUser();
     mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
       .headers(okapiHeaders())
@@ -73,7 +73,7 @@ public class AuthUserIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = {"/wiremock/stubs/users/get-user-no-username.json"})
-  public void createKeycloakUser_negative_userWithoutUsername() throws Exception {
+  void createKeycloakUser_negative_userWithoutUsername() throws Exception {
     mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
       .headers(okapiHeaders())
       .contentType(APPLICATION_JSON)).andExpectAll(status().isBadRequest());

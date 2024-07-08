@@ -32,28 +32,28 @@ public class AuthUserControllerTest {
   @MockBean private UserService userService;
 
   @Test
-  public void checkAuthUserExistence_nonExistentUser() throws Exception {
+  void checkAuthUserExistence_nonExistentUser() throws Exception {
     UUID userId = UUID.randomUUID();
     when(keycloakService.findKeycloakUserWithUserIdAttr(userId)).thenReturn(Optional.empty());
     mockMvc.perform(get("/users-keycloak/auth-users/" + userId)).andExpect(status().isNotFound());
   }
 
   @Test
-  public void checkAuthUserExistence_existingUser() throws Exception {
+  void checkAuthUserExistence_existingUser() throws Exception {
     UUID userId = UUID.randomUUID();
     when(keycloakService.findKeycloakUserWithUserIdAttr(userId)).thenReturn(Optional.of(new KeycloakUser()));
     mockMvc.perform(get("/users-keycloak/auth-users/" + userId)).andExpect(status().isNoContent());
   }
 
   @Test
-  public void createAuthUser_alreadyExists() throws Exception {
+  void createAuthUser_alreadyExists() throws Exception {
     UUID userId = UUID.randomUUID();
     when(keycloakService.findKeycloakUserWithUserIdAttr(userId)).thenReturn(Optional.of(new KeycloakUser()));
     mockMvc.perform(post("/users-keycloak/auth-users/" + userId)).andExpect(status().isNoContent());
   }
 
   @Test
-  public void createAuthUser_doesNotExist() throws Exception {
+  void createAuthUser_doesNotExist() throws Exception {
     UUID userId = UUID.randomUUID();
     User user = mock(User.class);
     when(user.getUsername()).thenReturn("not blank");
@@ -64,7 +64,7 @@ public class AuthUserControllerTest {
   }
 
   @Test
-  public void createAuthUser_hasNoUsername() throws Exception {
+  void createAuthUser_hasNoUsername() throws Exception {
     UUID userId = UUID.randomUUID();
     User user = mock(User.class);
     when(user.getUsername()).thenReturn(null);
