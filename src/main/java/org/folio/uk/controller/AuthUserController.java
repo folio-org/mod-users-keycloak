@@ -20,7 +20,7 @@ public class AuthUserController implements AuthUserApi {
 
   @Override
   public ResponseEntity<Void> createAuthUser(UUID userId) {
-    boolean userExists = keycloakService.findKeycloakUserWithUserIdAttr(userId).isPresent();
+    var userExists = keycloakService.findKeycloakUserWithUserIdAttr(userId).isPresent();
     if (userExists) {
       return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -39,8 +39,9 @@ public class AuthUserController implements AuthUserApi {
 
   @Override
   public ResponseEntity<String> checkIfExistsAuthUserById(UUID userId) {
-    boolean userExists = keycloakService.findKeycloakUserWithUserIdAttr(userId).isPresent();
-    return userExists ? ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+    var userExists = keycloakService.findKeycloakUserWithUserIdAttr(userId).isPresent();
+    return userExists
+      ? ResponseEntity.status(HttpStatus.NO_CONTENT).build()
       : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
   }
 }
