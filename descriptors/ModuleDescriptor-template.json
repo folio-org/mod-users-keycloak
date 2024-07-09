@@ -315,7 +315,7 @@
       "permissionName": "users-keycloak.users.permissions.collection.get"
     },
     {
-      "description": "Verify existence of Keycloak user",
+      "description": "Verify existence of a Keycloak user",
       "displayName": "Users (keycloak) - verify exists",
       "permissionName": "users-keycloak.auth-users.item.get"
     },
