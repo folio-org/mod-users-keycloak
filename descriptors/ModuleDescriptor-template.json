@@ -151,6 +151,19 @@
           "modulePermissions" : [
             "permissions.users.item.get"
           ]
+        },
+        {
+          "methods" : [ "GET" ],
+          "pathPattern" : "/users-keycloak/auth-users/{userId}",
+          "permissionsRequired" : ["users-keycloak.auth-users.item.get"]
+        },
+        {
+          "methods" : [ "POST" ],
+          "pathPattern" : "/users-keycloak/auth-users/{userId}",
+          "permissionsRequired" : ["users-keycloak.auth-users.item.post"],
+          "modulePermissions" : [
+            "permissions.users.item.get"
+          ]
         }
       ]
     },
@@ -302,6 +315,16 @@
       "permissionName": "users-keycloak.users.permissions.collection.get"
     },
     {
+      "description": "Verify existence of a Keycloak user",
+      "displayName": "Users (keycloak) - verify exists",
+      "permissionName": "users-keycloak.auth-users.item.get"
+    },
+    {
+      "description": "Create Keycloak user for Folio user, if not yet present",
+      "displayName": "Users (keycloak) - ensure created",
+      "permissionName": "users-keycloak.auth-users.item.post"
+    },
+    {
       "description": "All permissions for user operations",
       "displayName": "Users (keycloak) - all users permissions",
       "permissionName": "users-keycloak.all",
@@ -319,7 +342,9 @@
         "users-keycloak.password-reset-link.validate",
         "users-keycloak.read.restricted",
         "users-keycloak.read.basic",
-        "users-keycloak.users.permissions.collection.get"
+        "users-keycloak.users.permissions.collection.get",
+        "users-keycloak.auth-users.item.get",
+        "users-keycloak.auth-users.item.post"
       ]
     }
   ],

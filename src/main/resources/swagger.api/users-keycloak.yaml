@@ -367,6 +367,41 @@ paths:
           $ref: '#/components/responses/unprocessableEntity'
         '500':
           $ref: '#/components/responses/internalServerError'
+  /users-keycloak/auth-users/{userId}:
+    get:
+      operationId: checkIfExistsAuthUserById
+      tags:
+        - auth-user
+      description: Check if AuthUser exists for the specified user ID
+      parameters:
+        - $ref: '#/components/parameters/path-entity-userId'
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+          description: "User is present in Keycloak"
+        '404':
+          $ref: '#/components/responses/entityNotFound'
+          description: "User is not present in Keycloak"
+    post:
+      operationId: createAuthUser
+      tags:
+        - auth-user
+      description: Check if AuthUser exists for the specified user ID
+      parameters:
+        - $ref: '#/components/parameters/path-entity-userId'
+      responses:
+        '201':
+          $ref: '#/components/responses/created'
+          description: "User was not present in Keycloak and was created"
+        '204':
+          $ref: '#/components/responses/noContent'
+          description: "User was already present in Keycloak so nothing was changed"
+        '400':
+          $ref: '#/components/responses/badRequest'
+          description: "User doesn't have a username"
+        '500':
+          $ref: '#/components/responses/internalServerError'
+          description: "Unexpected error"
 
 components:
   schemas:
@@ -423,6 +458,8 @@ components:
         - expanded_servicepoints
 
   responses:
+    created:
+      description: Success, entity created
     noContent:
       description: Success, no content
       content:
@@ -531,5 +568,11 @@ components:
         items:
           type: string
       example: [ "users.collection.get", "users.item.*" ]
-
-
+    path-entity-userId:
+      in: path
+      required: true
+      name: userId
+      description: User ID
+      schema:
+        type: string
+        format: uuid

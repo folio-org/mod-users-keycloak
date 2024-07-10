@@ -3,6 +3,7 @@ package org.folio.uk.controller;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class UserController implements UsersApi {
 
   @Override
   public ResponseEntity<User> getUser(UUID id) {
-    return ResponseEntity.ok(service.getUser(id));
+    return ResponseEntity.ok(service.getUser(id).orElseThrow(() -> new EntityNotFoundException("Not Found")));
   }
 
   @Override
