@@ -1,3 +1,9 @@
+## Version `v1.5.2` (10.07.2024)
+### Changes:
+Upgrade keycloak-client to v25.0.1 (KEYCLOAK-11)
+API to verify and ensure existence of Keycloak user records corresponding to Folio user records (MODUSERSKC-30)
+
+---
 ## Version `v1.5.1` (20.06.2024)
 ### Changes:
 Fetched module system user instead of common system user for update and delete events (MODUSERSKC-11)
@@ -5,10 +11,12 @@ Applied OkHttpClient creation from lib with support of keystore custom type and 
 Packed application into Docker Image and save to Image Store (RANCHER-1515)
 Added handling of delete and update system user events (MODUSERSKC-11)
 
+---
 ## Version `v1.5.0` (25.05.2024)
 ### Changes:
 * Added profile picture link to user personal (EUREKA-95)
 
+---
 ## Version `v1.4.0` (16.04.2024)
 ### Changes:
 * Added type to system user (MODUSERSKC-34)
