@@ -1,9 +1,13 @@
 package org.folio.uk.controller;
 
+import static org.folio.uk.domain.dto.ErrorCode.USER_ABSENT_USERNAME;
+
+import jakarta.persistence.EntityNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.uk.domain.dto.User;
+import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.rest.resource.AuthUserApi;
 import org.folio.uk.service.UserService;
@@ -26,12 +30,13 @@ public class AuthUserController implements AuthUserApi {
     }
 
     return userService.getUser(userId).map(this::createKeycloakUser)
-      .orElseGet(() -> ResponseEntity.notFound().build());
+      .orElseThrow(() -> new EntityNotFoundException("Not Found"));
   }
 
   private ResponseEntity<Void> createKeycloakUser(User user) {
     if (StringUtils.isBlank(user.getUsername())) {
-      return ResponseEntity.badRequest().build();
+      throw new RequestValidationException("User without username cannot be created in Keycloak",
+        USER_ABSENT_USERNAME);
     }
     userService.createUser(user, true);
     return ResponseEntity.status(HttpStatus.CREATED).build();

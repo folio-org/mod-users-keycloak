@@ -243,8 +243,8 @@ public class ApiExceptionHandler {
     return buildResponseEntity(exception, INTERNAL_SERVER_ERROR, UNKNOWN_ERROR);
   }
 
-  private static ErrorResponse buildValidationError(Exception exception, List<Parameter> parameters) {
-    return buildErrorResponse(exception, parameters, VALIDATION_ERROR);
+  private static ErrorResponse buildValidationError(RequestValidationException exception, List<Parameter> parameters) {
+    return buildErrorResponse(exception, parameters, exception.getErrorCode());
   }
 
   private static ErrorResponse buildErrorResponse(Exception exception, List<Parameter> parameters, ErrorCode code) {

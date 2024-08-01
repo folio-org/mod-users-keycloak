@@ -40,4 +40,17 @@ public class RequestValidationException extends RuntimeException {
     this.errorCode = VALIDATION_ERROR;
     this.errorParameters = emptyList();
   }
+
+  /**
+   * Creates {@link RequestValidationException} object for given message.
+   *
+   * @param message - validation error message
+   * @param errorCode - an error code
+   */
+  public RequestValidationException(String message, ErrorCode errorCode) {
+    super(message);
+
+    this.errorCode = errorCode;
+    this.errorParameters = emptyList();
+  }
 }
