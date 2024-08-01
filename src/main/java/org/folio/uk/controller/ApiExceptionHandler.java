@@ -143,8 +143,7 @@ public class ApiExceptionHandler {
     var errors = exception.getErrors().stream()
       .map(e -> new Error()
         .code(e.getCode())
-        .message(e.getMessage()))
-      .collect(Collectors.toList());
+        .message(e.getMessage())).toList();
 
     return ResponseEntity.status(UNPROCESSABLE_ENTITY)
       .body(new ErrorResponse().errors(errors).totalRecords(errors.size()));
