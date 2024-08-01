@@ -21,7 +21,6 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.folio.cql2pgjson.exception.CQLFeatureUnsupportedException;
@@ -143,8 +142,7 @@ public class ApiExceptionHandler {
     var errors = exception.getErrors().stream()
       .map(e -> new Error()
         .code(e.getCode())
-        .message(e.getMessage()))
-      .collect(Collectors.toList());
+        .message(e.getMessage())).toList();
 
     return ResponseEntity.status(UNPROCESSABLE_ENTITY)
       .body(new ErrorResponse().errors(errors).totalRecords(errors.size()));
@@ -243,8 +241,8 @@ public class ApiExceptionHandler {
     return buildResponseEntity(exception, INTERNAL_SERVER_ERROR, UNKNOWN_ERROR);
   }
 
-  private static ErrorResponse buildValidationError(Exception exception, List<Parameter> parameters) {
-    return buildErrorResponse(exception, parameters, VALIDATION_ERROR);
+  private static ErrorResponse buildValidationError(RequestValidationException exception, List<Parameter> parameters) {
+    return buildErrorResponse(exception, parameters, exception.getErrorCode());
   }
 
   private static ErrorResponse buildErrorResponse(Exception exception, List<Parameter> parameters, ErrorCode code) {

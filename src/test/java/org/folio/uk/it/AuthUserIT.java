@@ -1,9 +1,12 @@
 package org.folio.uk.it;
 
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -35,30 +38,27 @@ public class AuthUserIT extends BaseIntegrationTest {
   @BeforeEach
   public void beforeEach() {
     var token = tokenService.issueToken();
-    keycloakClient.findUsersByUsername(TENANT_NAME, KC_USERNAME, true, token).forEach(user ->
-      keycloakClient.deleteUser(TENANT_NAME, user.getId(), token));
+    keycloakClient.findUsersByUsername(TENANT_NAME, KC_USERNAME, true, token)
+      .forEach(user -> keycloakClient.deleteUser(TENANT_NAME, user.getId(), token));
   }
 
   @Test
   void verify_negative_nonExistingKeycloakUser() throws Exception {
-    mockMvc.perform(get("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
-      .headers(okapiHeaders())
+    mockMvc.perform(get("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556").headers(okapiHeaders())
       .contentType(APPLICATION_JSON)).andExpectAll(status().isNotFound());
   }
 
   @Test
   void verify_positive_existingKeycloakUser() throws Exception {
     createKeycloakUser();
-    mockMvc.perform(get("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
-      .headers(okapiHeaders())
+    mockMvc.perform(get("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556").headers(okapiHeaders())
       .contentType(APPLICATION_JSON)).andExpectAll(status().isNoContent());
   }
 
   @Test
   @WireMockStub(scripts = {"/wiremock/stubs/users/get-user.json"})
   void createKeycloakUser_positive_noKeycloakUser() throws Exception {
-    mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
-      .headers(okapiHeaders())
+    mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556").headers(okapiHeaders())
       .contentType(APPLICATION_JSON)).andExpectAll(status().isCreated());
   }
 
@@ -66,23 +66,23 @@ public class AuthUserIT extends BaseIntegrationTest {
   @WireMockStub(scripts = {"/wiremock/stubs/users/get-user.json"})
   void createKeycloakUser_positive_keycloakUserAlreadyExists() throws Exception {
     createKeycloakUser();
-    mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
-      .headers(okapiHeaders())
+    mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556").headers(okapiHeaders())
       .contentType(APPLICATION_JSON)).andExpectAll(status().isNoContent());
   }
 
   @Test
   @WireMockStub(scripts = {"/wiremock/stubs/users/get-user-no-username.json"})
   void createKeycloakUser_negative_userWithoutUsername() throws Exception {
-    mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556")
-      .headers(okapiHeaders())
-      .contentType(APPLICATION_JSON)).andExpectAll(status().isBadRequest());
+    mockMvc.perform(post("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556").headers(okapiHeaders())
+      .contentType(APPLICATION_JSON)).andExpectAll(status().isBadRequest(),
+      jsonPath("$.errors[0].message", containsString("User without username cannot be created in Keycloak")),
+      jsonPath("$.errors[0].code", is("user.absent-username")),
+      jsonPath("$.errors[0].type", is("RequestValidationException")));
   }
 
   private void createKeycloakUser() {
-    keycloakClient.createUser(TENANT_NAME, KeycloakUser.builder()
-      .userName(KC_USERNAME)
-      .attributes(Map.of(KeycloakUser.USER_ID_ATTR, List.of("d3958402-2f80-421b-a527-9933245a3556")))
-      .build(), tokenService.issueToken());
+    keycloakClient.createUser(TENANT_NAME, KeycloakUser.builder().userName(KC_USERNAME)
+        .attributes(Map.of(KeycloakUser.USER_ID_ATTR, List.of("d3958402-2f80-421b-a527-9933245a3556"))).build(),
+      tokenService.issueToken());
   }
 }
