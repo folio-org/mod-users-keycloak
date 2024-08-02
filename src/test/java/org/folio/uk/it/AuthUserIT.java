@@ -45,7 +45,7 @@ public class AuthUserIT extends BaseIntegrationTest {
   @Test
   void verify_negative_nonExistingKeycloakUser() throws Exception {
     mockMvc.perform(get("/users-keycloak/auth-users/d3958402-2f80-421b-a527-9933245a3556").headers(okapiHeaders())
-      .contentType(APPLICATION_JSON)).andExpectAll(status().isNotFound());
+      .contentType(APPLICATION_JSON)).andExpectAll(notFoundWithMsg("Not Found"));
   }
 
   @Test

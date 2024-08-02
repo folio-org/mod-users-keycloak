@@ -45,8 +45,9 @@ public class AuthUserController implements AuthUserApi {
   @Override
   public ResponseEntity<String> checkIfExistsAuthUserById(UUID userId) {
     var userExists = keycloakService.findKeycloakUserWithUserIdAttr(userId).isPresent();
-    return userExists
-      ? ResponseEntity.status(HttpStatus.NO_CONTENT).build()
-      : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    if (!userExists) {
+      throw new EntityNotFoundException("Not Found");
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }
