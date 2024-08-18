@@ -19,15 +19,15 @@
   <properties>
     <java.version>17</java.version>
     <lombok.version>1.18.34</lombok.version>
-    <mapstruct.version>1.5.5.Final</mapstruct.version>
+    <mapstruct.version>1.6.0</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.8.2</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.22</swagger-annotations.version>
-    <apache-commons-lang3.version>3.14.0</apache-commons-lang3.version>
+    <apache-commons-lang3.version>3.16.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
     <folio-spring-support.version>8.1.2</folio-spring-support.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
-    <application-poc-tools.version>1.5.4</application-poc-tools.version>
+    <application-poc-tools.version>1.5.5</application-poc-tools.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <org.json.version>20240303</org.json.version>
 
