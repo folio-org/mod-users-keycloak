@@ -1,3 +1,8 @@
+## Version `v1.5.3` (14.08.2024)
+### Changes:
+* Return proper response bodies for error cases on creation of Keycloak user - 404 + body in cause Folio user doesn't exist, 400 + body in case Folio user doesn't have a username (MODUSERSKC-48)
+---
+
 ## Version `v1.5.2` (10.07.2024)
 ### Changes:
 Upgrade keycloak-client to v25.0.1 (KEYCLOAK-11)
