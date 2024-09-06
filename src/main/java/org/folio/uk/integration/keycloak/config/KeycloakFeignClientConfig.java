@@ -2,7 +2,7 @@ package org.folio.uk.integration.keycloak.config;
 
 import feign.Client;
 import lombok.extern.log4j.Log4j2;
-import org.folio.common.utils.FeignClientTlsUtils;
+import org.folio.common.utils.tls.FeignClientTlsUtils;
 import org.springframework.context.annotation.Bean;
 
 @Log4j2
