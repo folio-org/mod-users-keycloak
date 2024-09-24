@@ -1,4 +1,9 @@
-## Version `v1.5.3` (14.08.2024)
+## Version `v1.6.0` (24.09.2024)
+### Changes:
+*  Bumped up applications-poc-tools dependencies to 1.5.6 to support Hostname Verification for TLS connections
+---
+
+* ## Version `v1.5.3` (14.08.2024)
 ### Changes:
 * Return proper response bodies for error cases on creation of Keycloak user - 404 + body in cause Folio user doesn't exist, 400 + body in case Folio user doesn't have a username (MODUSERSKC-48)
 ---
