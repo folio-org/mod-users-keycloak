@@ -12,16 +12,7 @@
     },
     "logic": {
       "description": "The logic to apply for this policy.",
-      "type": "string",
-      "enum": [
-        "positive",
-        "negative"
-      ],
-      "default": "positive",
-      "examples": [
-        "positive",
-        "negative"
-      ]
+      "$ref": "policyLogicType.json"
     }
   },
   "required": [
@@ -35,6 +26,6 @@
       "f7f7f7f7-7777-f7f7-f7f7-f7f7f7f7f7f7",
       "7f7f7f7f-7f7f-7777-7f7f-7f7f7f7f7f7f"
     ],
-    "logic": "positive"
+    "logic": "POSITIVE"
   }
 }
