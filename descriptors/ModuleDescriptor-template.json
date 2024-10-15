@@ -92,7 +92,8 @@
             "users.collection.get",
             "users.item.get",
             "login.password-reset-action.post",
-            "notify.item.post"
+            "notify.item.post",
+            "notify.users.item.post"
           ]
         },
         {
@@ -106,6 +107,7 @@
             "perms.users.item.put",
             "configuration.entries.collection.get",
             "users.collection.get",
+            "notify.users.item.post",
             "notify.item.post"
           ]
         },
@@ -118,6 +120,7 @@
             "users.item.get",
             "configuration.entries.collection.get",
             "login.password-reset-action.post",
+            "notify.users.item.post",
             "notify.item.post"
           ]
         },
@@ -131,6 +134,7 @@
             "users.item.get",
             "login.password-reset.post",
             "validation.validate.post",
+            "notify.users.item.post",
             "notify.item.post"
           ]
         },
