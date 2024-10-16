@@ -1,0 +1,6 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Source type for roles and policies.",
+  "type": "string",
+  "enum": [ "SYSTEM", "USER", "CONSORTIUM" ]
+}

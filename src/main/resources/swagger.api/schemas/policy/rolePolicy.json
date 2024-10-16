@@ -11,12 +11,7 @@
     },
     "logic": {
       "description": "The logic to apply for this policy.",
-      "type": "string",
-      "enum": [
-        "positive",
-        "negative"
-      ],
-      "default": "positive"
+      "$ref": "policyLogicType.json"
     }
   },
   "required": [
