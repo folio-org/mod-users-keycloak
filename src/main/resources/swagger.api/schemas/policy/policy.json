@@ -17,8 +17,12 @@
       "type": "string"
     },
     "type": {
-      "description": "The type of policy. Required.", 
+      "description": "The type of policy. Required.",
       "$ref": "policyType.json"
+    },
+    "source": {
+      "description": "The source for the policy.",
+      "$ref": "sourceType.json"
     },
     "userPolicy": {
       "description": "Object containing the details of the user-based policy",
