@@ -61,7 +61,7 @@
           "permissionsRequired": [ "users-keycloak.migrations.post" ],
           "modulePermissions": [
             "users.collection.get",
-            "perms.users"
+            "perms.users.all"
           ]
         },
         {
