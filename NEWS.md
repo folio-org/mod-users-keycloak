@@ -1,3 +1,15 @@
+## Version `v2.1.0` (in progress)
+### Changes:
+---
+
+## Version `v2.0.0` (01.11.2024)
+### Changes:
+* Increase keycloak-admin-client to v25.0.6 (KEYCLOAK-24)
+* Update role related enum values to upper case (MODUSERSKC-58)
+* Add the permission `notify.users.item.post` (MODUSERSKC-57)
+* Rename permission (MODPERMS-233)
+---
+
 ## Version `v1.6.0` (24.09.2024)
 ### Changes:
 *  Bumped up applications-poc-tools dependencies to 1.5.6 to support Hostname Verification for TLS connections
@@ -10,16 +22,16 @@
 
 ## Version `v1.5.2` (10.07.2024)
 ### Changes:
-Upgrade keycloak-client to v25.0.1 (KEYCLOAK-11)
-API to verify and ensure existence of Keycloak user records corresponding to Folio user records (MODUSERSKC-30)
+* Upgrade keycloak-client to v25.0.1 (KEYCLOAK-11)
+* API to verify and ensure existence of Keycloak user records corresponding to Folio user records (MODUSERSKC-30)
 
 ---
 ## Version `v1.5.1` (20.06.2024)
 ### Changes:
-Fetched module system user instead of common system user for update and delete events (MODUSERSKC-11)
-Applied OkHttpClient creation from lib with support of keystore custom type and public trusted certs (APPPOCTOOL-20)
-Packed application into Docker Image and save to Image Store (RANCHER-1515)
-Added handling of delete and update system user events (MODUSERSKC-11)
+* Fetched module system user instead of common system user for update and delete events (MODUSERSKC-11)
+* Applied OkHttpClient creation from lib with support of keystore custom type and public trusted certs (APPPOCTOOL-20)
+* Packed application into Docker Image and save to Image Store (RANCHER-1515)
+* Added handling of delete and update system user events (MODUSERSKC-11)
 
 ---
 ## Version `v1.5.0` (25.05.2024)
