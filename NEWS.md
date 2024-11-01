@@ -1,3 +1,7 @@
+## Version `v2.1.0` (in progress)
+### Changes:
+---
+
 ## Version `v2.0.0` (01.11.2024)
 ### Changes:
 * Increase keycloak-admin-client to v25.0.6 (KEYCLOAK-24)
