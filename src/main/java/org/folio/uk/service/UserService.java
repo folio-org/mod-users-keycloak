@@ -11,6 +11,7 @@ import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -50,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserService {
 
+  public static final String PERMISSION_NAME_FIELD = "permissionName";
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
   private final UserCapabilitySetClient userCapabilitySetClient;
@@ -107,7 +109,7 @@ public class UserService {
 
     return new CompositeUser()
       .user(user)
-      .permissions(fetchPermissionUser(userId))
+      .permissions(fetchPermissionUser(userId, expandPermissions))
       .servicePointsUser(fetchServicePointUser(userId));
   }
 
@@ -216,14 +218,19 @@ public class UserService {
     return servicePointUser;
   }
 
-  private PermissionUser fetchPermissionUser(UUID userId) {
+  private PermissionUser fetchPermissionUser(UUID userId, boolean expandPermissions) {
     var includeOnlyVisiblePermissions = rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions();
     var userPermissions = userPermissionsClient.getPermissionsForUser(userId, includeOnlyVisiblePermissions, null);
-    var perms = emptyIfNull(userPermissions.getPermissions());
+    var permissionsList = emptyIfNull(userPermissions.getPermissions());
 
     return new PermissionUser()
-      .permissions(perms)
-      .userId(userId.toString());
+      .permissions(
+        permissionsList.stream()
+          // For backward compatibility of the API we must return a JSON object in permissions in case
+          // expandPermissions is set to true. For now, however, we only fill in the
+          // permissionName field and nothing else.
+          .map(permissionName -> expandPermissions ? Map.of(PERMISSION_NAME_FIELD, permissionName) : permissionName)
+          .toList()).userId(userId.toString());
   }
 
   private UUID extractUserId(String token) {

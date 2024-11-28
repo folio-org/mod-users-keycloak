@@ -4,10 +4,16 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.List.of;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.folio.uk.domain.dto.IncludedField.EXPANDED_PERMS;
+import static org.folio.uk.service.UserService.PERMISSION_NAME_FIELD;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -21,13 +27,16 @@ import feign.FeignException.UnprocessableEntity;
 import feign.Request;
 import feign.Request.HttpMethod;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
 import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
+import org.folio.uk.integration.inventory.model.ServicePointUserCollection;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.policy.PolicyService;
@@ -65,6 +74,7 @@ class UserServiceTest {
   @MockBean private UserCapabilitiesClient userCapabilitiesClient;
   @MockBean private PolicyService policyService;
   @MockBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  @MockBean private FolioExecutionContext folioExecutionContext;
 
   @AfterEach
   void tearDown() {
@@ -74,7 +84,6 @@ class UserServiceTest {
 
   @Test
   void createUserSafe_positive() {
-    System.out.println(applicationContext.getBeanDefinitionCount());
     var user = user();
     when(usersClient.createUser(user)).thenReturn(user);
 
@@ -251,7 +260,7 @@ class UserServiceTest {
 
   @Test
   void deleteUserById_positive_withResources() {
-    var userId = UUID.randomUUID();
+    var userId = randomUUID();
     var collectionResponse = new CollectionResponse();
     collectionResponse.setTotalRecords(1);
 
@@ -277,7 +286,7 @@ class UserServiceTest {
 
   @Test
   void resolvePermissions() {
-    var userId = UUID.randomUUID();
+    var userId = randomUUID();
     var request = of("user.item.*");
     var response = of("user.item.get", "user.item.post", "user.item.put");
     var userPermissions = new UserPermissions();
@@ -291,9 +300,40 @@ class UserServiceTest {
     verify(userPermissionsClient).getPermissionsForUser(userId, false, request);
   }
 
+  @Test
+  void testGetUserBySelfReference() {
+    var userId = randomUUID();
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getToken()).thenReturn("");
+    when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(mock(User.class)));
+    when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
+    var permissions = new UserPermissions();
+    permissions.setPermissions(List.of("some.permission"));
+    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
+
+    var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true);
+
+    verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
+    verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
+    verify(usersClient, times(1)).lookupUserById(userId);
+
+    assertThat(resultExpanded.getPermissions().getPermissions()).hasSize(1);
+    assertThat(resultExpanded.getPermissions().getPermissions().get(0)).isEqualTo(
+      Map.of(PERMISSION_NAME_FIELD, "some.permission"));
+
+    var result = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), false);
+
+    verify(userPermissionsClient, times(2)).getPermissionsForUser(eq(userId), any(), any());
+    verify(servicePointsUserClient, times(2)).getServicePointsUser(userId);
+    verify(usersClient, times(2)).lookupUserById(userId);
+
+    assertThat(result.getPermissions().getPermissions()).hasSize(1);
+    assertThat(result.getPermissions().getPermissions().get(0)).isEqualTo("some.permission");
+  }
+
   private static User user() {
     return new User()
-      .id(UUID.randomUUID())
+      .id(randomUUID())
       .username(USERNAME);
   }
 }
