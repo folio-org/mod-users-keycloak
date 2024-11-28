@@ -1,5 +1,6 @@
 ## Version `v2.1.0` (in progress)
 ### Changes:
+* Backwards-compatible API for expand permissions parameter (MODUSERSKC-63)
 ---
 
 ## Version `v2.0.0` (01.11.2024)
