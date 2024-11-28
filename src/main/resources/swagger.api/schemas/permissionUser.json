@@ -15,7 +15,7 @@
       "type": "array",
       "description": "Permissions array",
       "items": {
-        "type": "string"
+        "type": "object"
       }
     },
     "metadata" : {

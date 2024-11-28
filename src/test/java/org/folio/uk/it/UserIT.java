@@ -6,6 +6,7 @@ import static org.folio.test.TestConstants.TENANT_ID;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
 import static org.folio.test.TestUtils.readString;
+import static org.folio.uk.service.UserService.PERMISSION_NAME_FIELD;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.folio.uk.support.TestConstants.USER_ID;
 import static org.hamcrest.Matchers.containsString;
@@ -20,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.test.extensions.WireMockStub;
@@ -92,6 +94,29 @@ class UserIT extends BaseIntegrationTest {
     assertThat(user.getServicePointsUser().getId()).isEqualTo("e66e30fd-0473-4a3f-910b-7921817eb3ea");
     assertThat(user.getServicePointsUser().getServicePoints().get(0).getId()).isEqualTo(
       "7c5abc9f-f3d7-4856-b8d7-6712462ca007");
+  }
+
+  @Test
+  @WireMockStub(scripts = {
+    "/wiremock/stubs/users/get-user-by-self.json",
+    "/wiremock/stubs/users/get-perms-by-self.json",
+    "/wiremock/stubs/inventory/get-service-points-user.json",
+    "/wiremock/stubs/inventory/get-service-point.json"
+  })
+  void getBySelf_positive_expandedPermissions() throws Exception {
+    var response = mockMvc.perform(get("/users-keycloak/_self?expandPermissions=true")
+        .header(XOkapiHeaders.URL, wmAdminClient.getWireMockUrl())
+        .header(TENANT, TENANT_ID)
+        .header(XOkapiHeaders.TOKEN, TOKEN_WITH_USER_ID)
+        .header(XOkapiHeaders.USER_ID, USER_ID_FROM_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    var user = parseResponse(response, CompositeUser.class);
+    assertThat(user.getUser().getId()).isEqualTo(USER_ID_FROM_TOKEN);
+    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of(Map.of(PERMISSION_NAME_FIELD, "ui.all")));
+    assertThat(user.getServicePointsUser().getId()).isEqualTo("e66e30fd-0473-4a3f-910b-7921817eb3ea");
   }
 
   @Test
