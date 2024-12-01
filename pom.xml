@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.5</version>
+    <version>3.4.0</version>
     <relativePath />
   </parent>
 
@@ -21,7 +21,7 @@
     <lombok.version>1.18.36</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.9.0</hypersistence-utils-hibernate-63.version>
-    <swagger-annotations.version>2.2.25</swagger-annotations.version>
+    <swagger-annotations.version>2.2.26</swagger-annotations.version>
     <commons-lang3.version>3.17.0</commons-lang3.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
@@ -35,11 +35,11 @@
     </users-keycloak.yaml-file>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>10.20.1</maven-checkstyle.version>
+    <maven-checkstyle.version>10.20.2</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <openapi-generator.version>7.9.0</openapi-generator.version>
+    <openapi-generator.version>7.10.0</openapi-generator.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
   </properties>
 
