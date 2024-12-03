@@ -1,6 +1,7 @@
 package org.folio.uk.service;
 
 import static java.lang.Boolean.parseBoolean;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.folio.uk.domain.dto.ErrorCode.LINK_EXPIRED;
 import static org.folio.uk.domain.dto.ErrorCode.LINK_INVALID;
 import static org.folio.uk.domain.dto.ErrorCode.USER_ABSENT_USERNAME;
@@ -83,7 +84,7 @@ public class PasswordResetService {
 
     var passwordResetActionId = UUID.randomUUID().toString();
     var actionResponse = actionService.createPasswordResetAction(userId, expirationTime, passwordResetActionId);
-    var passwordExists = actionResponse.getPasswordExists();
+    var passwordExists = defaultIfNull(actionResponse.getPasswordExists(), false);
 
     var tokenResponse = resetTokenService.generateResetToken(passwordResetActionId);
     var token = tokenResponse.getAccessToken();
