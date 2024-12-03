@@ -190,6 +190,21 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
     shouldHandleExceptionWhenConvertTime();
   }
 
+  @Test
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset.json")
+  @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
+  @WireMockStub(scripts = "/wiremock/stubs/login/reset-non-existing-password-is-empty.json")
+  @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
+  void generatePasswordResetLink_positive_whenExistingPasswordCheckIsEmpty() throws Exception {
+    var expectedLink = getExpectedPasswordResetLink();
+
+    callGeneratePasswordResetLink()
+      .andExpectAll(status().isOk(),
+        jsonPath("$.link", is(expectedLink)));
+
+    verify(notificationClient).sendNotification(any());
+  }
+
   @SneakyThrows
   private void generateAndSendResetPasswordNotificationWhenPasswordExistsWith(
     String expectedExpirationTime, String expectedExpirationTimeOfUnit) {
