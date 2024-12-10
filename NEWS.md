@@ -1,4 +1,9 @@
-## Version `v2.1.0` (in progress)
+## Version `v2.0.2` (10.12.2024)
+### Changes:
+* Fix for 500 error when resetting password for some users (MODUSERSKC-62).
+---
+
+## Version `v2.0.1` (28.11.2024)
 ### Changes:
 * Backwards-compatible API for expand permissions parameter (MODUSERSKC-63)
 ---
