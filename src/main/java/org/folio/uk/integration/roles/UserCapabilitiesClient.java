@@ -1,5 +1,6 @@
 package org.folio.uk.integration.roles;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.folio.uk.domain.dto.UserCapabilitiesRequest;
 import org.folio.uk.integration.roles.model.CollectionResponse;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "user-capabilities-client", url = "users")
+@FeignClient(name = "user-capabilities-client", url = "users", dismiss404 = true)
 public interface UserCapabilitiesClient {
 
   @PutMapping("/{userId}/capabilities")
@@ -18,7 +19,7 @@ public interface UserCapabilitiesClient {
 
   @DeleteMapping("/{userId}/capabilities")
   void deleteUserCapabilities(@PathVariable("userId") UUID userId);
-  
+
   @GetMapping("/{userId}/capabilities")
-  CollectionResponse findUserCapabilities(@PathVariable("userId") UUID userId);
+  Optional<CollectionResponse> findUserCapabilities(@PathVariable("userId") UUID userId);
 }

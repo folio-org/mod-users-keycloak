@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/roles/users/d3958402-2f80-421b-a527-9933245a3556",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "testtenant" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
