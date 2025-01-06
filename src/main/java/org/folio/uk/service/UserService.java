@@ -157,20 +157,26 @@ public class UserService {
   private void removeUserWithLinkedResources(UUID id) {
     usersClient.deleteUser(id);
 
-    var userCapabilitySet = userCapabilitySetClient.findUserCapabilitySet(id);
-    if (userCapabilitySet.getTotalRecords() > 0) {
-      userCapabilitySetClient.deleteUserCapabilitySet(id);
-    }
+    userCapabilitySetClient.findUserCapabilitySet(id)
+      .ifPresent(userCapabilitySet -> {
+        if (userCapabilitySet.getTotalRecords() > 0) {
+          userCapabilitySetClient.deleteUserCapabilitySet(id);
+        }
+      });
 
-    var userCapabilities = userCapabilitiesClient.findUserCapabilities(id);
-    if (userCapabilities.getTotalRecords() > 0) {
-      userCapabilitiesClient.deleteUserCapabilities(id);
-    }
+    userCapabilitiesClient.findUserCapabilities(id)
+      .ifPresent(userCapabilities -> {
+        if (userCapabilities.getTotalRecords() > 0) {
+          userCapabilitiesClient.deleteUserCapabilities(id);
+        }
+      });
 
-    var roles = userRolesClient.findUserRoles(id);
-    if (roles.getTotalRecords() > 0) {
-      userRolesClient.deleteUserRoles(id);
-    }
+    userRolesClient.findUserRoles(id)
+      .ifPresent(roles -> {
+        if (roles.getTotalRecords() > 0) {
+          userRolesClient.deleteUserRoles(id);
+        }
+      });
 
     policyService.removePolicyByUserId(id);
   }

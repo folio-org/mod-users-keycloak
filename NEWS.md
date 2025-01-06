@@ -1,5 +1,6 @@
 ## Version `v2.1.0` (in progress)
 ### Changes:
+* Error when deleting a user without Keycloak record (MODUSERSKC-67)
 ---
 
 ## Version `v2.0.0` (01.11.2024)
