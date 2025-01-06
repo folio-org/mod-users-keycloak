@@ -199,9 +199,9 @@ class UserServiceTest {
     doNothing().when(userCapabilitySetClient).deleteUserCapabilitySet(userId);
     doNothing().when(userCapabilitiesClient).deleteUserCapabilities(userId);
     doNothing().when(policyService).removePolicyByUserId(userId);
-    when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
-    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
-    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
+    when(userRolesClient.findUserRoles(userId)).thenReturn(Optional.of(collectionResponse));
+    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(Optional.of(collectionResponse));
+    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(Optional.of(collectionResponse));
 
     userService.deleteUser(userId);
 
@@ -228,9 +228,9 @@ class UserServiceTest {
     doNothing().when(userCapabilitySetClient).deleteUserCapabilitySet(userId);
     doNothing().when(userCapabilitiesClient).deleteUserCapabilities(userId);
     doNothing().when(policyService).removePolicyByUserId(userId);
-    when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
-    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
-    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
+    when(userRolesClient.findUserRoles(userId)).thenReturn(Optional.of(collectionResponse));
+    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(Optional.of(collectionResponse));
+    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(Optional.of(collectionResponse));
 
     userService.deleteUser(userId);
 
@@ -270,9 +270,9 @@ class UserServiceTest {
     doNothing().when(userCapabilitySetClient).deleteUserCapabilitySet(userId);
     doNothing().when(userCapabilitiesClient).deleteUserCapabilities(userId);
     doNothing().when(policyService).removePolicyByUserId(userId);
-    when(userRolesClient.findUserRoles(userId)).thenReturn(collectionResponse);
-    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(collectionResponse);
-    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(collectionResponse);
+    when(userRolesClient.findUserRoles(userId)).thenReturn(Optional.of(collectionResponse));
+    when(userCapabilitySetClient.findUserCapabilitySet(userId)).thenReturn(Optional.of(collectionResponse));
+    when(userCapabilitiesClient.findUserCapabilities(userId)).thenReturn(Optional.of(collectionResponse));
 
     userService.deleteUserById(userId);
 

@@ -428,12 +428,9 @@ class UserIT extends BaseIntegrationTest {
     "/wiremock/stubs/policy/delete-policy.json",
     "/wiremock/stubs/policy/update-policy.json",
     "/wiremock/stubs/policy/find-policy-by-username.json",
-    "/wiremock/stubs/users/delete-user-capability.json",
-    "/wiremock/stubs/users/get-user-capability.json",
-    "/wiremock/stubs/users/delete-user-capability-set.json",
-    "/wiremock/stubs/users/get-user-capability-set.json",
-    "/wiremock/stubs/users/delete-user-roles.json",
-    "/wiremock/stubs/users/get-user-roles.json"
+    "/wiremock/stubs/users/get-user-capability-notfound.json",
+    "/wiremock/stubs/users/get-user-capability-set-notfound.json",
+    "/wiremock/stubs/users/get-user-roles-notfound.json"
   })
   void delete_positive_noAuthUser() throws Exception {
     doDelete("/users-keycloak/users/{id}", USER_ID);

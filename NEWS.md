@@ -1,3 +1,7 @@
+## Version `v2.0.3` (in progress)
+### Changes:
+* Error when deleting a user without Keycloak record (MODUSERSKC-67)
+
 ## Version `v2.0.2` (10.12.2024)
 ### Changes:
 * Fix for 500 error when resetting password for some users (MODUSERSKC-62).
