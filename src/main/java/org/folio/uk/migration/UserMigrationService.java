@@ -166,7 +166,8 @@ public class UserMigrationService {
   }
 
   /**
-   * Creates a user in Keycloak, with the given user object and sets the user's password to their username.
+   * Creates a user in Keycloak, with the given user object and sets the user's password to their username
+   * if migration.default-passwords-on-migration property is set to true.
    * If the creation fails, the method will log a warning and return an empty Optional.
    * If the creation fails due to an invalid email, the method will try to create the user without an email and retry
    * once if "retryIfEmailNotValid" is set to true.
@@ -177,7 +178,7 @@ public class UserMigrationService {
    * @return an Optional of the created user object if the creation is successful, otherwise an empty Optional
    */
   private Optional<User> createUserInKeycloakSafe(User user, boolean retryIfEmailNotValid) {
-    var password = user.getUsername();
+    var password = migrationProperties.isDefaultPasswordsOnMigration() ? user.getUsername() : null;
     try {
       userService.createUserForMigration(user, password, fetchUserTenants(user.getId()));
       return of(user);
