@@ -7,6 +7,8 @@ import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.folio.uk.support.TestValues.readValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,15 +20,20 @@ import org.folio.uk.base.BaseIntegrationTest;
 import org.folio.uk.domain.dto.UserMigrationJob;
 import org.folio.uk.domain.dto.UserMigrationJobStatus;
 import org.folio.uk.domain.dto.Users;
+import org.folio.uk.integration.keycloak.KeycloakService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @IntegrationTest
 class UserMigrationIT extends BaseIntegrationTest {
 
   private static final String JOB_ID = "9971c946-c449-46b6-968b-77b66280b044";
+
+  @SpyBean private KeycloakService userService;
 
   @BeforeAll
   static void beforeAll() {
@@ -60,6 +67,11 @@ class UserMigrationIT extends BaseIntegrationTest {
 
     var users = readValue("json/user/search-users-migration.json", Users.class);
     var migratedUser = users.getUsers().get(0);
+
+    var passwordCaptor = ArgumentCaptor.forClass(String.class);
+    verify(userService).createUserForMigration(any(), passwordCaptor.capture(), any());
+    assertThat(passwordCaptor.getValue()).isEqualTo(migratedUser.getUsername());
+
     verifyKeyCloakUser(migratedUser);
   }
 
