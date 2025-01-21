@@ -35,7 +35,7 @@ class UserMigrationIT extends BaseIntegrationTest {
 
   private static final String JOB_ID = "9971c946-c449-46b6-968b-77b66280b044";
 
-  @SpyBean private KeycloakService userService;
+  @SpyBean private KeycloakService keycloakService;
   @SpyBean private UserMigrationProperties userMigrationProperties;
 
   @BeforeAll
@@ -72,7 +72,7 @@ class UserMigrationIT extends BaseIntegrationTest {
     var migratedUser = users.getUsers().get(0);
 
     var passwordCaptor = ArgumentCaptor.forClass(String.class);
-    verify(userService).createUserForMigration(any(), passwordCaptor.capture(), any());
+    verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
     assertThat(passwordCaptor.getValue()).isNull();
 
     verifyKeyCloakUser(migratedUser);
@@ -103,7 +103,7 @@ class UserMigrationIT extends BaseIntegrationTest {
     var migratedUser = users.getUsers().get(0);
 
     var passwordCaptor = ArgumentCaptor.forClass(String.class);
-    verify(userService).createUserForMigration(any(), passwordCaptor.capture(), any());
+    verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
     assertThat(passwordCaptor.getValue()).isEqualTo(migratedUser.getUsername());
 
     verifyKeyCloakUser(migratedUser);

@@ -54,7 +54,7 @@ public class UserMigrationService {
   private final PermissionService permissionService;
   private final UserMigrationProperties migrationProperties;
   private final UserMigrationJobRepository repository;
-  private final KeycloakService userService;
+  private final KeycloakService keycloakService;
   private final UsersClient usersClient;
   private final UserMigrationMapper mapper;
   private final FolioExecutionContext folioContext;
@@ -180,7 +180,7 @@ public class UserMigrationService {
   private Optional<User> createUserInKeycloakSafe(User user, boolean retryIfEmailNotValid) {
     var password = migrationProperties.isDefaultPasswordsOnMigration() ? user.getUsername() : null;
     try {
-      userService.createUserForMigration(user, password, fetchUserTenants(user.getId()));
+      keycloakService.createUserForMigration(user, password, fetchUserTenants(user.getId()));
       return of(user);
     } catch (Exception e) {
       var message = e.getCause().getMessage();
