@@ -27,7 +27,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @IntegrationTest
@@ -35,8 +35,8 @@ class UserMigrationIT extends BaseIntegrationTest {
 
   private static final String JOB_ID = "9971c946-c449-46b6-968b-77b66280b044";
 
-  @SpyBean private KeycloakService keycloakService;
-  @SpyBean private UserMigrationProperties userMigrationProperties;
+  @MockitoSpyBean private KeycloakService keycloakService;
+  @MockitoSpyBean private UserMigrationProperties userMigrationProperties;
 
   @BeforeAll
   static void beforeAll() {
