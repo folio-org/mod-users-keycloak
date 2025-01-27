@@ -7,6 +7,9 @@ import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.folio.uk.support.TestValues.readValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,15 +21,22 @@ import org.folio.uk.base.BaseIntegrationTest;
 import org.folio.uk.domain.dto.UserMigrationJob;
 import org.folio.uk.domain.dto.UserMigrationJobStatus;
 import org.folio.uk.domain.dto.Users;
+import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.migration.properties.UserMigrationProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @IntegrationTest
 class UserMigrationIT extends BaseIntegrationTest {
 
   private static final String JOB_ID = "9971c946-c449-46b6-968b-77b66280b044";
+
+  @MockitoSpyBean private KeycloakService keycloakService;
+  @MockitoSpyBean private UserMigrationProperties userMigrationProperties;
 
   @BeforeAll
   static void beforeAll() {
@@ -60,6 +70,42 @@ class UserMigrationIT extends BaseIntegrationTest {
 
     var users = readValue("json/user/search-users-migration.json", Users.class);
     var migratedUser = users.getUsers().get(0);
+
+    var passwordCaptor = ArgumentCaptor.forClass(String.class);
+    verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
+    assertThat(passwordCaptor.getValue()).isNull();
+
+    verifyKeyCloakUser(migratedUser);
+  }
+
+  @Test
+  @Sql("classpath:/sql/truncate-migration.sql")
+  @WireMockStub(scripts = {
+    "/wiremock/stubs/perms/search-users-migration.json",
+    "/wiremock/stubs/users/search-users-migration.json",
+    "/wiremock/stubs/users/search-users-tenants-migration.json",
+  })
+  void migrateUsers_positive_if_default_passwords_on_migration_equals_true() throws Exception {
+    when(userMigrationProperties.isDefaultPasswordsOnMigration()).thenReturn(true);
+    var mvcResult = doPost("/users-keycloak/migrations", null).andReturn();
+    var resp = parseResponse(mvcResult, UserMigrationJob.class);
+
+    assertThat(resp.getId()).isNotNull();
+    assertThat(resp.getStartedAt()).isNotNull();
+    assertThat(resp.getStatus()).isEqualTo(UserMigrationJobStatus.IN_PROGRESS);
+    assertThat(resp.getTotalRecords()).isEqualTo(20);
+
+    var status = await().atMost(Duration.ofSeconds(10))
+      .until(() -> getJobStatusById(resp.getId()), equalTo(UserMigrationJobStatus.FINISHED));
+    assertThat(status).isEqualTo(UserMigrationJobStatus.FINISHED);
+
+    var users = readValue("json/user/search-users-migration.json", Users.class);
+    var migratedUser = users.getUsers().get(0);
+
+    var passwordCaptor = ArgumentCaptor.forClass(String.class);
+    verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
+    assertThat(passwordCaptor.getValue()).isEqualTo(migratedUser.getUsername());
+
     verifyKeyCloakUser(migratedUser);
   }
 

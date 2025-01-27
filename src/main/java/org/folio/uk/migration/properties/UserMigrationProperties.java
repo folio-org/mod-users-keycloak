@@ -16,4 +16,5 @@ public class UserMigrationProperties {
   @NotNull
   @Max(value = 50)
   private Integer batchSize;
+  private boolean defaultPasswordsOnMigration;
 }
