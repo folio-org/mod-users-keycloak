@@ -1,6 +1,12 @@
-## Version `v2.0.3` (in progress)
+## Version `v2.0.4` (31.01.2025)
+### Changes:
+* Upgrade keycloak-client to v26.0.4 (KEYCLOAK-25)
+---
+
+## Version `v2.0.3` (23.01.2025)
 ### Changes:
 * Error when deleting a user without Keycloak record (MODUSERSKC-67)
+---
 
 ## Version `v2.0.2` (10.12.2024)
 ### Changes:
