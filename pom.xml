@@ -12,7 +12,7 @@
   <name>mod-users-keycloak</name>
   <groupId>org.folio</groupId>
   <artifactId>mod-users-keycloak</artifactId>
-  <version>1.6.0</version>
+  <version>1.6.1-SNAPSHOT</version>
   <description>mod-users-keycloak</description>
   <packaging>jar</packaging>
 
@@ -27,7 +27,7 @@
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
     <folio-spring-support.version>8.1.2</folio-spring-support.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
-    <application-poc-tools.version>1.5.7</application-poc-tools.version>
+    <application-poc-tools.version>1.5.8</application-poc-tools.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <org.json.version>20240303</org.json.version>
 
@@ -40,6 +40,7 @@
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
     <openapi-generator.version>7.8.0</openapi-generator.version>
+    <keycloak-admin-client.version>26.0.4</keycloak-admin-client.version>
   </properties>
 
   <dependencies>
@@ -199,6 +200,13 @@
       <groupId>org.folio</groupId>
       <artifactId>folio-backend-testing</artifactId>
       <version>${application-poc-tools.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-admin-client</artifactId>
+      <version>${keycloak-admin-client.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
