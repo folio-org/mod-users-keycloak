@@ -1,3 +1,8 @@
+## Version `v1.6.1` (04.02.2025)
+### Changes:
+* Add support for Keycloak v26.1.0 ([KEYCLOAK-37](https://issues.folio.org/browse/KEYCLOAK-37))
+---
+
 ## Version `v1.6.0` (24.09.2024)
 ### Changes:
 *  Bumped up applications-poc-tools dependencies to 1.5.6 to support Hostname Verification for TLS connections
