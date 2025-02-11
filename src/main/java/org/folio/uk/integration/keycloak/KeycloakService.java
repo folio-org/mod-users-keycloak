@@ -3,6 +3,7 @@ package org.folio.uk.integration.keycloak;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.List.of;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -23,7 +24,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.uk.domain.dto.User;
-import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.integration.keycloak.config.KeycloakLoginClientProperties;
 import org.folio.uk.integration.keycloak.model.Client;
 import org.folio.uk.integration.keycloak.model.Credential;
@@ -45,10 +45,7 @@ public class KeycloakService {
   private final FolioExecutionContext folioExecutionContext;
   private final KeycloakLoginClientProperties loginClientProperties;
 
-  public String createUser(User user, String password) {
-    if (user.getId() == null) {
-      throw new RequestValidationException("User id is missing", "id", user.getId());
-    }
+  public void createUser(User user, String password) {
     var kcUser = toKeycloakUser(user, password);
     kcUser.setUserTenantAttr(of(getRealm()));
     log.info("Creating keycloak user: userId = {}", user.getId());
@@ -58,8 +55,6 @@ public class KeycloakService {
         userId -> updateUser(fromString(userId), user),
         () -> callKeycloak(create(kcUser),
           () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId())));
-
-    return kcUser.getId();
   }
 
   public void linkIdentityProviderToUser(String keycloakUserId) {
@@ -112,6 +107,16 @@ public class KeycloakService {
     }
 
     return Optional.of(found.get(0));
+  }
+
+  public Optional<KeycloakUser> findKeycloakUserByUserID(UUID userId) {
+    var keycloakUser = keycloakClient.getUser(getRealm(), userId.toString(), getToken());
+
+    if (isNull(keycloakUser)) {
+      return Optional.empty();
+    }
+
+    return Optional.of(keycloakUser);
   }
 
   /**

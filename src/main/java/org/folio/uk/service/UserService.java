@@ -26,6 +26,7 @@ import org.folio.uk.domain.dto.PermissionUser;
 import org.folio.uk.domain.dto.ServicePointUser;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
+import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
@@ -77,8 +78,13 @@ public class UserService {
 
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
       createdUser -> {
-        var keycloakUserId = keycloakService.createUser(createdUser, password);
-        if (Boolean.TRUE.equals(isSingleTenantUxEnabled)) {
+        if (user.getId() == null) {
+          throw new RequestValidationException("User id is missing", "id", user.getId());
+        }
+        keycloakService.createUser(createdUser, password);
+        var keycloakUser = keycloakService.findKeycloakUserByUserID(user.getId());
+        if (Boolean.TRUE.equals(isSingleTenantUxEnabled) && keycloakUser.isPresent()) {
+          var keycloakUserId = keycloakUser.get().getId();
           keycloakService.linkIdentityProviderToUser(keycloakUserId);
         }
       });
