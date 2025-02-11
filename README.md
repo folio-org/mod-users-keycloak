@@ -54,7 +54,9 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | KC_LOGIN_CLIENT_SUFFIX           | -login-application         |  false   | Suffix of a Keycloak client who owns the authorization resources. It is used as `audience` for keycloak when evaluating permissions. |
 | MIGRATION_BATCH_SIZE             | 20                         |  false   | Batch size for user migration. Max value is 50                                                                                       |
 | DEFAULT_PASSWORDS_ON_MIGRATION   | false                      |  false   | If specified to true migrated user’s password being set to their username otherwise migrated users not having any credentials set    |
-| INCLUDE_ONLY_VISIBLE_PERMISSIONS | true                       |  false   | Defines if onlyVisible (UI permisisons/permission-set names) will be returned using `_self` endpoint                                 |
+| INCLUDE_ONLY_VISIBLE_PERMISSIONS | true                       |  false   | Defines if onlyVisible (UI permissions/permission-set names) will be returned using `_self` endpoint                                 |
+| SINGLE_TENANT_UX                 | false                      |  false   | Defines if the module is running in single tenant UX mode                                                                            |
+| IDENTITY_PROVIDER_SUFFIX         | {tenantId}-keycloak-oidc   |  false   | Suffix of a Keycloak OIDC identity provider who will perform federated authentication requests. Used if SINGLE_TENANT_UX is enabled  |
 
 ### Kafka environment variables
 
@@ -75,14 +77,14 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 
 ### System User Environment Variables
 
-| Name                              | Default value                    | Required | Description                                                            |
-|:----------------------------------|:---------------------------------|:--------:|:-----------------------------------------------------------------------|
-| SYSTEM_USER_USERNAME_TEMPLATE     | {tenantId}-system-user           |  false   | System user username template, used to generate system user `username` |
-| SYSTEM_USER_EMAIL_TEMPLATE        | {tenantId}-system-user@folio.org |  false   | System user email template, used to generate system user `email`.      |
-| SYSTEM_USER_ROLE                  | System                           |  false   | System user role name. It will be assigned on tenant initialization    |
-| SYSTEM_USER_PASSWORD_LENGTH       | 32                               |  false   | Batch size for user migration. Max value is 50                         |
-| SYSTEM_USER_RETRY_COUNT           | 10                               |  false   | Number of retry attempts to create a system user                       |
-| SYSTEM_USER_RETRY_DELAY           | 250                              |  false   | Amount of milliseconds between retry attempts                          |
+| Name                          | Default value                    | Required | Description                                                            |
+|:------------------------------|:---------------------------------|:--------:|:-----------------------------------------------------------------------|
+| SYSTEM_USER_USERNAME_TEMPLATE | {tenantId}-system-user           |  false   | System user username template, used to generate system user `username` |
+| SYSTEM_USER_EMAIL_TEMPLATE    | {tenantId}-system-user@folio.org |  false   | System user email template, used to generate system user `email`.      |
+| SYSTEM_USER_ROLE              | System                           |  false   | System user role name. It will be assigned on tenant initialization    |
+| SYSTEM_USER_PASSWORD_LENGTH   | 32                               |  false   | Batch size for user migration. Max value is 50                         |
+| SYSTEM_USER_RETRY_COUNT       | 10                               |  false   | Number of retry attempts to create a system user                       |
+| SYSTEM_USER_RETRY_DELAY       | 250                              |  false   | Amount of milliseconds between retry attempts                          |
 
 ### Secure storage environment variables
 
@@ -133,7 +135,6 @@ Keycloak all configuration properties: https://www.keycloak.org/server/all-confi
 | KC_CLIENT_TLS_TRUSTSTORE_PATH     | Truststore file path for keycloak clients.                                                                                                                                 |
 | KC_CLIENT_TLS_TRUSTSTORE_PASSWORD | Truststore password for keycloak clients.                                                                                                                                  |
 | KC_CLIENT_TLS_TRUSTSTORE_TYPE     | Truststore file type for keycloak clients.                                                                                                                                 |
-
 
 ### mod-configuration properties
 

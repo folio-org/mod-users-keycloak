@@ -135,4 +135,17 @@ public interface KeycloakClient {
   List<Client> findClientsByClientId(@PathVariable("realmId") String realmId,
     @PathVariable("clientId") String clientId,
     @RequestHeader(AUTHORIZATION) String token);
+
+  /**
+   * Link an identity provider to user.
+   *
+   * @param realm - tenant identifier
+   * @param userId - keycloak user unique identifier
+   * @param providerAlias - keycloak identity provider unique identifier
+   */
+  @PostMapping("/admin/realms/{realm}/users/{userId}/federated-identity/{providerId}")
+  ScopePermission linkIdentityProviderToUser(@PathVariable("realm") String realm,
+                                             @PathVariable("userId") String userId,
+                                             @PathVariable("providerAlias") String providerAlias,
+                                             @RequestHeader(AUTHORIZATION) String token);
 }

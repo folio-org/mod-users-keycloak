@@ -29,6 +29,7 @@ import org.folio.uk.integration.keycloak.model.Client;
 import org.folio.uk.integration.keycloak.model.Credential;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.keycloak.model.ScopePermission;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Log4j2
@@ -36,12 +37,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KeycloakService {
 
+  @Value("${federated-auth.identity_provider_suffix:{tenantId}-keycloak-oidc}")
+  private String identityProviderSuffix;
+
   private final KeycloakClient keycloakClient;
   private final TokenService tokenService;
   private final FolioExecutionContext folioExecutionContext;
   private final KeycloakLoginClientProperties loginClientProperties;
 
-  public void createUser(User user, String password) {
+  public String createUser(User user, String password) {
     if (user.getId() == null) {
       throw new RequestValidationException("User id is missing", "id", user.getId());
     }
@@ -54,6 +58,20 @@ public class KeycloakService {
         userId -> updateUser(fromString(userId), user),
         () -> callKeycloak(create(kcUser),
           () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId())));
+
+    return kcUser.getId();
+  }
+
+  public void linkIdentityProviderToUser(String keycloakUserId) {
+    log.info("Link identity provider to user [keycloakUserId: {}]", keycloakUserId);
+
+    var realm = getRealm();
+    var providerAlias = identityProviderSuffix.replace("{tenantId}", realm);
+
+    callKeycloak(
+      () -> keycloakClient.linkIdentityProviderToUser(realm, keycloakUserId, providerAlias, getToken()),
+      () -> String.format("Failed to link identity provider to user [userId: %s, providerAlias: %s]", keycloakUserId,
+        providerAlias));
   }
 
   public void createUserForMigration(User user, String password, List<String> userTenants) {
@@ -188,7 +206,7 @@ public class KeycloakService {
 
     findPermission(clientKcId, permissionName).ifPresentOrElse(
       permission -> keycloakClient.deleteScopePermission(realm, clientKcId, permission.getId(), getToken()),
-      () -> log.warn("Permission is not found: " + permissionName));
+      () -> log.warn("Permission is not found: {}", permissionName));
   }
 
   /**

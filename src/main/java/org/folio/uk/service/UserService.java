@@ -40,6 +40,7 @@ import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.users.UsersClient;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,10 @@ public class UserService {
   private final FolioExecutionContext folioExecutionContext;
   private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
 
+  // TODO Set to false afterwards
+  @Value("${federated-auth.enabled:true}")
+  private boolean isSingleTenantUxEnabled;
+
   public User createUser(User user, boolean keycloakOnly) {
     return createUser(user, null, keycloakOnly);
   }
@@ -71,7 +76,12 @@ public class UserService {
   public User createUser(User user, String password, boolean keycloakOnly) {
 
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
-      createdUser -> keycloakService.createUser(createdUser, password));
+      createdUser -> {
+        var keycloakUserId = keycloakService.createUser(createdUser, password);
+        if (Boolean.TRUE.equals(isSingleTenantUxEnabled)) {
+          keycloakService.linkIdentityProviderToUser(keycloakUserId);
+        }
+      });
   }
 
   @Retryable(
