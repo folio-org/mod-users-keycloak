@@ -82,7 +82,7 @@ public class UserService {
           throw new RequestValidationException("User id is missing", "id", user.getId());
         }
         keycloakService.createUser(createdUser, password);
-        var keycloakUser = keycloakService.findKeycloakUserByUserID(user.getId());
+        var keycloakUser = keycloakService.findKeycloakUserByUserId(user.getId());
         if (Boolean.TRUE.equals(isSingleTenantUxEnabled) && keycloakUser.isPresent()) {
           var keycloakUserId = keycloakUser.get().getId();
           keycloakService.linkIdentityProviderToUser(keycloakUserId);

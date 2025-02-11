@@ -109,7 +109,7 @@ public class KeycloakService {
     return Optional.of(found.get(0));
   }
 
-  public Optional<KeycloakUser> findKeycloakUserByUserID(UUID userId) {
+  public Optional<KeycloakUser> findKeycloakUserByUserId(UUID userId) {
     var keycloakUser = keycloakClient.getUser(getRealm(), userId.toString(), getToken());
 
     if (isNull(keycloakUser)) {
