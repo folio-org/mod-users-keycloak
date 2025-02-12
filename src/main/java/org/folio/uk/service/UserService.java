@@ -75,17 +75,15 @@ public class UserService {
   }
 
   public User createUser(User user, String password, boolean keycloakOnly) {
-
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
       createdUser -> {
         if (user.getId() == null) {
           throw new RequestValidationException("User id is missing", "id", user.getId());
         }
-        keycloakService.createUser(createdUser, password);
-        var keycloakUser = keycloakService.findKeycloakUserByUserId(user.getId());
-        if (Boolean.TRUE.equals(isSingleTenantUxEnabled) && keycloakUser.isPresent()) {
-          var keycloakUserId = keycloakUser.get().getId();
-          keycloakService.linkIdentityProviderToUser(keycloakUserId);
+        var kcUserId = keycloakService.createUser(createdUser, password);
+        if (Boolean.TRUE.equals(isSingleTenantUxEnabled) && kcUserId != null) {
+          log.info("Found keycloak user by username: {}, keycloakUserId: {}", user.getUsername(), kcUserId);
+          keycloakService.linkIdentityProviderToUser(kcUserId);
         }
       });
   }

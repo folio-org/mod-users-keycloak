@@ -3,7 +3,6 @@ package org.folio.uk.integration.keycloak;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.List.of;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -45,16 +44,22 @@ public class KeycloakService {
   private final FolioExecutionContext folioExecutionContext;
   private final KeycloakLoginClientProperties loginClientProperties;
 
-  public void createUser(User user, String password) {
+  public String createUser(User user, String password) {
     var kcUser = toKeycloakUser(user, password);
     kcUser.setUserTenantAttr(of(getRealm()));
     log.info("Creating keycloak user: userId = {}", user.getId());
 
-    findUserByUsername(user.getUsername(), false)
-      .flatMap(this::getUserIdFromAttributes).ifPresentOrElse(
-        userId -> updateUser(fromString(userId), user),
-        () -> callKeycloak(create(kcUser),
-          () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId())));
+    var foundKcUserOptional = findUserByUsername(user.getUsername(), false)
+      .flatMap(this::getUserIdFromAttributes);
+
+    if (foundKcUserOptional.isPresent()) {
+      var kcUserId = foundKcUserOptional.get();
+      updateUser(fromString(kcUserId), user);
+      return kcUserId;
+    } else {
+      callKeycloak(create(kcUser), () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId()));
+      return null;
+    }
   }
 
   public void linkIdentityProviderToUser(String keycloakUserId) {
@@ -107,16 +112,6 @@ public class KeycloakService {
     }
 
     return Optional.of(found.get(0));
-  }
-
-  public Optional<KeycloakUser> findKeycloakUserByUserId(UUID userId) {
-    var keycloakUser = keycloakClient.getUser(getRealm(), userId.toString(), getToken());
-
-    if (isNull(keycloakUser)) {
-      return Optional.empty();
-    }
-
-    return Optional.of(keycloakUser);
   }
 
   /**
@@ -276,7 +271,7 @@ public class KeycloakService {
     }
   }
 
-  private Runnable create(KeycloakUser kcUser) {
+  private Callable<String> create(KeycloakUser kcUser) {
     return () -> {
       var res = keycloakClient.createUser(getRealm(), kcUser, getToken());
 
@@ -285,7 +280,11 @@ public class KeycloakService {
         var id = StringUtils.substringAfterLast(path, "/");
 
         log.info("Keycloak user created with id: {}", id);
+
+        return id;
       }
+
+      return null;
     };
   }
 
