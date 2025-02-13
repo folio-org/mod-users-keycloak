@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -26,10 +27,12 @@ import org.folio.uk.domain.dto.PermissionUser;
 import org.folio.uk.domain.dto.ServicePointUser;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
+import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
@@ -63,15 +66,25 @@ public class UserService {
   private final UserPermissionsClient userPermissionsClient;
   private final FolioExecutionContext folioExecutionContext;
   private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   public User createUser(User user, boolean keycloakOnly) {
     return createUser(user, null, keycloakOnly);
   }
 
   public User createUser(User user, String password, boolean keycloakOnly) {
-
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
-      createdUser -> keycloakService.createUser(createdUser, password));
+      createdUser -> {
+        if (Objects.isNull(user.getId())) {
+          throw new RequestValidationException("User id is missing", "id", null);
+        }
+
+        keycloakService.createUser(createdUser, password);
+        if (Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled())) {
+          log.info("Found keycloak user by username: {}", user.getUsername());
+          keycloakService.linkIdentityProviderToUser(user);
+        }
+      });
   }
 
   @Retryable(

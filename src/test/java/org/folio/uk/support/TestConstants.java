@@ -25,6 +25,7 @@ public class TestConstants {
   public static final Date USER_ENROLLMENT_DATE = Date.from(parse("2020-10-07T04:00:00.000+00:00").toInstant());
   public static final Date USER_EXPIRATION_DATE = Date.from(parse("2023-02-28T23:59:59.000+00:00").toInstant());
 
+  public static final String CENTRAL_TENANT_NAME = "centraltenant";
   public static final String TENANT_NAME = "testtenant";
   public static final String TOKEN_CACHE = "token";
   public static final String TOKEN_CACHE_KEY = "admin-cli-token";

@@ -1,0 +1,188 @@
+{
+  "realm": "centraltenant",
+  "enabled": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "Password Reset",
+        "description": "A role with access to password reset endpoints",
+        "composite": false,
+        "clientRole": false,
+        "attributes": { }
+      },
+      {
+        "name": "System",
+        "description": "System role for module-to-module communication",
+        "composite": false,
+        "clientRole": false,
+        "attributes": { }
+      }
+    ]
+  },
+  "groups": [ ],
+  "localizationTexts": { },
+  "users": [ ],
+  "clients": [
+    {
+      "clientId": "folio-backend-admin-client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "supersecret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true
+    },
+    {
+      "id": "7348d799-f795-47f9-946c-609f88ffbdbc",
+      "clientId": "centraltenant-login-application",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "supersecret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.url": "",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "fullScopeAllowed": true,
+      "authorizationSettings": {
+        "allowRemoteResourceManagement": true,
+        "policyEnforcementMode": "ENFORCING",
+        "resources": [
+          {
+            "name": "/users-keycloak/password-reset/reset",
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ]
+          },
+          {
+            "name": "/users-keycloak/password-reset/validate",
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ]
+          }
+        ],
+        "policies": [
+          {
+            "name": "System role policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "roles": "[{\"id\":\"System\",\"required\":false}]"
+            }
+          },
+          {
+            "name": "Password Reset policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "roles": "[{\"id\":\"Password Reset\",\"required\":false}]"
+            }
+          },
+          {
+            "name": "System role permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "scopes": "[\"GET\",\"POST\",\"PUT\",\"PATCH\",\"OPTIONS\",\"DELETE\"]",
+              "applyPolicies": "[\"System role policy\"]"
+            }
+          }
+        ],
+        "scopes": [
+          {
+            "name": "GET",
+            "iconUri": "GET",
+            "displayName": "GET"
+          },
+          {
+            "name": "POST",
+            "iconUri": "POST",
+            "displayName": "POST"
+          },
+          {
+            "name": "PUT",
+            "iconUri": "PUT",
+            "displayName": "PUT"
+          },
+          {
+            "name": "DELETE",
+            "iconUri": "DELETE",
+            "displayName": "DELETE"
+          },
+          {
+            "name": "PATCH",
+            "iconUri": "PATCH",
+            "displayName": "PATCH"
+          },
+          {
+            "name": "OPTIONS",
+            "iconUri": "OPTIONS",
+            "displayName": "OPTIONS"
+          },
+          {
+            "name": "HEAD"
+          },
+          {
+            "name": "TRACE"
+          }
+        ],
+        "decisionStrategy": "AFFIRMATIVE"
+      }
+    },
+    {
+      "clientId": "password-reset-client",
+      "name": "password-reset-client",
+      "description": "",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "**********",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.url": "",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      }
+    }
+  ],
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "subComponents": { },
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}],\"unmanagedAttributePolicy\":\"ENABLED\"}"
+          ]
+        }
+      }
+    ]
+  }
+}
