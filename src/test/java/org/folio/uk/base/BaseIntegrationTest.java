@@ -289,7 +289,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
     var federatedIdentities = keycloakClient.getUserIdentityProvider(CENTRAL_TENANT_NAME, kcUserId, dto.authToken());
     assertThat(federatedIdentities).isNotEmpty();
-    assertThat(federatedIdentities.size()).isEqualTo(1);
+    assertThat(federatedIdentities).hasSize(1);
 
     var federatedIdentity = federatedIdentities.stream().findFirst();
     assertThat(federatedIdentity).isNotNull();

@@ -53,8 +53,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @UnitTest
 @SpringBootTest(classes = {UserService.class, RetryTestConfiguration.class}, webEnvironment = NONE)
@@ -65,18 +65,18 @@ class UserServiceTest {
 
   @Autowired private UserService userService;
   @Autowired private ApplicationContext applicationContext;
-  @MockBean private UsersClient usersClient;
-  @MockBean private ServicePointsUserClient servicePointsUserClient;
-  @MockBean private ServicePointsClient servicePointsClient;
-  @MockBean private KeycloakService keycloakService;
-  @MockBean private UserPermissionsClient userPermissionsClient;
-  @MockBean private UserRolesClient userRolesClient;
-  @MockBean private UserCapabilitySetClient userCapabilitySetClient;
-  @MockBean private UserCapabilitiesClient userCapabilitiesClient;
-  @MockBean private PolicyService policyService;
-  @MockBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
-  @MockBean private FolioExecutionContext folioExecutionContext;
-  @MockBean private KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
+  @MockitoBean private UsersClient usersClient;
+  @MockitoBean private ServicePointsUserClient servicePointsUserClient;
+  @MockitoBean private ServicePointsClient servicePointsClient;
+  @MockitoBean private KeycloakService keycloakService;
+  @MockitoBean private UserPermissionsClient userPermissionsClient;
+  @MockitoBean private UserRolesClient userRolesClient;
+  @MockitoBean private UserCapabilitySetClient userCapabilitySetClient;
+  @MockitoBean private UserCapabilitiesClient userCapabilitiesClient;
+  @MockitoBean private PolicyService policyService;
+  @MockitoBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  @MockitoBean private FolioExecutionContext folioExecutionContext;
+  @MockitoBean private KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   @AfterEach
   void tearDown() {
