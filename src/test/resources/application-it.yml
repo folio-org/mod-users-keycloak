@@ -29,6 +29,9 @@ application:
     system-user-capabilities:
       retry-attempts: 2
       retry-delay: 50ms
+  federated-auth:
+    enabled: ${SINGLE_TENANT_UX_ENABLED:false}
+    identity_provider_suffix: ${IDENTITY_PROVIDER_SUFFIX:{tenantId}-keycloak-oidc}
 
 header:
   validation:

@@ -36,6 +36,7 @@ import org.folio.test.extensions.impl.WireMockExecutionListener;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.integration.keycloak.KeycloakClient;
 import org.folio.uk.integration.keycloak.TokenService;
+import org.folio.uk.it.CreateUserVerifyDto;
 import org.folio.uk.support.TestValues;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -200,16 +201,27 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     }
   }
 
-  protected void verifyKeyCloakUser(User user) {
+  protected CreateUserVerifyDto verifyKeycloakUser(User user) {
     var authToken = tokenService.issueToken();
     var keycloakUsers = keycloakClient.findUsersByUsername(TENANT_NAME, user.getUsername(), false, authToken);
     var keycloakUser = keycloakUsers.get(0);
 
+    assertThat(user.getPersonal()).isNotNull();
     assertThat(keycloakUser.getEmail()).isEqualTo(user.getPersonal().getEmail());
 
     var attributes = keycloakUser.getAttributes();
+    assertThat(user.getId()).isNotNull();
     assertThat(attributes.get(USER_ID_ATTR)).contains(user.getId().toString());
     assertThat(attributes.get(USER_EXTERNAL_SYSTEM_ID_ATTR)).contains(user.getExternalSystemId());
+
+    return new CreateUserVerifyDto(authToken, keycloakUser);
+  }
+
+  protected void verifyKeycloakUserAndWithNoIdentityProvider(User user) {
+    var dto = verifyKeycloakUser(user);
+
+    var providers = keycloakClient.getUserIdentityProvider(TENANT_NAME, dto.keycloakUser().getId(), dto.authToken());
+    assertThat(providers).isEmpty();
   }
 
   @TestConfiguration

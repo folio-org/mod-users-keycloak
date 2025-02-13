@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -31,6 +32,7 @@ import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
@@ -41,7 +43,6 @@ import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.users.UsersClient;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -65,10 +66,7 @@ public class UserService {
   private final UserPermissionsClient userPermissionsClient;
   private final FolioExecutionContext folioExecutionContext;
   private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
-
-  // TODO Set to false afterwards
-  @Value("${federated-auth.enabled:true}")
-  private boolean isSingleTenantUxEnabled;
+  private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   public User createUser(User user, boolean keycloakOnly) {
     return createUser(user, null, keycloakOnly);
@@ -77,13 +75,15 @@ public class UserService {
   public User createUser(User user, String password, boolean keycloakOnly) {
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
       createdUser -> {
-        if (user.getId() == null) {
-          throw new RequestValidationException("User id is missing", "id", user.getId());
+        var userId = user.getId();
+        if (Objects.isNull(user.getId())) {
+          throw new RequestValidationException("User id is missing", "id", null);
         }
+
         var kcUserId = keycloakService.createUser(createdUser, password);
-        if (Boolean.TRUE.equals(isSingleTenantUxEnabled) && kcUserId != null) {
+        if (Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled()) && Objects.nonNull(kcUserId)) {
           log.info("Found keycloak user by username: {}, keycloakUserId: {}", user.getUsername(), kcUserId);
-          keycloakService.linkIdentityProviderToUser(kcUserId);
+          keycloakService.linkIdentityProviderToUser(userId, kcUserId);
         }
       });
   }

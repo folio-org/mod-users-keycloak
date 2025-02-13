@@ -40,6 +40,7 @@ import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.inventory.model.ServicePointUserCollection;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
 import org.folio.uk.integration.roles.UserCapabilitiesClient;
@@ -76,6 +77,7 @@ class UserServiceTest {
   @MockBean private PolicyService policyService;
   @MockBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
   @MockBean private FolioExecutionContext folioExecutionContext;
+  @MockBean private KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   @AfterEach
   void tearDown() {

@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/admin/realms/testtenant/users/d3958402-2f80-421b-a527-9933245a3556/federated-identity",
+    "headers": {
+      "Authorization": {
+        "equalTo": "*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "identityProvider": "testtenant-keycloak-oidc",
+        "userId": "ZakirBailey",
+        "userName": "ZakirBailey"
+      }
+    ]
+  }
+}

@@ -257,7 +257,7 @@ class UserIT extends BaseIntegrationTest {
 
     assertThat(resp.getMetadata()).isNotNull();
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -275,7 +275,7 @@ class UserIT extends BaseIntegrationTest {
     assertThat(resp.getPersonal().getLastName()).isEqualTo(user.getPersonal().getLastName());
     assertThat(resp.getPersonal().getEmail()).isEqualTo(user.getPersonal().getEmail());
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -315,7 +315,7 @@ class UserIT extends BaseIntegrationTest {
     ).andExpectAll(status().isCreated(),
       jsonPath("$.username", is("create-user-auth-exist")));
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -332,7 +332,7 @@ class UserIT extends BaseIntegrationTest {
     ).andExpectAll(status().isCreated(),
       jsonPath("$.username", is("create-user-auth-exist")));
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -352,7 +352,7 @@ class UserIT extends BaseIntegrationTest {
     doPost("/users-keycloak/users?keycloakOnly=true", user);
     doPut("/users-keycloak/users/{id}", user, userId);
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -368,7 +368,7 @@ class UserIT extends BaseIntegrationTest {
       .contentType(APPLICATION_JSON)
       .accept(TEXT_PLAIN)).andExpect(status().isNoContent());
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
