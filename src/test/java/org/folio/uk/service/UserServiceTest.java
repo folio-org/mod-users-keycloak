@@ -30,7 +30,6 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
@@ -178,8 +177,7 @@ class UserServiceTest {
     var keycloakException = new KeycloakException("Failed to create keycloak user", cause);
 
     when(usersClient.createUser(user)).thenReturn(user);
-    doThrow(keycloakException).doThrow(keycloakException).doReturn(UUID.randomUUID().toString())
-      .when(keycloakService).createUser(user, PASSWORD);
+    doThrow(keycloakException).doThrow(keycloakException).doNothing().when(keycloakService).createUser(user, PASSWORD);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
 

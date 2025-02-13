@@ -4,7 +4,7 @@
     "urlPath": "/user-tenants",
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "centraltenant"
+        "equalTo": "testtenant"
       },
       "x-okapi-token": {
         "equalTo": "X-Okapi-Token test value"
@@ -22,17 +22,8 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "userTenants": [
-        {
-          "id": "9afb0f4f-bc8d-475b-ace7-3d0ec02796ea",
-          "userId": "d3958402-2f80-421b-a527-9933245a3556",
-          "username": "ZakirBailey",
-          "tenantId": "centraltenant",
-          "centralTenantId": "centraltenant",
-          "consortiumId": "f388d371-61a8-471c-80b3-4d4d8f9b5e9d"
-        }
-      ],
-      "totalRecords": 1
+      "userTenants": [],
+      "totalRecords": 0
     }
   }
 }

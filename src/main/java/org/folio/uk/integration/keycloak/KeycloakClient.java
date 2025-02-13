@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.UUID;
 import org.folio.uk.integration.keycloak.config.KeycloakFeignClientConfig;
 import org.folio.uk.integration.keycloak.model.Client;
+import org.folio.uk.integration.keycloak.model.FederatedIdentity;
 import org.folio.uk.integration.keycloak.model.IdentityProvider;
 import org.folio.uk.integration.keycloak.model.KeycloakRole;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
-import org.folio.uk.integration.keycloak.model.PostIdentityProvider;
 import org.folio.uk.integration.keycloak.model.ScopePermission;
 import org.folio.uk.integration.keycloak.model.TokenResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -145,21 +145,47 @@ public interface KeycloakClient {
    * @param userId - keycloak user unique identifier
    */
   @GetMapping("/admin/realms/{realm}/users/{userId}/federated-identity")
-  List<IdentityProvider> getUserIdentityProvider(@PathVariable("realm") String realm,
-                                                 @PathVariable("userId") String userId,
-                                                 @RequestHeader(AUTHORIZATION) String token);
+  List<FederatedIdentity> getUserIdentityProvider(@PathVariable("realm") String realm,
+                                                  @PathVariable("userId") String userId,
+                                                  @RequestHeader(AUTHORIZATION) String token);
 
   /**
    * Link an identity provider to user.
    *
    * @param realm - tenant identifier
    * @param userId - keycloak user unique identifier
-   * @param providerAlias - keycloak identity provider unique identifier
+   * @param providerAlias - keycloak identity provider alias
+   * @param federatedIdentity - federated identity payload
+   * @param token - authorization token
    */
   @PostMapping("/admin/realms/{realm}/users/{userId}/federated-identity/{providerAlias}")
   void linkIdentityProviderToUser(@PathVariable("realm") String realm,
                                   @PathVariable("userId") String userId,
                                   @PathVariable("providerAlias") String providerAlias,
-                                  @RequestBody PostIdentityProvider payload,
+                                  @RequestBody FederatedIdentity federatedIdentity,
                                   @RequestHeader(AUTHORIZATION) String token);
+
+  /**
+   * Create an identity provider.
+   *
+   * @param realm - tenant identifier
+   * @param identityProvider - identity provider payload
+   * @param token - authorization token
+   */
+  @PostMapping("/admin/realms/{realm}/identity-provider/instances")
+  void createIdentityProvider(@PathVariable("realm") String realm,
+                              @RequestBody IdentityProvider identityProvider,
+                              @RequestHeader(AUTHORIZATION) String token);
+
+  /**
+   * Create an identity provider.
+   *
+   * @param realm - tenant identifier
+   * @param providerAlias - keycloak identity provider alias
+   * @param token - authorization token
+   */
+  @DeleteMapping("/admin/realms/{realm}/identity-provider/instances/{providerAlias}")
+  void removeIdentityProvider(@PathVariable("realm") String realm,
+                              @PathVariable("providerAlias") String providerAlias,
+                              @RequestHeader(AUTHORIZATION) String token);
 }

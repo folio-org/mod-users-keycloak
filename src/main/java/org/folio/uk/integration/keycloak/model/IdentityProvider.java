@@ -1,6 +1,5 @@
 package org.folio.uk.integration.keycloak.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +10,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IdentityProvider {
-  @JsonProperty("identityProvider")
-  private String providerAlias;
-  private String userId;
-  private String userName;
+  private String alias;
+  private String displayName;
+  private String internalId;
+  private String providerId;
+  private boolean enabled;
+  private String updateProfileFirstLoginMode;
+  private boolean trustEmail;
+  private boolean storeToken;
+  private boolean addReadTokenRoleOnCreate;
+  private boolean authenticateByDefault;
+  private boolean linkOnly;
+  private boolean hideOnLogin;
+  private IdentityProviderConfig config;
 }
