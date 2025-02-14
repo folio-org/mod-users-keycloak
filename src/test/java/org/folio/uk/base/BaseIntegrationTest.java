@@ -233,7 +233,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     }
   }
 
-  private static String readString(String tenantId, String filename) {
+  protected static String readString(String tenantId, String filename) {
     var tenantFolder = tenantId.equals(CENTRAL_TENANT_NAME) ? "central-tenant" : "";
     return TestUtils.readString(java.nio.file.Path.of(String.format(filename, tenantFolder))
       .normalize().toString());

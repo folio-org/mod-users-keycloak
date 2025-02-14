@@ -4,6 +4,7 @@ import static org.folio.test.TestUtils.parseResponse;
 import static org.folio.uk.support.TestConstants.CENTRAL_TENANT_NAME;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
 
+import org.folio.test.TestUtils;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @IntegrationTest
@@ -102,12 +105,15 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
     verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
   }
 
-  @Test
-  @WireMockStub({
-    "/wiremock/stubs/users/create-user-shadow.json",
-    "/wiremock/stubs/users/get-user-tenants-empty-central-tenant-id.json",
+  @ParameterizedTest
+  @ValueSource(strings = {
+    "wiremock/stubs/users/get-user-tenants-empty-array.json",
+    "wiremock/stubs/users/get-user-tenants-empty-central-tenant-id.json"
   })
-  void create_positive_emptyCentralTenantUserTenants() throws Exception {
+  void create_positive_emptyCentralTenantUserTenants(String userTenantsStub) throws Exception {
+    wmAdminClient.addStubMapping(TestUtils.readString("wiremock/stubs/users/create-user-shadow.json"));
+    wmAdminClient.addStubMapping(TestUtils.readString(userTenantsStub));
+
     tenant = CENTRAL_TENANT_NAME;
     user = TestConstants.shadowUser();
 
