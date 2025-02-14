@@ -24,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserTenant;
-import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.config.KeycloakLoginClientProperties;
 import org.folio.uk.integration.keycloak.model.Client;
@@ -40,6 +39,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KeycloakService {
 
+  private static final int RANDOM_STRING_COUNT = 6;
   private final KeycloakClient keycloakClient;
   private final TokenService tokenService;
   private final UserTenantsClient userTenantsClient;
@@ -47,86 +47,89 @@ public class KeycloakService {
   private final KeycloakLoginClientProperties loginClientProperties;
   private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
-  public void createUser(User user, String password) {
-    if (user.getId() == null) {
-      throw new RequestValidationException("User id is missing", "id", user.getId());
+  public String createUser(User user, String password) {
+    var foundKcUser = findUserByUsername(user.getUsername(), false);
+    if (foundKcUser.isPresent()) {
+      var kcUserId = foundKcUser.get().getId();
+      var kcUserAttributes = foundKcUser.flatMap(this::getUserIdFromAttributes);
+      kcUserAttributes.ifPresent(userId -> updateUser(fromString(userId), user));
+
+      return kcUserId;
     }
+
     var kcUser = toKeycloakUser(user, password);
     kcUser.setUserTenantAttr(of(getRealm()));
     log.info("Creating keycloak user: userId = {}", user.getId());
-
-    findUserByUsername(user.getUsername(), false)
-      .flatMap(this::getUserIdFromAttributes).ifPresentOrElse(
-        userId -> updateUser(fromString(userId), user),
-        () -> callKeycloak(create(kcUser),
-          () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId())));
+    return callKeycloak(
+      create(kcUser), () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId()));
   }
 
-  public void linkIdentityProviderToUser(User user) {
-    log.info("Linking identity provider to user [userId: {}]", user.getId());
-
+  public void linkIdentityProviderToUser(User user, String kcUserId) {
+    var userId = user.getId();
     var tenant = getRealm();
-    if (Objects.isNull(tenant)) {
-      throw new RequestValidationException("Tenant is missing", "tenant", null);
-    }
 
-    var userTenant = getUserTenant(user);
-    if (userTenant.isEmpty() || StringUtils.isEmpty(userTenant.get().getCentralTenantId())) {
-      log.warn("Identity provider cannot be linked to user because user tenant is empty"
-        + " or has no matching centralTenantId, [userId: {}]", user.getId());
+    log.info("Linking identity provider to user [userId: {}, kcUserId: {}, tenant: {}, username: {}]", userId,
+      kcUserId, tenant, user.getUsername());
+
+    var userTenantOptional = getUserTenant(userId);
+    if (userTenantOptional.isEmpty() || StringUtils.isEmpty(userTenantOptional.get().getCentralTenantId())) {
+      log.warn("Identity provider cannot be linked to user because userTenant is empty"
+        + " or has empty centralTenantId, [userId: {}, kcUserId: {}, tenant: {}]", userId, kcUserId, tenant);
       return;
     }
 
-    var centralTenant = userTenant.get().getCentralTenantId();
-    if (tenant.equals(centralTenant)) {
-      log.warn("Identity provider cannot be linked to central tenant user, [userId: {}, tenant: {}]",
-        user.getId(), tenant);
+    var userTenant = userTenantOptional.get();
+    log.info("Found userTenant for user [userId: {}, kcUserId: {}, tenant: {}, userTenant: {}]", userId,
+      kcUserId, tenant, userTenant);
+
+    // Prevents linking if not as a central OR if as a member tenant
+    var memberTenant = userTenant.getTenantId();
+    if (!tenant.equals(userTenant.getCentralTenantId()) || tenant.equals(memberTenant)) {
+      log.warn("Identity provider cannot be linked to central tenant or member tenant real users, "
+        + "[userId: {}, kcUserId: {}, tenant: {}, memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
       return;
     }
 
     var providerAlias = keycloakFederatedAuthProperties.getIdentityProviderSuffix()
-      .replace("{tenantId}", tenant);
-    var kcUserId = getShadowKeycloakUser(user.getId(), centralTenant);
-    log.info("Found shadow keycloak user, [userId: {}]", kcUserId);
+      .replace("{tenantId}", memberTenant);
 
-    if (isIdentityProviderAlreadyLinked(kcUserId, centralTenant, providerAlias)) {
-      log.warn("Identity provider is already linked to user [userId: {}, providerAlias: {}, tenant: {}]",
-        user.getId(), providerAlias, tenant);
+    if (isIdentityProviderAlreadyLinked(kcUserId, tenant, providerAlias)) {
+      log.warn("Identity provider is already linked to user [userId: {}, kcUserId: {}, tenant: {}, "
+        + "memberTenant: {}, providerAlias: {}]", userId, kcUserId, tenant, memberTenant, providerAlias);
       return;
     }
 
-    log.info("Creating identity provider for user [userId: {}, providerAlias: {}, centralTenant: {}]",
-      user.getId(), providerAlias, centralTenant);
-
     var federatedIdentity = createFederatedIdentity(user);
     callKeycloak(
-      () -> keycloakClient.linkIdentityProviderToUser(centralTenant, kcUserId, providerAlias, federatedIdentity,
-        getToken()),
-      () -> String.format("Failed to link identity provider to user [userId: %s, providerAlias: %s, centralTenant: %s]",
-        user.getId(), providerAlias, centralTenant));
+      () -> keycloakClient.linkIdentityProviderToUser(tenant, kcUserId, providerAlias, federatedIdentity, getToken()),
+      () -> String.format("Failed to link identity provider to user [userId: %s, kcUserId: %s, tenant: %s, "
+        + "memberTenant: %s, providerAlias: %s]", userId, kcUserId, tenant, memberTenant, providerAlias));
+
+    log.info("Created identity provider for use [userId: {}, kcUserId: {}, tenant: {}, memberTenant: {}, "
+      + "providerAlias: {}, federatedIdentity: {}]", userId, kcUserId, tenant, memberTenant, providerAlias,
+      federatedIdentity);
   }
 
-  private Optional<UserTenant> getUserTenant(User user) {
-    return userTenantsClient.lookupByUserId(user.getId()).getUserTenants().stream()
+  private Optional<UserTenant> getUserTenant(UUID userId) {
+    return userTenantsClient.lookupByUserId(userId).getUserTenants().stream()
       .filter(Objects::nonNull).findFirst();
   }
 
-  private String getShadowKeycloakUser(UUID userId, String centralTenant) {
-    return findKeycloakUserWithUserIdAttr(centralTenant, userId)
-      .orElseThrow(() -> new RequestValidationException("Shadow keycloak user is missing", "userId", userId)).getId();
+  private boolean isIdentityProviderAlreadyLinked(String kcUserId, String tenant, String providerAlias) {
+    return keycloakClient.getUserIdentityProvider(tenant, kcUserId, getToken())
+      .stream().map(FederatedIdentity::getProviderAlias).filter(Objects::nonNull)
+      .anyMatch(getProviderAlias -> getProviderAlias.equals(providerAlias));
   }
 
   private FederatedIdentity createFederatedIdentity(User user) {
+    if (StringUtils.isEmpty(user.getUsername())) {
+      throw new IllegalStateException(String.format("Username is missing, userId: %s", user.getId()));
+    }
+    var realUsername = user.getUsername().substring(0, user.getUsername().length() - RANDOM_STRING_COUNT);
     return FederatedIdentity.builder()
-      .userId(user.getUsername())
-      .userName(user.getUsername())
+      .userId(realUsername)
+      .userName(realUsername)
       .build();
-  }
-
-  private boolean isIdentityProviderAlreadyLinked(String keycloakUserId, String realm, String providerAlias) {
-    return keycloakClient.getUserIdentityProvider(realm, keycloakUserId, getToken())
-      .stream().map(FederatedIdentity::getProviderAlias).filter(Objects::nonNull)
-      .anyMatch(getProviderAlias -> getProviderAlias.equals(providerAlias));
   }
 
   public void createUserForMigration(User user, String password, List<String> userTenants) {
@@ -318,6 +321,7 @@ public class KeycloakService {
     try {
       method.run();
     } catch (Exception cause) {
+      log.info("Exception: {}", cause.getMessage());
       throw new KeycloakException(expMsgSupplier.get(), cause);
     }
   }
@@ -330,16 +334,17 @@ public class KeycloakService {
     }
   }
 
-  private Runnable create(KeycloakUser kcUser) {
+  private Callable<String> create(KeycloakUser kcUser) {
     return () -> {
       var res = keycloakClient.createUser(getRealm(), kcUser, getToken());
-
       if (res.getStatusCode().is2xxSuccessful() && res.getHeaders().getLocation() != null) {
         var path = res.getHeaders().getLocation().getPath();
         var id = StringUtils.substringAfterLast(path, "/");
-
         log.info("Keycloak user created with id: {}", id);
+
+        return id;
       }
+      return null;
     };
   }
 

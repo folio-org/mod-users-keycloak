@@ -48,6 +48,11 @@ public class TestConstants {
       .personal(person(email));
   }
 
+  public static User shadowUser() {
+    return user(USER_ID.toString(), USER_NAME + "-12345", "new9@new.com",
+      "newUser@folio.org");
+  }
+
   public static Personal person(String email) {
     return new Personal()
       .firstName("Bailey")
@@ -72,6 +77,7 @@ public class TestConstants {
   }
 
   public static List<String> systemUserPermissions() {
-    return TestValues.readValue("json/capability/permissions.json", new TypeReference<>() {});
+    return TestValues.readValue("json/capability/permissions.json", new TypeReference<>() {
+    });
   }
 }

@@ -79,10 +79,9 @@ public class UserService {
           throw new RequestValidationException("User id is missing", "id", null);
         }
 
-        keycloakService.createUser(createdUser, password);
-        if (Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled())) {
-          log.info("Found keycloak user by username: {}", user.getUsername());
-          keycloakService.linkIdentityProviderToUser(user);
+        var kcUserId = keycloakService.createUser(createdUser, password);
+        if (StringUtils.isNotEmpty(kcUserId) && Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled())) {
+          keycloakService.linkIdentityProviderToUser(user, kcUserId);
         }
       });
   }

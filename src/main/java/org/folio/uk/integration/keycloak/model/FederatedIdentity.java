@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 @Builder
@@ -17,4 +18,19 @@ public class FederatedIdentity {
   private String providerAlias;
   private String userId;
   private String userName;
+
+  @Override
+  public String toString() {
+    if (StringUtils.isEmpty(providerAlias)) {
+      return "FederatedIdentity{"
+        + ", userId='" + userId + '\''
+        + ", userName='" + userName + '\''
+        + '}';
+    }
+    return "FederatedIdentity{"
+      + "providerAlias='" + providerAlias + '\''
+      + ", userId='" + userId + '\''
+      + ", userName='" + userName + '\''
+      + '}';
+  }
 }

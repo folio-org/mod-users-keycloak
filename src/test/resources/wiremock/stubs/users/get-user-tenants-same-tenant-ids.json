@@ -4,7 +4,7 @@
     "urlPath": "/user-tenants",
     "headers": {
       "x-okapi-tenant": {
-        "equalTo": "centraltenant"
+        "equalTo": "testtenant"
       },
       "x-okapi-token": {
         "equalTo": "X-Okapi-Token test value"
@@ -28,7 +28,7 @@
           "userId": "d3958402-2f80-421b-a527-9933245a3556",
           "username": "ZakirBailey",
           "tenantId": "testtenant",
-          "centralTenantId": "centraltenant",
+          "centralTenantId": "testtenant",
           "consortiumId": "f388d371-61a8-471c-80b3-4d4d8f9b5e9d"
         }
       ],

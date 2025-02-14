@@ -2,11 +2,9 @@ package org.folio.uk.base;
 
 import static net.minidev.json.JSONValue.parse;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import static org.folio.spring.integration.XOkapiHeaders.URL;
 import static org.folio.test.TestUtils.asJsonString;
-import static org.folio.test.TestUtils.readString;
 import static org.folio.test.extensions.impl.KeycloakContainerExtension.getKeycloakAdminClient;
 import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_EXTERNAL_SYSTEM_ID_ATTR;
 import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_ID_ATTR;
@@ -23,11 +21,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import feign.FeignException;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
+import org.folio.test.TestUtils;
 import org.folio.test.base.BaseBackendIntegrationTest;
 import org.folio.test.extensions.EnableKafka;
 import org.folio.test.extensions.EnableKeycloakTlsMode;
@@ -88,6 +89,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
   @Autowired protected CacheManager cacheManager;
   @Autowired protected KeycloakClient keycloakClient;
+  @Autowired protected KeycloakTestClient keycloakTestClient;
   @Autowired protected TokenService tokenService;
   @Autowired protected KeycloakService keycloakService;
 
@@ -180,8 +182,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   @SneakyThrows
   @SuppressWarnings("SameParameterValue")
   protected static void enableTenant(String tenantId) {
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/create-system-user.json"));
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/create-system-user-central.json"));
+    wmAdminClient.addStubMapping(readString(tenantId, "wiremock/stubs/users/%s/create-system-user.json"));
 
     var realmFile = "json/keycloak/" + tenantId + "-realm.json";
     var tenantRealmRepresentation = TestValues.readValue(realmFile, RealmRepresentation.class);
@@ -207,13 +208,13 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
   @SneakyThrows
   protected static void removeTenant(String tenantId, boolean removeRealm) {
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/find-system-user-by-query.json"));
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/delete-system-user.json"));
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/find-system-user-by-id.json"));
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/policy/find-policy-by-system-username.json"));
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/get-system-user-capability.json"));
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/get-system-user-capability-set.json"));
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/get-system-user-roles.json"));
+    wmAdminClient.addStubMapping(readString(tenantId, "wiremock/stubs/users/%s/find-system-user-by-query.json"));
+    wmAdminClient.addStubMapping(readString(tenantId, "wiremock/stubs/users/%s/delete-system-user.json"));
+    wmAdminClient.addStubMapping(readString(tenantId, "wiremock/stubs/users/%s/find-system-user-by-id.json"));
+    wmAdminClient.addStubMapping(readString(tenantId, "wiremock/stubs/policy/%s/find-policy-by-system-username.json"));
+    wmAdminClient.addStubMapping(readString(tenantId, "wiremock/stubs/users/%s/get-system-user-capability.json"));
+    wmAdminClient.addStubMapping(readString(tenantId, "wiremock/stubs/users/%s/get-system-user-capability-set.json"));
+    wmAdminClient.addStubMapping(readString(tenantId, "wiremock/stubs/users/%s/get-system-user-roles.json"));
 
     var tenantAttributes = new TenantAttributes().moduleFrom(MODULE_NAME).purge(true);
     mockMvc.perform(post("/_/tenant")
@@ -232,36 +233,61 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     }
   }
 
+  private static String readString(String tenantId, String filename) {
+    var tenantFolder = tenantId.equals(CENTRAL_TENANT_NAME) ? "central-tenant" : "";
+    return TestUtils.readString(java.nio.file.Path.of(String.format(filename, tenantFolder))
+      .normalize().toString());
+  }
+
   protected void createIdentityProviderInCentralTenant() {
-    var identityProvider = parse(readTemplate("user/create-identity-provider-request.json"), IdentityProvider.class);
-    keycloakClient.createIdentityProvider(CENTRAL_TENANT_NAME, identityProvider, tokenService.issueToken());
+    var templateFilePath = "user/create-identity-provider-request.json";
+    var identityProvider = parse(readTemplate(templateFilePath), IdentityProvider.class);
+    keycloakTestClient.createIdentityProvider(CENTRAL_TENANT_NAME, identityProvider, tokenService.issueToken());
+    log.info("Created identity provider in central tenant");
   }
 
   protected void removeIdentityProviderInCentralTenant() {
-    keycloakClient.removeIdentityProvider(CENTRAL_TENANT_NAME, PROVIDER_ALIAS, tokenService.issueToken());
+    try {
+      keycloakTestClient.removeIdentityProvider(CENTRAL_TENANT_NAME, PROVIDER_ALIAS, tokenService.issueToken());
+      log.info("Removed identity provider in central tenant");
+    } catch (FeignException.NotFound e) {
+      log.info("Cannot remove identity provider in central tenant, provider is not found");
+    }
   }
 
-  protected KeycloakUser createShadowKeycloakUserInCentralTenant(User user) {
-    var shadowKeycloakUser = keycloakService.toKeycloakUser(user);
-    keycloakClient.createUser(CENTRAL_TENANT_NAME, shadowKeycloakUser, tokenService.issueToken());
-    return keycloakService.findKeycloakUserWithUserIdAttr(CENTRAL_TENANT_NAME, user.getId())
-      .orElseThrow();
+  protected void removeShadowKeycloakUserInCentralTenant(String tenant, User user) {
+    if (Objects.isNull(user)) {
+      return;
+    }
+    var authToken = tokenService.issueToken();
+    getKcUser(tenant, user, authToken)
+      .ifPresent(kcUser ->  keycloakClient.deleteUser(tenant, kcUser.getId(), authToken));
+    log.info("Removed shadow keycloak user in central tenant");
   }
 
-  protected void removeShadowKeycloakUserInCentralTenant(String userId) {
-    keycloakClient.deleteUser(CENTRAL_TENANT_NAME, userId, tokenService.issueToken());
+  protected void assertSuccessfulUserCreation(User resp, User user) {
+    assertThat(resp.getId()).isEqualTo(user.getId());
+    assertThat(resp.getUsername()).isEqualTo(user.getUsername());
+    assertThat(resp.getBarcode()).isEqualTo(user.getBarcode());
+    assertThat(resp.getPatronGroup()).isEqualTo(user.getPatronGroup());
+
+    assertThat(resp.getPersonal()).isNotNull();
+    assertThat(user.getPersonal()).isNotNull();
+    assertThat(resp.getPersonal().getFirstName()).isEqualTo(user.getPersonal().getFirstName());
+    assertThat(resp.getPersonal().getLastName()).isEqualTo(user.getPersonal().getLastName());
+    assertThat(resp.getPersonal().getEmail()).isEqualTo(user.getPersonal().getEmail());
+
+    assertThat(resp.getMetadata()).isNotNull();
   }
 
   protected void verifyKeycloakUser(User user) {
     var authToken = tokenService.issueToken();
-    var keycloakUsers = keycloakClient.findUsersByUsername(TENANT_NAME, user.getUsername(), false, authToken);
-    var keycloakUser = keycloakUsers.stream().findFirst()
-      .orElseThrow();
+    var kcUser = getKcUser(TENANT_NAME, user, authToken).orElseThrow();
 
     assertThat(user.getPersonal()).isNotNull();
-    assertThat(keycloakUser.getEmail()).isEqualTo(user.getPersonal().getEmail());
+    assertThat(kcUser.getEmail()).isEqualTo(user.getPersonal().getEmail());
 
-    var attributes = keycloakUser.getAttributes();
+    var attributes = kcUser.getAttributes();
     assertThat(user.getId()).isNotNull();
     assertThat(attributes.get(USER_ID_ATTR)).contains(user.getId().toString());
     assertThat(attributes.get(USER_EXTERNAL_SYSTEM_ID_ATTR)).contains(user.getExternalSystemId());
@@ -269,25 +295,30 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
   protected CreateUserVerifyDto verifyKeycloakUser(String tenant, User user) {
     var authToken = tokenService.issueToken();
-    var keycloakUsers = keycloakClient.findUsersByUsername(tenant, user.getUsername(), false, authToken);
-    var keycloakUser = keycloakUsers.stream().findFirst()
-      .orElseThrow();
+    var kcUser = getKcUser(tenant, user, authToken).orElseThrow();
 
     assertThat(user.getPersonal()).isNotNull();
-    assertThat(keycloakUser.getEmail()).isEqualTo(user.getPersonal().getEmail());
+    assertThat(kcUser.getEmail()).isEqualTo(user.getPersonal().getEmail());
 
-    var attributes = keycloakUser.getAttributes();
+    var attributes = kcUser.getAttributes();
     assertThat(user.getId()).isNotNull();
     assertThat(attributes.get(USER_ID_ATTR)).contains(user.getId().toString());
     assertThat(attributes.get(USER_EXTERNAL_SYSTEM_ID_ATTR)).contains(user.getExternalSystemId());
 
-    return new CreateUserVerifyDto(authToken, keycloakUser);
+    return new CreateUserVerifyDto(authToken, kcUser);
   }
 
-  protected void verifyKeycloakUserAndIdentityProvider(String tenant, User user, String kcUserId) {
-    var dto = verifyKeycloakUser(tenant, user);
+  private Optional<KeycloakUser> getKcUser(String tenant, User user, String authToken) {
+    return keycloakClient.findUsersByUsername(tenant, user.getUsername(), false, authToken)
+      .stream().findFirst();
+  }
 
-    var federatedIdentities = keycloakClient.getUserIdentityProvider(CENTRAL_TENANT_NAME, kcUserId, dto.authToken());
+  protected void verifyKeycloakUserAndIdentityProvider(String tenant, User user) {
+    var verifyDto = verifyKeycloakUser(tenant, user);
+    var authToken = verifyDto.authToken();
+    var kcUserId = verifyDto.kcUser().getId();
+
+    var federatedIdentities = keycloakTestClient.getUserIdentityProvider(tenant, kcUserId, authToken);
     assertThat(federatedIdentities).isNotEmpty();
     assertThat(federatedIdentities).hasSize(1);
 
@@ -297,15 +328,14 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     assertThat(federatedIdentity.get().getProviderAlias()).isEqualTo(PROVIDER_ALIAS);
   }
 
-  protected void verifyKeycloakUserAndWithNoIdentityProvider(String tenant, User user) {
-    var dto = verifyKeycloakUser(tenant, user);
+  protected void verifyKeycloakUserAndWithNoIdentityProviderCreated(String tenant, User user) {
+    var verifyDto = verifyKeycloakUser(tenant, user);
 
-    var kcUserId = keycloakService.findKeycloakUserWithUserIdAttr(CENTRAL_TENANT_NAME, user.getId())
+    var kcUserId = keycloakService.findKeycloakUserWithUserIdAttr(tenant, user.getId())
       .orElseThrow().getId();
 
-    assertThatThrownBy(() -> keycloakClient.getUserIdentityProvider(TENANT_NAME, kcUserId, dto.authToken()))
-      .isInstanceOf(FeignException.NotFound.class)
-      .hasMessageContaining("User not found");
+    var federatedIdentities = keycloakTestClient.getUserIdentityProvider(tenant, kcUserId, verifyDto.authToken());
+    assertThat(federatedIdentities).isEmpty();
   }
 
   @TestConfiguration
