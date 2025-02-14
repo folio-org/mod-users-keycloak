@@ -1,4 +1,4 @@
-package org.folio.uk.integration.keycloak.model;
+package org.folio.uk.base.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

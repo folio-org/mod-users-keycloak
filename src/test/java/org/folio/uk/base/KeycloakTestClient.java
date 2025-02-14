@@ -3,9 +3,9 @@ package org.folio.uk.base;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import java.util.List;
+import org.folio.uk.base.model.IdentityProvider;
 import org.folio.uk.integration.keycloak.config.KeycloakFeignClientConfig;
 import org.folio.uk.integration.keycloak.model.FederatedIdentity;
-import org.folio.uk.integration.keycloak.model.IdentityProvider;
 import org.folio.uk.integration.keycloak.model.KeycloakRole;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;

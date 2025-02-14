@@ -1,4 +1,4 @@
-package org.folio.uk.integration.keycloak.model;
+package org.folio.uk.base.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

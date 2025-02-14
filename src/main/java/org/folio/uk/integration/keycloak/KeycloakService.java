@@ -79,7 +79,7 @@ public class KeycloakService {
     }
 
     var userTenant = userTenantOptional.get();
-    log.info("Found userTenant for user [userId: {}, kcUserId: {}, tenant: {}, userTenant: {}]", userId,
+    log.debug("Found userTenant for user [userId: {}, kcUserId: {}, tenant: {}, userTenant: {}]", userId,
       kcUserId, tenant, userTenant);
 
     // Prevents linking if not as a central OR if as a member tenant
