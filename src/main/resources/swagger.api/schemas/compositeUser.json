@@ -26,6 +26,10 @@
     "servicePointsUser": {
       "description": "Service point user",
       "$ref": "servicePointUser.json"
+    },
+    "originalTenantId": {
+      "description": "An original tenant id to redirect member tenant to",
+      "type": "string"
     }
   }
 }

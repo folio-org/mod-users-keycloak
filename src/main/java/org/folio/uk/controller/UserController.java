@@ -33,8 +33,9 @@ public class UserController implements UsersApi {
   }
 
   @Override
-  public ResponseEntity<CompositeUser> getUserBySelfReference(List<IncludedField> include, Boolean expandPermissions) {
-    return ResponseEntity.ok(service.getUserBySelfReference(include, expandPermissions));
+  public ResponseEntity<CompositeUser> getUserBySelfReference(List<IncludedField> include, Boolean expandPermissions,
+                                                              Boolean overrideUser) {
+    return ResponseEntity.ok(service.getUserBySelfReference(include, expandPermissions, overrideUser));
   }
 
   @Override
