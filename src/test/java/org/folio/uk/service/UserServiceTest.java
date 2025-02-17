@@ -30,6 +30,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
@@ -39,6 +40,7 @@ import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.inventory.model.ServicePointUserCollection;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
 import org.folio.uk.integration.roles.UserCapabilitiesClient;
@@ -52,8 +54,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @UnitTest
 @SpringBootTest(classes = {UserService.class, RetryTestConfiguration.class}, webEnvironment = NONE)
@@ -64,17 +66,18 @@ class UserServiceTest {
 
   @Autowired private UserService userService;
   @Autowired private ApplicationContext applicationContext;
-  @MockBean private UsersClient usersClient;
-  @MockBean private ServicePointsUserClient servicePointsUserClient;
-  @MockBean private ServicePointsClient servicePointsClient;
-  @MockBean private KeycloakService keycloakService;
-  @MockBean private UserPermissionsClient userPermissionsClient;
-  @MockBean private UserRolesClient userRolesClient;
-  @MockBean private UserCapabilitySetClient userCapabilitySetClient;
-  @MockBean private UserCapabilitiesClient userCapabilitiesClient;
-  @MockBean private PolicyService policyService;
-  @MockBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
-  @MockBean private FolioExecutionContext folioExecutionContext;
+  @MockitoBean private UsersClient usersClient;
+  @MockitoBean private ServicePointsUserClient servicePointsUserClient;
+  @MockitoBean private ServicePointsClient servicePointsClient;
+  @MockitoBean private KeycloakService keycloakService;
+  @MockitoBean private UserPermissionsClient userPermissionsClient;
+  @MockitoBean private UserRolesClient userRolesClient;
+  @MockitoBean private UserCapabilitySetClient userCapabilitySetClient;
+  @MockitoBean private UserCapabilitiesClient userCapabilitiesClient;
+  @MockitoBean private PolicyService policyService;
+  @MockitoBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  @MockitoBean private FolioExecutionContext folioExecutionContext;
+  @MockitoBean private KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   @AfterEach
   void tearDown() {
@@ -175,7 +178,8 @@ class UserServiceTest {
     var keycloakException = new KeycloakException("Failed to create keycloak user", cause);
 
     when(usersClient.createUser(user)).thenReturn(user);
-    doThrow(keycloakException).doThrow(keycloakException).doNothing().when(keycloakService).createUser(user, PASSWORD);
+    doThrow(keycloakException).doThrow(keycloakException).doReturn(UUID.randomUUID().toString())
+      .when(keycloakService).createUser(user, PASSWORD);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
 

@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/policies",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "centraltenant" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    },
+    "queryParameters": {
+      "query": { "equalTo": "name=*83eb1e14-c657-4db8-8ba4-119670fc3552" },
+      "limit": { "equalTo": "9999" },
+      "offset": { "equalTo": "0" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "policies": [],
+      "totalRecords": 0
+    }
+  }
+}

@@ -75,7 +75,7 @@ class UserMigrationIT extends BaseIntegrationTest {
     verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
     assertThat(passwordCaptor.getValue()).isNull();
 
-    verifyKeyCloakUser(migratedUser);
+    verifyKeycloakUser(migratedUser);
   }
 
   @Test
@@ -106,7 +106,7 @@ class UserMigrationIT extends BaseIntegrationTest {
     verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
     assertThat(passwordCaptor.getValue()).isEqualTo(migratedUser.getUsername());
 
-    verifyKeyCloakUser(migratedUser);
+    verifyKeycloakUser(migratedUser);
   }
 
   @Test

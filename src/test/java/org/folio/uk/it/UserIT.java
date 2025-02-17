@@ -5,7 +5,6 @@ import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import static org.folio.test.TestConstants.TENANT_ID;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
-import static org.folio.test.TestUtils.readString;
 import static org.folio.uk.service.UserService.PERMISSION_NAME_FIELD;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.folio.uk.support.TestConstants.USER_ID;
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.folio.test.TestUtils;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
@@ -257,7 +257,7 @@ class UserIT extends BaseIntegrationTest {
 
     assertThat(resp.getMetadata()).isNotNull();
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -275,7 +275,7 @@ class UserIT extends BaseIntegrationTest {
     assertThat(resp.getPersonal().getLastName()).isEqualTo(user.getPersonal().getLastName());
     assertThat(resp.getPersonal().getEmail()).isEqualTo(user.getPersonal().getEmail());
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -315,7 +315,7 @@ class UserIT extends BaseIntegrationTest {
     ).andExpectAll(status().isCreated(),
       jsonPath("$.username", is("create-user-auth-exist")));
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -332,7 +332,7 @@ class UserIT extends BaseIntegrationTest {
     ).andExpectAll(status().isCreated(),
       jsonPath("$.username", is("create-user-auth-exist")));
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -352,7 +352,7 @@ class UserIT extends BaseIntegrationTest {
     doPost("/users-keycloak/users?keycloakOnly=true", user);
     doPut("/users-keycloak/users/{id}", user, userId);
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -368,7 +368,7 @@ class UserIT extends BaseIntegrationTest {
       .contentType(APPLICATION_JSON)
       .accept(TEXT_PLAIN)).andExpect(status().isNoContent());
 
-    verifyKeyCloakUser(user);
+    verifyKeycloakUser(user);
   }
 
   @Test
@@ -451,6 +451,6 @@ class UserIT extends BaseIntegrationTest {
     var url = "/users-keycloak/users/{id}/permissions?desiredPermissions=ui.all&desiredPermissions=users.item.*";
     attemptGet(url, USER_ID)
       .andExpect(status().isOk())
-      .andExpect(content().json(readString("json/user/resolve-permissions.json")));
+      .andExpect(content().json(TestUtils.readString("json/user/resolve-permissions.json")));
   }
 }
