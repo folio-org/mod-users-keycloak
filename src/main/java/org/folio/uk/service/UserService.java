@@ -56,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
-  private static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
+  public static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
   private static final String SHADOW_USER_TYPE = "shadow";
 
   private final UsersClient usersClient;
