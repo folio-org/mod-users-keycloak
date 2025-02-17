@@ -57,7 +57,6 @@ public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
   private static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
-  private static final String STAFF_USER_TYPE = "staff";
 
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
@@ -117,9 +116,7 @@ public class UserService {
 
     // TODO Switch overrideUser back to assert true
     // Whether to override from shadow to a real user in ECS
-    if (Boolean.FALSE.equals(overrideUser)
-      // && StringUtils.isNotEmpty(user.getType()) && user.getType().equalsIgnoreCase(STAFF_USER_TYPE)
-    ) {
+    if (Boolean.FALSE.equals(overrideUser)) {
       var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
         .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
         .map(entry -> (String) entry.getValue()).findFirst();
