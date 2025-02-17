@@ -55,7 +55,6 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | MIGRATION_BATCH_SIZE             | 20                         |  false   | Batch size for user migration. Max value is 50                                                                                       |
 | DEFAULT_PASSWORDS_ON_MIGRATION   | false                      |  false   | If specified to true migrated user’s password being set to their username otherwise migrated users not having any credentials set    |
 | INCLUDE_ONLY_VISIBLE_PERMISSIONS | true                       |  false   | Defines if onlyVisible (UI permisisons/permission-set names) will be returned using `_self` endpoint                                 |
-| SINGLE_TENANT_UX                 | false                      |  false   | Defines if the module is running in single tenant UX mode                                                                            |
 
 ### Kafka environment variables
 

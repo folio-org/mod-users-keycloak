@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.toStream;
+import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
 
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,7 +34,6 @@ import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
-import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
@@ -42,7 +42,6 @@ import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
 import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.users.UsersClient;
-import org.folio.uk.utils.TenantContextUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.retry.annotation.Backoff;
@@ -58,7 +57,7 @@ public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
   private static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
-  private static final int RANDOM_STRING_COUNT = 6;
+  private static final String STAFF_USER_TYPE = "staff";
 
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
@@ -72,7 +71,6 @@ public class UserService {
   private final FolioModuleMetadata folioModuleMetadata;
   private final FolioExecutionContext folioExecutionContext;
   private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
-  private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   public User createUser(User user, boolean keycloakOnly) {
     return createUser(user, null, keycloakOnly);
@@ -118,7 +116,9 @@ public class UserService {
       .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: id = " + userId));
 
     // TODO Switch overrideUser back to assert true
-    if (Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled()) && Boolean.FALSE.equals(overrideUser)) {
+    // Whether to override from shadow to a real user in ECS
+    if (Boolean.FALSE.equals(overrideUser) && StringUtils.isNotEmpty(user.getType())
+      && user.getType().equalsIgnoreCase(STAFF_USER_TYPE)) {
       var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
         .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
         .map(entry -> (String) entry.getValue()).findFirst();
@@ -134,16 +134,17 @@ public class UserService {
 
   private CompositeUser getRealUserByReference(User shadowUser, String originalTenantId, boolean expandPermissions) {
     log.info("Overriding self reference to use a real shadowUser with: tenant = {}", originalTenantId);
+    var userId = shadowUser.getId();
+
     if (StringUtils.isEmpty(shadowUser.getUsername())) {
-      throw new IllegalStateException("Username was Is Empty: id = " + shadowUser.getId());
+      throw new IllegalStateException("Username was Is Empty: id = " + userId);
     }
 
     try (var ignored = new FolioExecutionContextSetter(
-      TenantContextUtils.prepareContextForTenant(originalTenantId, folioModuleMetadata, folioExecutionContext))) {
-      var username = shadowUser.getUsername().substring(0, shadowUser.getUsername().length() - RANDOM_STRING_COUNT);
-      var realUser = usersClient.query("username==" + username, 1)
-        .getUsers().stream().filter(foundUser -> Objects.nonNull(foundUser.getId()))
-        .findFirst().orElseThrow(() -> new EntityNotFoundException("User was Not Found with: username = " + username));
+      prepareContextForTenant(originalTenantId, folioModuleMetadata, folioExecutionContext))) {
+      var realUser = usersClient.lookupUserById(userId)
+        .filter(foundUser -> Objects.nonNull(foundUser.getId()))
+        .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: userId = " + userId));
 
       return new CompositeUser().user(realUser)
         .originalTenantId(originalTenantId)
