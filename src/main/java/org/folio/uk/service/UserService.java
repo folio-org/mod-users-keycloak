@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -20,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.uk.domain.dto.CompositeUser;
 import org.folio.uk.domain.dto.IncludedField;
 import org.folio.uk.domain.dto.PermissionUser;
@@ -30,6 +33,7 @@ import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
@@ -38,6 +42,7 @@ import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
 import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.users.UsersClient;
+import org.folio.uk.utils.TenantContextUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.retry.annotation.Backoff;
@@ -52,6 +57,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
+  private static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
+  private static final int RANDOM_STRING_COUNT = 6;
+
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
   private final UserCapabilitySetClient userCapabilitySetClient;
@@ -61,8 +69,10 @@ public class UserService {
   private final ServicePointsClient servicePointsClient;
   private final KeycloakService keycloakService;
   private final UserPermissionsClient userPermissionsClient;
+  private final FolioModuleMetadata folioModuleMetadata;
   private final FolioExecutionContext folioExecutionContext;
   private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   public User createUser(User user, boolean keycloakOnly) {
     return createUser(user, null, keycloakOnly);
@@ -98,19 +108,48 @@ public class UserService {
     return usersClient.lookupUserById(id);
   }
 
-  public CompositeUser getUserBySelfReference(List<IncludedField> include, boolean expandPermissions) {
+  public CompositeUser getUserBySelfReference(List<IncludedField> include, boolean expandPermissions,
+                                              boolean overrideUser) {
     log.info("Retrieving user by self reference with parameters: include = {}, expandPermissions = {}",
       () -> StringUtils.join(emptyIfNull(include), ", "), () -> expandPermissions);
 
     var userId = getUserId();
-
     var user = usersClient.lookupUserById(userId)
       .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: id = " + userId));
 
-    return new CompositeUser()
-      .user(user)
+    // TODO Switch overrideUser back to assert true
+    if (Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled()) && Boolean.FALSE.equals(overrideUser)) {
+      var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
+        .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
+        .map(entry -> (String) entry.getValue()).findFirst();
+      if (originalTenantIdOptional.isPresent()) {
+        return getRealUserByReference(user, originalTenantIdOptional.get(), expandPermissions);
+      }
+    }
+
+    return new CompositeUser().user(user)
       .permissions(fetchPermissionUser(userId, expandPermissions))
       .servicePointsUser(fetchServicePointUser(userId));
+  }
+
+  private CompositeUser getRealUserByReference(User shadowUser, String originalTenantId, boolean expandPermissions) {
+    log.info("Overriding self reference to use a real shadowUser with: tenant = {}", originalTenantId);
+    if (StringUtils.isEmpty(shadowUser.getUsername())) {
+      throw new IllegalStateException("Username was Is Empty: id = " + shadowUser.getId());
+    }
+
+    try (var ignored = new FolioExecutionContextSetter(
+      TenantContextUtils.prepareContextForTenant(originalTenantId, folioModuleMetadata, folioExecutionContext))) {
+      var username = shadowUser.getUsername().substring(0, shadowUser.getUsername().length() - RANDOM_STRING_COUNT);
+      var realUser = usersClient.query("username==" + username, 1)
+        .getUsers().stream().filter(foundUser -> Objects.nonNull(foundUser.getId()))
+        .findFirst().orElseThrow(() -> new EntityNotFoundException("User was Not Found with: username = " + username));
+
+      return new CompositeUser().user(realUser)
+        .originalTenantId(originalTenantId)
+        .permissions(fetchPermissionUser(realUser.getId(), expandPermissions))
+        .servicePointsUser(fetchServicePointUser(realUser.getId()));
+    }
   }
 
   public void updateUser(UUID id, User user) {

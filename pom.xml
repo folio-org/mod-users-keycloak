@@ -30,6 +30,7 @@
     <application-poc-tools.version>2.3.0-SNAPSHOT</application-poc-tools.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <org.json.version>20250107</org.json.version>
+    <commons-collections.version>3.2.2</commons-collections.version>
 
     <users-keycloak.yaml-file>${project.basedir}/src/main/resources/swagger.api/users-keycloak.yaml
     </users-keycloak.yaml-file>
@@ -207,6 +208,12 @@
       <artifactId>folio-backend-testing</artifactId>
       <version>${application-poc-tools.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>${commons-collections.version}</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 

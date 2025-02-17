@@ -311,7 +311,7 @@ class UserServiceTest {
     permissions.setPermissions(List.of("some.permission"));
     when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
 
-    var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true);
+    var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, false);
 
     verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
     verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
@@ -321,7 +321,7 @@ class UserServiceTest {
     assertThat(resultExpanded.getPermissions().getPermissions().get(0)).isEqualTo(
       Map.of(PERMISSION_NAME_FIELD, "some.permission"));
 
-    var result = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), false);
+    var result = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), false, false);
 
     verify(userPermissionsClient, times(2)).getPermissionsForUser(eq(userId), any(), any());
     verify(servicePointsUserClient, times(2)).getServicePointsUser(userId);

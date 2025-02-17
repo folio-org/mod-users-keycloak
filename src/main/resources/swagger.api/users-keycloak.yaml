@@ -179,6 +179,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/query-include'
         - $ref: '#/components/parameters/query-expand-permissions'
+        - $ref: '#/components/parameters/query-override-user'
       responses:
         '200':
           description: Returns user by self reference
@@ -540,6 +541,14 @@ components:
       required: false
       name: expandPermissions
       description: Whether or not to expand permissions listings
+      schema:
+        type: boolean
+        default: false
+    query-override-user:
+      in: query
+      required: false
+      name: overrideUser
+      description: Whether or not to override from shadow to real user
       schema:
         type: boolean
         default: false
