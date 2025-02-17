@@ -321,7 +321,6 @@ public class KeycloakService {
     try {
       method.run();
     } catch (Exception cause) {
-      log.info("Exception: {}", cause.getMessage());
       throw new KeycloakException(expMsgSupplier.get(), cause);
     }
   }
