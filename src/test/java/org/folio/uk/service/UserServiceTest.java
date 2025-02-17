@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
@@ -74,6 +75,7 @@ class UserServiceTest {
   @MockBean private UserCapabilitiesClient userCapabilitiesClient;
   @MockBean private PolicyService policyService;
   @MockBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  @MockBean private FolioModuleMetadata folioModuleMetadata;
   @MockBean private FolioExecutionContext folioExecutionContext;
 
   @AfterEach
