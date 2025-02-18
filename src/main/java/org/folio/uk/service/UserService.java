@@ -115,7 +115,8 @@ public class UserService {
     var user = usersClient.lookupUserById(userId)
       .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: id = " + userId));
 
-    // Whether to override from shadow to a real user in ECS
+    // When overrideUser is set to true the shadow user will be used to retrieve the real user
+    // with its permissions and service points to support the ECS login into member tenants
     if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), SHADOW_USER_TYPE)) {
       var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
         .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
