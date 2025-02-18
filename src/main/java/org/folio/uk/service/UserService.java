@@ -116,7 +116,7 @@ public class UserService {
       .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: id = " + userId));
 
     // Whether to override from shadow to a real user in ECS
-    if (Boolean.TRUE.equals(overrideUser) && isShadowUserType(user)) {
+    if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), SHADOW_USER_TYPE)) {
       var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
         .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
         .map(entry -> (String) entry.getValue()).findFirst();
@@ -128,10 +128,6 @@ public class UserService {
     return new CompositeUser().user(user)
       .permissions(fetchPermissionUser(userId, expandPermissions))
       .servicePointsUser(fetchServicePointUser(userId));
-  }
-
-  private boolean isShadowUserType(User user) {
-    return StringUtils.isNotEmpty(user.getType()) && user.getType().equalsIgnoreCase(SHADOW_USER_TYPE);
   }
 
   private CompositeUser getRealUserByReference(User shadowUser, String originalTenantId, boolean expandPermissions) {

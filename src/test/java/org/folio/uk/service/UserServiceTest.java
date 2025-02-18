@@ -468,7 +468,7 @@ class UserServiceTest {
     var expandedPerms = of(EXPANDED_PERMS);
     assertThatThrownBy(() -> userService.getUserBySelfReference(expandedPerms, true, true))
       .isInstanceOf(IllegalStateException.class)
-      .hasMessage("Username was Is Empty: id = " + userId);
+      .hasMessage("Shadow user's username is empty: id = " + userId);
 
     verify(usersClient, times(1)).lookupUserById(userId);
     verify(userPermissionsClient, never()).getPermissionsForUser(eq(userId), any(), any());
