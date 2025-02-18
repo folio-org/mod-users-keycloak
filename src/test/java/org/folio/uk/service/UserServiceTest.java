@@ -465,7 +465,8 @@ class UserServiceTest {
     permissions.setPermissions(List.of("some.permission"));
     when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
 
-    assertThatThrownBy(() -> userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, true))
+    var expandedPerms = of(EXPANDED_PERMS);
+    assertThatThrownBy(() -> userService.getUserBySelfReference(expandedPerms, true, true))
       .isInstanceOf(IllegalStateException.class)
       .hasMessage("Username was Is Empty: id = " + userId);
 
