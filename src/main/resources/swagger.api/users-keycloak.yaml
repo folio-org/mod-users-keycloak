@@ -548,7 +548,7 @@ components:
       in: query
       required: false
       name: overrideUser
-      description: Whether to override from shadow to a real user in ECS
+      description:  When set to true the real user will be retrieved for ECS login into member tenants
       schema:
         type: boolean
         default: false

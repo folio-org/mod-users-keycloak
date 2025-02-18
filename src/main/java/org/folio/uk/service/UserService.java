@@ -135,10 +135,6 @@ public class UserService {
     log.info("Overriding self reference to use a real shadowUser with: tenant = {}", originalTenantId);
     var userId = shadowUser.getId();
 
-    if (StringUtils.isEmpty(shadowUser.getUsername())) {
-      throw new IllegalStateException("Shadow user's username is empty: id = " + userId);
-    }
-
     try (var ignored = new FolioExecutionContextSetter(
       prepareContextForTenant(originalTenantId, folioModuleMetadata, folioExecutionContext))) {
       var realUser = usersClient.lookupUserById(userId)

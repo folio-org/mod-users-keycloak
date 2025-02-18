@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -443,36 +442,6 @@ class UserServiceTest {
     assertThat(resultExpanded.getPermissions().getPermissions()).hasSize(1);
     assertThat(resultExpanded.getPermissions().getPermissions().get(0)).isEqualTo(
       Map.of(PERMISSION_NAME_FIELD, "some.permission"));
-  }
-
-  @Test
-  void getUserBySelfReference_negative_overrideUserNoUsername() {
-    var userId = randomUUID();
-    var user = mock(User.class);
-    when(user.getId()).thenReturn(userId);
-    // No username
-    when(user.getUsername()).thenReturn(null);
-    when(user.getType()).thenReturn("shadow");
-    when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
-      .thenReturn(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, "testtenant"));
-    when(folioExecutionContext.getUserId()).thenReturn(userId);
-    when(folioExecutionContext.getToken()).thenReturn("");
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
-      Map.entry("x-okapi-tenant", List.of("centraltenant"))));
-    when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
-    when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
-    var permissions = new UserPermissions();
-    permissions.setPermissions(List.of("some.permission"));
-    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
-
-    var expandedPerms = of(EXPANDED_PERMS);
-    assertThatThrownBy(() -> userService.getUserBySelfReference(expandedPerms, true, true))
-      .isInstanceOf(IllegalStateException.class)
-      .hasMessage("Shadow user's username is empty: id = " + userId);
-
-    verify(usersClient, times(1)).lookupUserById(userId);
-    verify(userPermissionsClient, never()).getPermissionsForUser(eq(userId), any(), any());
-    verify(servicePointsUserClient, never()).getServicePointsUser(userId);
   }
 
   private static User user() {
