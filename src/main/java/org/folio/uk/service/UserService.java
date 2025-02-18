@@ -139,7 +139,7 @@ public class UserService {
     var userId = shadowUser.getId();
 
     if (StringUtils.isEmpty(shadowUser.getUsername())) {
-      throw new IllegalStateException("Username was Is Empty: id = " + userId);
+      throw new IllegalStateException("Shadow user's username is empty: id = " + userId);
     }
 
     try (var ignored = new FolioExecutionContextSetter(
