@@ -8,6 +8,7 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.uk.domain.dto.IncludedField.EXPANDED_PERMS;
+import static org.folio.uk.service.UserService.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 import static org.folio.uk.service.UserService.PERMISSION_NAME_FIELD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
@@ -50,10 +52,12 @@ import org.folio.uk.integration.roles.model.UserPermissions;
 import org.folio.uk.integration.users.UsersClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @UnitTest
 @SpringBootTest(classes = {UserService.class, RetryTestConfiguration.class}, webEnvironment = NONE)
@@ -64,17 +68,18 @@ class UserServiceTest {
 
   @Autowired private UserService userService;
   @Autowired private ApplicationContext applicationContext;
-  @MockBean private UsersClient usersClient;
-  @MockBean private ServicePointsUserClient servicePointsUserClient;
-  @MockBean private ServicePointsClient servicePointsClient;
-  @MockBean private KeycloakService keycloakService;
-  @MockBean private UserPermissionsClient userPermissionsClient;
-  @MockBean private UserRolesClient userRolesClient;
-  @MockBean private UserCapabilitySetClient userCapabilitySetClient;
-  @MockBean private UserCapabilitiesClient userCapabilitiesClient;
-  @MockBean private PolicyService policyService;
-  @MockBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
-  @MockBean private FolioExecutionContext folioExecutionContext;
+  @MockitoBean private UsersClient usersClient;
+  @MockitoBean private ServicePointsUserClient servicePointsUserClient;
+  @MockitoBean private ServicePointsClient servicePointsClient;
+  @MockitoBean private KeycloakService keycloakService;
+  @MockitoBean private UserPermissionsClient userPermissionsClient;
+  @MockitoBean private UserRolesClient userRolesClient;
+  @MockitoBean private UserCapabilitySetClient userCapabilitySetClient;
+  @MockitoBean private UserCapabilitiesClient userCapabilitiesClient;
+  @MockitoBean private PolicyService policyService;
+  @MockitoBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  @MockitoBean private FolioModuleMetadata folioModuleMetadata;
+  @MockitoBean private FolioExecutionContext folioExecutionContext;
 
   @AfterEach
   void tearDown() {
@@ -301,7 +306,7 @@ class UserServiceTest {
   }
 
   @Test
-  void testGetUserBySelfReference() {
+  void getUserBySelfReference_positive() {
     var userId = randomUUID();
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(folioExecutionContext.getToken()).thenReturn("");
@@ -311,24 +316,132 @@ class UserServiceTest {
     permissions.setPermissions(List.of("some.permission"));
     when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
 
-    var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true);
+    var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, false);
 
+    verify(usersClient, times(1)).lookupUserById(userId);
     verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
     verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
-    verify(usersClient, times(1)).lookupUserById(userId);
 
+    assertThat(resultExpanded.getPermissions()).isNotNull();
     assertThat(resultExpanded.getPermissions().getPermissions()).hasSize(1);
     assertThat(resultExpanded.getPermissions().getPermissions().get(0)).isEqualTo(
       Map.of(PERMISSION_NAME_FIELD, "some.permission"));
 
-    var result = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), false);
+    var result = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), false, false);
 
+    verify(usersClient, times(2)).lookupUserById(userId);
     verify(userPermissionsClient, times(2)).getPermissionsForUser(eq(userId), any(), any());
     verify(servicePointsUserClient, times(2)).getServicePointsUser(userId);
-    verify(usersClient, times(2)).lookupUserById(userId);
 
+    assertThat(result.getPermissions()).isNotNull();
     assertThat(result.getPermissions().getPermissions()).hasSize(1);
     assertThat(result.getPermissions().getPermissions().get(0)).isEqualTo("some.permission");
+  }
+
+  @Test
+  void getUserBySelfReference_positive_overrideUser() {
+    var userId = randomUUID();
+    var user = mock(User.class);
+    when(user.getId()).thenReturn(userId);
+    when(user.getUsername()).thenReturn("username-12345");
+    when(user.getType()).thenReturn("shadow");
+    when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
+      .thenReturn(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, "testtenant"));
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getToken()).thenReturn("");
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
+      Map.entry("x-okapi-tenant", List.of("centraltenant"))));
+    when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
+    when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
+    var permissions = new UserPermissions();
+    permissions.setPermissions(List.of("some.permission"));
+    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
+
+    var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, true);
+
+    verify(usersClient, times(2)).lookupUserById(userId);
+    verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
+    verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
+
+    assertThat(resultExpanded.getPermissions()).isNotNull();
+    assertThat(resultExpanded.getPermissions().getPermissions()).hasSize(1);
+    assertThat(resultExpanded.getPermissions().getPermissions().get(0)).isEqualTo(
+      Map.of(PERMISSION_NAME_FIELD, "some.permission"));
+
+    var result = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), false, true);
+
+    verify(usersClient, times(4)).lookupUserById(userId);
+    verify(userPermissionsClient, times(2)).getPermissionsForUser(eq(userId), any(), any());
+    verify(servicePointsUserClient, times(2)).getServicePointsUser(userId);
+
+    assertThat(result.getPermissions()).isNotNull();
+    assertThat(result.getPermissions().getPermissions()).hasSize(1);
+    assertThat(result.getPermissions().getPermissions().get(0)).isEqualTo("some.permission");
+  }
+
+  @Test
+  void getUserBySelfReference_positive_noCustomFieldOriginalTenantId() {
+    var userId = randomUUID();
+    var user = mock(User.class);
+    when(user.getId()).thenReturn(userId);
+    when(user.getUsername()).thenReturn("username-12345");
+    when(user.getType()).thenReturn("shadow");
+    // No custom Field original tenant id
+    when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
+      .thenReturn(Map.of());
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getToken()).thenReturn("");
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
+      Map.entry("x-okapi-tenant", List.of("centraltenant"))));
+    when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
+    when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
+    var permissions = new UserPermissions();
+    permissions.setPermissions(List.of("some.permission"));
+    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
+
+    var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, true);
+
+    verify(usersClient, times(1)).lookupUserById(userId);
+    verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
+    verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
+
+    assertThat(resultExpanded.getPermissions()).isNotNull();
+    assertThat(resultExpanded.getPermissions().getPermissions()).hasSize(1);
+    assertThat(resultExpanded.getPermissions().getPermissions().get(0)).isEqualTo(
+      Map.of(PERMISSION_NAME_FIELD, "some.permission"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"staff", ""})
+  void getUserBySelfReference_positive_overrideUserWrongUserType(String userType) {
+    var userId = randomUUID();
+    var user = mock(User.class);
+    when(user.getId()).thenReturn(userId);
+    when(user.getUsername()).thenReturn("username-12345");
+    // Wrong user type (expecting "shadow")
+    when(user.getType()).thenReturn(userType);
+    when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
+      .thenReturn(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, "testtenant"));
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getToken()).thenReturn("");
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
+      Map.entry("x-okapi-tenant", List.of("centraltenant"))));
+    when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
+    when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
+    var permissions = new UserPermissions();
+    permissions.setPermissions(List.of("some.permission"));
+    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
+
+    var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, true);
+
+    verify(usersClient, times(1)).lookupUserById(userId);
+    verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
+    verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
+
+    assertThat(resultExpanded.getPermissions()).isNotNull();
+    assertThat(resultExpanded.getPermissions().getPermissions()).hasSize(1);
+    assertThat(resultExpanded.getPermissions().getPermissions().get(0)).isEqualTo(
+      Map.of(PERMISSION_NAME_FIELD, "some.permission"));
   }
 
   private static User user() {

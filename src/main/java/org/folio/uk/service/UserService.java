@@ -6,12 +6,14 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.toStream;
+import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
 
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -20,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.uk.domain.dto.CompositeUser;
 import org.folio.uk.domain.dto.IncludedField;
 import org.folio.uk.domain.dto.PermissionUser;
@@ -52,6 +56,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
+  public static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
+  private static final String SHADOW_USER_TYPE = "shadow";
+
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
   private final UserCapabilitySetClient userCapabilitySetClient;
@@ -61,6 +68,7 @@ public class UserService {
   private final ServicePointsClient servicePointsClient;
   private final KeycloakService keycloakService;
   private final UserPermissionsClient userPermissionsClient;
+  private final FolioModuleMetadata folioModuleMetadata;
   private final FolioExecutionContext folioExecutionContext;
   private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
 
@@ -98,19 +106,46 @@ public class UserService {
     return usersClient.lookupUserById(id);
   }
 
-  public CompositeUser getUserBySelfReference(List<IncludedField> include, boolean expandPermissions) {
+  public CompositeUser getUserBySelfReference(List<IncludedField> include, boolean expandPermissions,
+                                              boolean overrideUser) {
     log.info("Retrieving user by self reference with parameters: include = {}, expandPermissions = {}",
       () -> StringUtils.join(emptyIfNull(include), ", "), () -> expandPermissions);
 
     var userId = getUserId();
-
     var user = usersClient.lookupUserById(userId)
       .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: id = " + userId));
 
-    return new CompositeUser()
-      .user(user)
+    // When overrideUser is set to true the shadow user will be used to retrieve the real user
+    // with its permissions and service points to support the ECS login into member tenants
+    if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), SHADOW_USER_TYPE)) {
+      var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
+        .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
+        .map(entry -> (String) entry.getValue()).findFirst();
+      if (originalTenantIdOptional.isPresent()) {
+        return getRealUserByReference(user, originalTenantIdOptional.get(), expandPermissions);
+      }
+    }
+
+    return new CompositeUser().user(user)
       .permissions(fetchPermissionUser(userId, expandPermissions))
       .servicePointsUser(fetchServicePointUser(userId));
+  }
+
+  private CompositeUser getRealUserByReference(User shadowUser, String originalTenantId, boolean expandPermissions) {
+    log.info("Overriding self reference to use a real shadowUser with: tenant = {}", originalTenantId);
+    var userId = shadowUser.getId();
+
+    try (var ignored = new FolioExecutionContextSetter(
+      prepareContextForTenant(originalTenantId, folioModuleMetadata, folioExecutionContext))) {
+      var realUser = usersClient.lookupUserById(userId)
+        .filter(foundUser -> Objects.nonNull(foundUser.getId()))
+        .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: userId = " + userId));
+
+      return new CompositeUser().user(realUser)
+        .originalTenantId(originalTenantId)
+        .permissions(fetchPermissionUser(realUser.getId(), expandPermissions))
+        .servicePointsUser(fetchServicePointUser(realUser.getId()));
+    }
   }
 
   public void updateUser(UUID id, User user) {
