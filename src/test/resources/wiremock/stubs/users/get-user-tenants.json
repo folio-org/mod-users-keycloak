@@ -11,11 +11,8 @@
       }
     },
     "queryParameters": {
-      "userId": {
+      "tenantId": {
         "matches": ".*"
-      },
-      "limit": {
-        "equalTo": "1"
       }
     }
   },

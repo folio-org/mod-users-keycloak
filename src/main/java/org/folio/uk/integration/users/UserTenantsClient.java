@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "user-tenants", dismiss404 = true)
 public interface UserTenantsClient {
 
-  @GetMapping(value = "?userId={id}&limit={limit}")
-  UserTenantCollection lookupByUserId(@PathVariable("id") UUID userId, @PathVariable("limit") Integer limit);
+  @GetMapping(value = "?userId={id}")
+  UserTenantCollection lookupByUserId(@PathVariable("id") UUID userId);
+
+  @GetMapping(value = "?tenantId={id}")
+  UserTenantCollection lookupByTenantId(@PathVariable("id") String tenantId);
 }

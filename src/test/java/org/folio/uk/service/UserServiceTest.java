@@ -8,8 +8,8 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.uk.domain.dto.IncludedField.EXPANDED_PERMS;
-import static org.folio.uk.service.UserService.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 import static org.folio.uk.service.UserService.PERMISSION_NAME_FIELD;
+import static org.folio.uk.utils.UserUtils.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -388,9 +388,9 @@ class UserServiceTest {
     var userId = randomUUID();
     var user = mock(User.class);
     when(user.getId()).thenReturn(userId);
-    when(user.getUsername()).thenReturn("username-12345");
+    when(user.getUsername()).thenReturn("username_12345");
     when(user.getType()).thenReturn("shadow");
-    // No custom Field original tenant id
+    // No custom Field "originaltenantid"
     when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
       .thenReturn(Map.of());
     when(folioExecutionContext.getUserId()).thenReturn(userId);

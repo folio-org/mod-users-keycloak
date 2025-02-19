@@ -1,10 +1,12 @@
 package org.folio.uk.support;
 
 import static java.time.OffsetDateTime.parse;
+import static org.folio.uk.utils.UserUtils.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -59,7 +61,8 @@ public class TestConstants {
       .patronGroup(USER_PATRON_GROUP_ID)
       .enrollmentDate(USER_ENROLLMENT_DATE)
       .expirationDate(USER_EXPIRATION_DATE)
-      .personal(person("new9@new.com"));
+      .personal(person("new9@new.com"))
+      .customFields(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, TENANT_NAME));
   }
 
   public static Personal person(String email) {

@@ -7,6 +7,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
+import static org.folio.uk.utils.UserUtils.getOriginalTenantIdOptional;
 
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
@@ -58,7 +59,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
-  public static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
 
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
@@ -124,9 +124,7 @@ public class UserService {
     // When overrideUser is set to true the shadow user will be used to retrieve the real user
     // with its permissions and service points to support the ECS login into member tenants
     if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
-      var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
-        .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
-        .map(entry -> (String) entry.getValue()).findFirst();
+      var originalTenantIdOptional = getOriginalTenantIdOptional(user);
       if (originalTenantIdOptional.isPresent()) {
         return getRealUserByReference(user, originalTenantIdOptional.get(), expandPermissions);
       }

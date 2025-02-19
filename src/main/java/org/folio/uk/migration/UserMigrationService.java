@@ -201,7 +201,7 @@ public class UserMigrationService {
 
   private List<String> fetchUserTenants(UUID userId) {
     try {
-      var userTenantsList = userTenantsClient.lookupByUserId(userId, Integer.MAX_VALUE);
+      var userTenantsList = userTenantsClient.lookupByUserId(userId);
 
       return toStream(userTenantsList.getUserTenants())
         .map(UserTenant::getTenantId)
