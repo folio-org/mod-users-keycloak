@@ -6,8 +6,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum UserType {
+  PATRON("patron"),
   STAFF("staff"),
-  SHADOW("shadow");
+  SHADOW("shadow"),
+  SYSTEM("system"),
+  DCB("dcb");
 
   private final String value;
 }

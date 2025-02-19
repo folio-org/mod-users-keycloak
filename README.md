@@ -56,7 +56,7 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | DEFAULT_PASSWORDS_ON_MIGRATION   | false                      |  false   | If specified to true migrated user’s password being set to their username otherwise migrated users not having any credentials set    |
 | INCLUDE_ONLY_VISIBLE_PERMISSIONS | true                       |  false   | Defines if onlyVisible (UI permissions/permission-set names) will be returned using `_self` endpoint                                 |
 | SINGLE_TENANT_UX                 | false                      |  false   | Defines if the module is running in single tenant UX mode                                                                            |
-| IDENTITY_PROVIDER_SUFFIX         | {tenantId}-keycloak-oidc   |  false   | Suffix of a Keycloak OIDC identity provider who will perform federated authentication requests. Used if SINGLE_TENANT_UX is enabled  |
+| IDENTITY_PROVIDER_SUFFIX         | -keycloak-oidc             |  false   | Suffix of a Keycloak OIDC identity provider who will perform federated authentication requests. Used if SINGLE_TENANT_UX is enabled  |
 
 ### Kafka environment variables
 
