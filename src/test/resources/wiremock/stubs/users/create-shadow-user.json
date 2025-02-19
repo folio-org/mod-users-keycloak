@@ -13,11 +13,11 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "username": "ZakirBailey",
+      "username": "ZakirBailey_12345",
       "id": "d3958402-2f80-421b-a527-9933245a3556",
       "barcode": "12359",
       "active": true,
-      "type": "",
+      "type": "shadow",
       "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
       "externalSystemId": "newUser@folio.org",
       "departments": [],

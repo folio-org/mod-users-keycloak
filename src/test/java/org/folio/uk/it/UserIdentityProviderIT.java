@@ -55,7 +55,7 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/wiremock/stubs/users/create-user-shadow.json",
+    "/wiremock/stubs/users/create-shadow-user.json",
     "/wiremock/stubs/users/get-user-tenants.json"
   })
   void create_positive() throws Exception {
@@ -72,7 +72,7 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/wiremock/stubs/users/create-user-shadow.json",
+    "/wiremock/stubs/users/create-shadow-user.json",
     "/wiremock/stubs/users/get-user-tenants.json"
   })
   void update_positive() throws Exception {
@@ -90,7 +90,7 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/wiremock/stubs/users/create-user-shadow.json",
+    "/wiremock/stubs/users/create-shadow-user.json",
     "/wiremock/stubs/users/get-user-tenants-empty-array.json",
   })
   void create_positive_emptyUserTenants() throws Exception {
@@ -110,8 +110,8 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
     "wiremock/stubs/users/get-user-tenants-empty-array.json",
     "wiremock/stubs/users/get-user-tenants-empty-central-tenant-id.json"
   })
-  void create_positive_emptyCentralTenantUserTenants(String userTenantsStub) throws Exception {
-    wmAdminClient.addStubMapping(TestUtils.readString("wiremock/stubs/users/create-user-shadow.json"));
+  void create_positive_emptyCentralTenantUserTenant(String userTenantsStub) throws Exception {
+    wmAdminClient.addStubMapping(TestUtils.readString("wiremock/stubs/users/create-shadow-user.json"));
     wmAdminClient.addStubMapping(TestUtils.readString(userTenantsStub));
 
     tenant = CENTRAL_TENANT_NAME;
@@ -127,28 +127,11 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub({
-    "/wiremock/stubs/users/create-user-central.json",
+    "/wiremock/stubs/users/create-staff-user.json",
     "/wiremock/stubs/users/get-user-tenants-central.json",
   })
-  void create_positive_asCentralTenantRealUser() throws Exception {
+  void create_positive_wrongUserType() throws Exception {
     tenant = CENTRAL_TENANT_NAME;
-    user = TestConstants.user();
-
-    var mvcResult = doPostWithTenant("/users-keycloak/users", tenant, user).andReturn();
-    var resp = parseResponse(mvcResult, User.class);
-
-    assertSuccessfulUserCreation(resp, user);
-
-    verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
-  }
-
-  @Test
-  @WireMockStub({
-    "/wiremock/stubs/users/create-user.json",
-    "/wiremock/stubs/users/get-user-tenants-same-tenant-ids.json",
-  })
-  void create_positive_asMemberTenantRealUser() throws Exception {
-    tenant = TENANT_NAME;
     user = TestConstants.user();
 
     var mvcResult = doPostWithTenant("/users-keycloak/users", tenant, user).andReturn();

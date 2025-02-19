@@ -11,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
+import org.folio.uk.domain.model.UserType;
 import org.folio.uk.integration.kafka.model.ResourceEvent;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 
@@ -49,8 +50,16 @@ public class TestConstants {
   }
 
   public static User shadowUser() {
-    return user(USER_ID.toString(), USER_NAME + "-12345", "new9@new.com",
-      "newUser@folio.org");
+    return new User().id(UUID.fromString(USER_ID.toString()))
+      .username(USER_NAME + "_12345")
+      .type(UserType.SHADOW.getValue())
+      .barcode("12359")
+      .active(true)
+      .externalSystemId("newUser@folio.org")
+      .patronGroup(USER_PATRON_GROUP_ID)
+      .enrollmentDate(USER_ENROLLMENT_DATE)
+      .expirationDate(USER_EXPIRATION_DATE)
+      .personal(person("new9@new.com"));
   }
 
   public static Personal person(String email) {

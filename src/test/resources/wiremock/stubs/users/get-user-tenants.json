@@ -13,6 +13,9 @@
     "queryParameters": {
       "userId": {
         "matches": ".*"
+      },
+      "limit": {
+        "equalTo": "1"
       }
     }
   },

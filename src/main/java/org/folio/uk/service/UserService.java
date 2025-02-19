@@ -30,7 +30,7 @@ import org.folio.uk.domain.dto.PermissionUser;
 import org.folio.uk.domain.dto.ServicePointUser;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
-import org.folio.uk.exception.RequestValidationException;
+import org.folio.uk.domain.model.UserType;
 import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
@@ -59,7 +59,6 @@ public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
   public static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
-  private static final String SHADOW_USER_TYPE = "shadow";
 
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
@@ -82,10 +81,6 @@ public class UserService {
   public User createUser(User user, String password, boolean keycloakOnly) {
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
       createdUser -> {
-        if (Objects.isNull(user.getId())) {
-          throw new RequestValidationException("User id is missing", "id", null);
-        }
-
         var kcUserId = keycloakService.createUser(createdUser, password);
         if (StringUtils.isNotEmpty(kcUserId) && Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled())) {
           keycloakService.linkIdentityProviderToUser(user, kcUserId);
@@ -128,7 +123,7 @@ public class UserService {
 
     // When overrideUser is set to true the shadow user will be used to retrieve the real user
     // with its permissions and service points to support the ECS login into member tenants
-    if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), SHADOW_USER_TYPE)) {
+    if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
       var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
         .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
         .map(entry -> (String) entry.getValue()).findFirst();
