@@ -11,4 +11,7 @@ public interface UserTenantsClient {
 
   @GetMapping(value = "?userId={id}")
   UserTenantCollection lookupByUserId(@PathVariable("id") UUID userId);
+
+  @GetMapping(value = "?tenantId={id}")
+  UserTenantCollection lookupByTenantId(@PathVariable("id") String tenantId);
 }

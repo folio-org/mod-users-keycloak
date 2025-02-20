@@ -8,8 +8,8 @@ import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.uk.domain.dto.IncludedField.EXPANDED_PERMS;
-import static org.folio.uk.service.UserService.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 import static org.folio.uk.service.UserService.PERMISSION_NAME_FIELD;
+import static org.folio.uk.utils.UserUtils.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -31,6 +31,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.test.types.UnitTest;
@@ -41,6 +42,7 @@ import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.inventory.model.ServicePointUserCollection;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
 import org.folio.uk.integration.roles.UserCapabilitiesClient;
@@ -80,6 +82,7 @@ class UserServiceTest {
   @MockitoBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
   @MockitoBean private FolioModuleMetadata folioModuleMetadata;
   @MockitoBean private FolioExecutionContext folioExecutionContext;
+  @MockitoBean private KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   @AfterEach
   void tearDown() {
@@ -97,7 +100,7 @@ class UserServiceTest {
     assertThat(result).isEqualTo(user);
     verify(usersClient).createUser(user);
     verify(keycloakService).findUserByUsername(USERNAME, false);
-    verify(keycloakService).createUser(user, PASSWORD);
+    verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -114,7 +117,7 @@ class UserServiceTest {
     verify(usersClient).createUser(user);
     verify(usersClient).query("username==test-username", 1);
     verify(keycloakService).findUserByUsername(USERNAME, false);
-    verify(keycloakService).createUser(user, PASSWORD);
+    verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -128,7 +131,7 @@ class UserServiceTest {
     var keycloakException = new KeycloakException("Failed to create keycloak user", cause);
 
     when(usersClient.createUser(user)).thenReturn(user);
-    doThrow(keycloakException).when(keycloakService).createUser(user, PASSWORD);
+    doThrow(keycloakException).when(keycloakService).upsertUser(user, PASSWORD);
     when(usersClient.query("username==test-username", 1)).thenReturn(users);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
@@ -136,7 +139,7 @@ class UserServiceTest {
     assertThat(result).isEqualTo(user);
     verify(usersClient).createUser(user);
     verify(keycloakService).findUserByUsername(USERNAME, false);
-    verify(keycloakService).createUser(user, PASSWORD);
+    verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -168,7 +171,7 @@ class UserServiceTest {
     assertThat(result).isEqualTo(user);
     verify(usersClient, times(2)).createUser(user);
     verify(keycloakService, times(2)).findUserByUsername(USERNAME, false);
-    verify(keycloakService).createUser(user, PASSWORD);
+    verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -180,14 +183,15 @@ class UserServiceTest {
     var keycloakException = new KeycloakException("Failed to create keycloak user", cause);
 
     when(usersClient.createUser(user)).thenReturn(user);
-    doThrow(keycloakException).doThrow(keycloakException).doNothing().when(keycloakService).createUser(user, PASSWORD);
+    doThrow(keycloakException).doThrow(keycloakException).doReturn(UUID.randomUUID().toString())
+      .when(keycloakService).upsertUser(user, PASSWORD);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
 
     assertThat(result).isEqualTo(user);
     verify(usersClient, times(3)).createUser(user);
     verify(keycloakService, times(3)).findUserByUsername(USERNAME, false);
-    verify(keycloakService, times(3)).createUser(user, PASSWORD);
+    verify(keycloakService, times(3)).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -384,9 +388,9 @@ class UserServiceTest {
     var userId = randomUUID();
     var user = mock(User.class);
     when(user.getId()).thenReturn(userId);
-    when(user.getUsername()).thenReturn("username-12345");
+    when(user.getUsername()).thenReturn("username_12345");
     when(user.getType()).thenReturn("shadow");
-    // No custom Field original tenant id
+    // No custom Field "originaltenantid"
     when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
       .thenReturn(Map.of());
     when(folioExecutionContext.getUserId()).thenReturn(userId);

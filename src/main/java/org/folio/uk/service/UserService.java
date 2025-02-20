@@ -7,6 +7,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
+import static org.folio.uk.utils.UserUtils.getOriginalTenantIdOptional;
 
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,10 +31,12 @@ import org.folio.uk.domain.dto.PermissionUser;
 import org.folio.uk.domain.dto.ServicePointUser;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
+import org.folio.uk.domain.model.UserType;
 import org.folio.uk.integration.inventory.ServicePointsClient;
 import org.folio.uk.integration.inventory.ServicePointsUserClient;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
+import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
@@ -56,8 +59,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
-  public static final String ORIGINAL_TENANT_ID_CUSTOM_FIELD = "originaltenantid";
-  private static final String SHADOW_USER_TYPE = "shadow";
 
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
@@ -71,15 +72,20 @@ public class UserService {
   private final FolioModuleMetadata folioModuleMetadata;
   private final FolioExecutionContext folioExecutionContext;
   private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   public User createUser(User user, boolean keycloakOnly) {
     return createUser(user, null, keycloakOnly);
   }
 
   public User createUser(User user, String password, boolean keycloakOnly) {
-
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
-      createdUser -> keycloakService.createUser(createdUser, password));
+      createdUser -> {
+        var kcUserId = keycloakService.upsertUser(createdUser, password);
+        if (StringUtils.isNotEmpty(kcUserId) && Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled())) {
+          keycloakService.linkIdentityProviderToUser(user, kcUserId);
+        }
+      });
   }
 
   @Retryable(
@@ -117,10 +123,8 @@ public class UserService {
 
     // When overrideUser is set to true the shadow user will be used to retrieve the real user
     // with its permissions and service points to support the ECS login into member tenants
-    if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), SHADOW_USER_TYPE)) {
-      var originalTenantIdOptional = user.getCustomFields().entrySet().stream()
-        .filter(entry -> entry.getKey().equalsIgnoreCase(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
-        .map(entry -> (String) entry.getValue()).findFirst();
+    if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
+      var originalTenantIdOptional = getOriginalTenantIdOptional(user);
       if (originalTenantIdOptional.isPresent()) {
         return getRealUserByReference(user, originalTenantIdOptional.get(), expandPermissions);
       }
@@ -157,7 +161,7 @@ public class UserService {
       keycloakService.updateUser(id, user);
     } else {
       log.info("User was not found in keycloak by user_id attribute: id = {}", id);
-      keycloakService.createUser(user, null);
+      keycloakService.upsertUser(user, null);
     }
   }
 
@@ -326,7 +330,7 @@ public class UserService {
 
   private void createUserInKeycloakSafe(User user, String password) {
     try {
-      keycloakService.createUser(user, password);
+      keycloakService.upsertUser(user, password);
     } catch (KeycloakException exception) {
       if (exception.getCause() instanceof FeignException.Conflict) {
         log.warn("System user is already created: username = {}, service = keycloak", user.getUsername());

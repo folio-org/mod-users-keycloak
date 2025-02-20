@@ -114,5 +114,8 @@ application:
     system-user-capabilities:
       retry-attempts: ${KAFKA_SYS_USER_CAPABILITIES_RETRY_ATTEMPTS:60}
       retry-delay: ${KAFKA_SYS_USER_CAPABILITIES_RETRY_DELAY:5s}
+  federated-auth:
+    enabled: ${SINGLE_TENANT_UX:false}
+    identity_provider_suffix: ${IDENTITY_PROVIDER_SUFFIX:-keycloak-oidc}
 
 okapi.url: ${OKAPI_URL:http://sidecar:8081}

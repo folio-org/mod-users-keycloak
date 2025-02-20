@@ -2,7 +2,6 @@ package org.folio.uk.it;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.folio.test.TestUtils.readString;
 import static org.folio.test.extensions.impl.KeycloakContainerExtension.getKeycloakAdminClient;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.mockito.Mockito.only;
@@ -10,6 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
 import org.awaitility.Durations;
+import org.folio.test.TestUtils;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
@@ -70,7 +70,7 @@ class SystemUserIT extends BaseIntegrationTest {
 
     await().atMost(Durations.FIVE_SECONDS).untilAsserted(() -> verify(usersClient).deleteUser(USER_ID));
 
-    wmAdminClient.addStubMapping(readString("wiremock/stubs/users/create-system-user.json"));
+    wmAdminClient.addStubMapping(TestUtils.readString("wiremock/stubs/users/create-system-user.json"));
   }
 
   @Test
