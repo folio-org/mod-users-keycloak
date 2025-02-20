@@ -104,7 +104,7 @@ public class KeycloakService {
       kcUserId, tenant, userTenant);
 
     if (!tenant.equals(userTenant.getCentralTenantId())) {
-      log.warn("Identity provider cannot be linked to non-central tenant, [userId: {}, kcUserId: {}, "
+      log.info("Identity provider cannot be linked to non-central tenant, [userId: {}, kcUserId: {}, "
         + "tenant: {}, memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
       return;
     }
@@ -137,6 +137,8 @@ public class KeycloakService {
     if (StringUtils.isEmpty(user.getUsername())) {
       throw new IllegalStateException(String.format("Username is missing, userId: %s", user.getId()));
     }
+    // Shadow username is created in mod-consortia-keycloak project by UserServiceImpl::prepareShadowUser method
+    // by appending "_{5 random strings}" suffix to the real username, this suffix is unlikely to change
     var realUsername = user.getUsername().substring(0, user.getUsername().length() - RANDOM_STRING_COUNT);
     return FederatedIdentity.builder()
       .userId(realUsername)
