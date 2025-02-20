@@ -81,7 +81,7 @@ public class UserService {
   public User createUser(User user, String password, boolean keycloakOnly) {
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
       createdUser -> {
-        var kcUserId = keycloakService.createUser(createdUser, password);
+        var kcUserId = keycloakService.upsertUser(createdUser, password);
         if (StringUtils.isNotEmpty(kcUserId) && Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled())) {
           keycloakService.linkIdentityProviderToUser(user, kcUserId);
         }
@@ -161,7 +161,7 @@ public class UserService {
       keycloakService.updateUser(id, user);
     } else {
       log.info("User was not found in keycloak by user_id attribute: id = {}", id);
-      keycloakService.createUser(user, null);
+      keycloakService.upsertUser(user, null);
     }
   }
 
@@ -330,7 +330,7 @@ public class UserService {
 
   private void createUserInKeycloakSafe(User user, String password) {
     try {
-      keycloakService.createUser(user, password);
+      keycloakService.upsertUser(user, password);
     } catch (KeycloakException exception) {
       if (exception.getCause() instanceof FeignException.Conflict) {
         log.warn("System user is already created: username = {}, service = keycloak", user.getUsername());

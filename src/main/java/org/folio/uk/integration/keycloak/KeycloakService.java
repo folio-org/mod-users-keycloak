@@ -49,7 +49,7 @@ public class KeycloakService {
   private final KeycloakLoginClientProperties loginClientProperties;
   private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
-  public String createUser(User user, String password) {
+  public String upsertUser(User user, String password) {
     if (user.getId() == null) {
       throw new RequestValidationException("User id is missing", "id", user.getId());
     }

@@ -100,7 +100,7 @@ class UserServiceTest {
     assertThat(result).isEqualTo(user);
     verify(usersClient).createUser(user);
     verify(keycloakService).findUserByUsername(USERNAME, false);
-    verify(keycloakService).createUser(user, PASSWORD);
+    verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -117,7 +117,7 @@ class UserServiceTest {
     verify(usersClient).createUser(user);
     verify(usersClient).query("username==test-username", 1);
     verify(keycloakService).findUserByUsername(USERNAME, false);
-    verify(keycloakService).createUser(user, PASSWORD);
+    verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -131,7 +131,7 @@ class UserServiceTest {
     var keycloakException = new KeycloakException("Failed to create keycloak user", cause);
 
     when(usersClient.createUser(user)).thenReturn(user);
-    doThrow(keycloakException).when(keycloakService).createUser(user, PASSWORD);
+    doThrow(keycloakException).when(keycloakService).upsertUser(user, PASSWORD);
     when(usersClient.query("username==test-username", 1)).thenReturn(users);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
@@ -139,7 +139,7 @@ class UserServiceTest {
     assertThat(result).isEqualTo(user);
     verify(usersClient).createUser(user);
     verify(keycloakService).findUserByUsername(USERNAME, false);
-    verify(keycloakService).createUser(user, PASSWORD);
+    verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -171,7 +171,7 @@ class UserServiceTest {
     assertThat(result).isEqualTo(user);
     verify(usersClient, times(2)).createUser(user);
     verify(keycloakService, times(2)).findUserByUsername(USERNAME, false);
-    verify(keycloakService).createUser(user, PASSWORD);
+    verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
   @Test
@@ -184,14 +184,14 @@ class UserServiceTest {
 
     when(usersClient.createUser(user)).thenReturn(user);
     doThrow(keycloakException).doThrow(keycloakException).doReturn(UUID.randomUUID().toString())
-      .when(keycloakService).createUser(user, PASSWORD);
+      .when(keycloakService).upsertUser(user, PASSWORD);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
 
     assertThat(result).isEqualTo(user);
     verify(usersClient, times(3)).createUser(user);
     verify(keycloakService, times(3)).findUserByUsername(USERNAME, false);
-    verify(keycloakService, times(3)).createUser(user, PASSWORD);
+    verify(keycloakService, times(3)).upsertUser(user, PASSWORD);
   }
 
   @Test
