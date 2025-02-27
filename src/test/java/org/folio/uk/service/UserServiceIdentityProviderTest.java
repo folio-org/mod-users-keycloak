@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserTenant;
 import org.folio.uk.domain.dto.UserTenantCollection;
@@ -29,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@UnitTest
 @ExtendWith(MockitoExtension.class)
 class UserServiceIdentityProviderTest {
 
@@ -69,7 +71,7 @@ class UserServiceIdentityProviderTest {
 
   @Test
   void linkIdentityProviderToUser_positive_emptyMemberTenant() {
-    // Wrong user type
+    // Empty member tenant ("originatenantid")
     var user = createStaffUser(Map.of());
     keycloakService.linkIdentityProviderToUser(user, KC_USER_ID);
 

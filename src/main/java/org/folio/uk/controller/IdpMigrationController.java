@@ -1,5 +1,6 @@
 package org.folio.uk.controller;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,12 @@ public class IdpMigrationController implements IdpMigrationApi {
 
   @Override
   public ResponseEntity<String> linkUserIdpMigration(UsersIdp usersIdp) {
-    idpMigrationService.linkUserIdpMigration(usersIdp);
-    return ResponseEntity.status(NO_CONTENT).build();
+    try {
+      idpMigrationService.linkUserIdpMigration(usersIdp);
+      return ResponseEntity.status(NO_CONTENT).build();
+    } catch (IllegalStateException e) {
+      log.error("Caught a validation exception: ", e);
+      return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+    }
   }
 }

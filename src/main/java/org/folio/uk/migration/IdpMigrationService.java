@@ -1,5 +1,7 @@
 package org.folio.uk.migration;
 
+import static java.util.concurrent.CompletableFuture.allOf;
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 
@@ -37,29 +39,19 @@ public class IdpMigrationService {
       log.info("Linking users to an IDP is disabled");
       return;
     }
-
     var tenantId = usersIdp.getTenantId();
-    if (StringUtils.isEmpty(tenantId)) {
-      throw new IllegalStateException("Cannot link users to an IDP, no tenant id is supplied in request body");
-    }
-
     if (!StringUtils.equals(folioExecutionContext.getTenantId(), tenantId)) {
       throw new IllegalStateException("Cannot link users to an IDP, supplied tenantId doesn't match context tenantId");
     }
-
     var userIds = new ArrayList<>(usersIdp.getUserIds());
     if (CollectionUtils.isEmpty(userIds)) {
       throw new IllegalStateException("Cannot link users to an IDP, no userIds is supplied in request body");
     }
-
     log.info("Linking {} user(s) in {} tenant", userIds.size(), tenantId);
-
-    var partitions = partition(userIds, migrationProperties.getBatchSize());
-    CompletableFuture.allOf(partitions.stream()
-        .map(part -> CompletableFuture.runAsync(getRunnableWithCurrentFolioContext(
-          () -> findAndLinkUserIdpByPart(part))))
-        .toArray(CompletableFuture[]::new))
-      .whenComplete(migrationCompleteHandler(userIds.size()));
+    var partitions = partition(userIds, migrationProperties.getBatchSize()).stream()
+      .map(part -> runAsync(getRunnableWithCurrentFolioContext(() -> findAndLinkUserIdpByPart(part))))
+      .toArray(CompletableFuture[]::new);
+    allOf(partitions).whenComplete(migrationCompleteHandler(userIds.size()));
   }
 
   private void findAndLinkUserIdpByPart(List<UUID> userIds) {

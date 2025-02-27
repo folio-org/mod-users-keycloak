@@ -18,5 +18,9 @@
       }
     }
   },
-  "additionalProperties": false
+  "required": [
+    "tenantId",
+    "userIds"
+  ],
+  "additionalProperties": true
 }

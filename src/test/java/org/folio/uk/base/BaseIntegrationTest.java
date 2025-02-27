@@ -150,9 +150,15 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     return attemptPost(uri, body, args).andExpect(status().isCreated());
   }
 
-  protected static ResultActions doPostWithTenant(String uri, String tenant,
-                                                  Object body, Object... args) throws Exception {
+  protected static ResultActions doPostWithTenant(String uri, String tenant, Object body, Object... args)
+    throws Exception {
     return attemptPostWithTenant(uri, tenant, body, args).andExpect(status().isCreated());
+  }
+
+  protected static ResultActions doPostWithTenantAndStatusCode(String uri, String tenant, Object body,
+                                                               int statusCode, Object... args)
+    throws Exception {
+    return attemptPostWithTenant(uri, tenant, body, args).andExpect(status().is(statusCode));
   }
 
   protected static ResultActions doPut(String uri, Object body, Object... args) throws Exception {

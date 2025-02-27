@@ -123,8 +123,7 @@ public class KeycloakService {
         + "memberTenant: %s, providerAlias: %s]", userId, kcUserId, tenant, memberTenant, providerAlias));
 
     log.info("Created identity provider for use [userId: {}, kcUserId: {}, tenant: {}, memberTenant: {}, "
-      + "providerAlias: {}, federatedIdentity: {}]", userId, kcUserId, tenant, memberTenant, providerAlias,
-      federatedIdentity);
+      + "providerAlias: {}]", userId, kcUserId, tenant, memberTenant, providerAlias);
   }
 
   private boolean isIdentityProviderAlreadyLinked(String kcUserId, String tenant, String providerAlias) {
