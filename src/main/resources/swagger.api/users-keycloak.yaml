@@ -235,6 +235,7 @@ paths:
           $ref: '#/components/responses/unprocessableEntity'
         '500':
           $ref: '#/components/responses/internalServerError'
+
   /users-keycloak/migrations/{id}:
     get:
       description: Retrieve a user migration
@@ -268,6 +269,27 @@ paths:
             text/plain:
               schema:
                 type: string
+
+  /users-keycloak/idp-migrations:
+    post:
+      operationId: linkUserIdpMigration
+      description: Link users to an identity provider migration operation
+      tags:
+        - idp-migration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/usersIdp'
+      responses:
+        '204':
+          description: Link users to an identity provider migration operation
+          content:
+            text/plain:
+              schema:
+                type: string
+
   /users-keycloak/forgotten/password:
     post:
       description: called when a user has forgotten a password
@@ -289,6 +311,7 @@ paths:
           $ref: '#/components/responses/unprocessableEntity'
         '500':
           $ref: '#/components/responses/internalServerError'
+
   /users-keycloak/forgotten/username:
     post:
       description: called when a user has forgotten a username
@@ -314,6 +337,7 @@ paths:
           $ref: '#/components/responses/unprocessableEntity'
         '500':
           $ref: '#/components/responses/internalServerError'
+
   /users-keycloak/password-reset/reset:
     post:
       operationId: passwordReset
@@ -337,6 +361,7 @@ paths:
           $ref: '#/components/responses/unprocessableEntity'
         '500':
           $ref: '#/components/responses/internalServerError'
+
   /users-keycloak/password-reset/link:
     post:
       operationId: generatePasswordResetLink
@@ -355,6 +380,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/generateLinkResponse'
+
   /users-keycloak/password-reset/validate:
     post:
       operationId: validatePasswordResetLink
@@ -368,6 +394,7 @@ paths:
           $ref: '#/components/responses/unprocessableEntity'
         '500':
           $ref: '#/components/responses/internalServerError'
+
   /users-keycloak/auth-users/{userId}:
     get:
       operationId: checkIfExistsAuthUserById
@@ -422,6 +449,8 @@ components:
       $ref: schemas/userTenant.json
     userTenantCollection:
       $ref: schemas/userTenantCollection.json
+    usersIdp:
+      $ref: schemas/usersIdp.json
     userMigrationJob:
       $ref: schemas/migration/userMigrationJob.json
     userMigrationJobs:
@@ -535,7 +564,6 @@ components:
         type: array
         items:
           $ref: '#/components/schemas/includedField'
-
     query-expand-permissions:
       in: query
       required: false
