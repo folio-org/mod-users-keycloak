@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @IntegrationTest
-public class IdpMigrationIT extends BaseIntegrationTest {
+class IdpMigrationIT extends BaseIntegrationTest {
 
   @Autowired
   protected KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
