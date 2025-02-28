@@ -39,14 +39,16 @@ public class IdpMigrationService {
   private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   public void linkUserIdpMigration(UsersIdp usersIdp) {
-    applyUserIdpMigration(usersIdp, true, keycloakService::linkIdentityProviderToUser);
+    log.info("Started user IDP linking migration");
+    applyUserIdpMigration(usersIdp, keycloakService::linkIdentityProviderToUser);
   }
 
   public void unlinkUserIdpMigration(UsersIdp usersIdp) {
-    applyUserIdpMigration(usersIdp, false, keycloakService::unlinkIdentityProviderFromUser);
+    log.info("Started user IDP unlinking migration");
+    applyUserIdpMigration(usersIdp, keycloakService::unlinkIdentityProviderFromUser);
   }
 
-  public void applyUserIdpMigration(UsersIdp usersIdp, boolean isLinking, BiConsumer<User, String> kcOperation) {
+  private void applyUserIdpMigration(UsersIdp usersIdp, BiConsumer<User, String> kcOperation) {
     if (Boolean.FALSE.equals(keycloakFederatedAuthProperties.isEnabled())) {
       log.info("Applying user IDP migration is disabled");
       return;
@@ -66,7 +68,7 @@ public class IdpMigrationService {
       .map(part -> runAsync(getRunnableWithCurrentFolioContext(
         () -> findAndLinkUserIdpByPart(part, kcOperation))))
       .toArray(CompletableFuture[]::new);
-    allOf(partitions).whenComplete(migrationCompleteHandler(isLinking, userIds.size()));
+    allOf(partitions).whenComplete(migrationCompleteHandler(userIds.size()));
   }
 
   private void findAndLinkUserIdpByPart(List<UUID> userIds, BiConsumer<User, String> kcOperation) {
@@ -76,14 +78,13 @@ public class IdpMigrationService {
         keycloakUser -> kcOperation.accept(user, keycloakUser.getId())));
   }
 
-  private BiConsumer<Void, ? super Throwable> migrationCompleteHandler(boolean isLinking, int totalRecords) {
+  private BiConsumer<Void, ? super Throwable> migrationCompleteHandler(int totalRecords) {
     return (result, ex) -> {
-      var mode = isLinking ? "linking" : "unlinking";
       if (Objects.nonNull(ex)) {
-        log.error("User IDP {} migration has failed", mode, ex);
+        log.error("User IDP migration has failed", ex);
         return;
       }
-      log.info("User IDP {} migration has finished, total records: {}", mode, totalRecords);
+      log.info("User IDP migration has finished, total records: {}", totalRecords);
     };
   }
 }
