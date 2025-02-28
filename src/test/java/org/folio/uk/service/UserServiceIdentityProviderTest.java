@@ -82,8 +82,8 @@ class UserServiceIdentityProviderTest {
 
     verify(keycloakClient, never()).linkIdentityProviderToUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
       eq(PROVIDER_ALIAS), any(FederatedIdentity.class), eq(AUTH_TOKEN));
-    verify(keycloakClient, atMostOnce()).unlinkIdentityProviderFromUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
-      eq(PROVIDER_ALIAS), eq(AUTH_TOKEN));
+    verify(keycloakClient, atMostOnce()).unlinkIdentityProviderFromUser(CENTRAL_TENANT_NAME, KC_USER_ID,
+      PROVIDER_ALIAS, AUTH_TOKEN);
   }
 
   @Test
