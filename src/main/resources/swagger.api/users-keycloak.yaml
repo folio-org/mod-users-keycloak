@@ -289,6 +289,24 @@ paths:
             text/plain:
               schema:
                 type: string
+    delete:
+      operationId: unlinkUserIdpMigration
+      description: Unlink users from an identity provider migration operation
+      tags:
+        - idp-migration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/usersIdp'
+      responses:
+        '204':
+          description: Unlink users from an identity provider migration operation
+          content:
+            text/plain:
+              schema:
+                type: string
 
   /users-keycloak/forgotten/password:
     post:

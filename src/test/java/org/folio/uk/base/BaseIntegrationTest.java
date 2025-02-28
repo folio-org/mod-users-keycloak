@@ -142,6 +142,14 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
       .contentType(APPLICATION_JSON));
   }
 
+  protected static ResultActions attemptDeleteWithTenant(String uri, String tenant,
+                                                         Object body, Object... args) throws Exception {
+    return mockMvc.perform(delete(uri, args)
+      .headers(okapiHeadersWithTenant(tenant))
+      .content(asJsonString(body))
+      .contentType(APPLICATION_JSON));
+  }
+
   public static ResultActions doGet(String uri, Object... args) throws Exception {
     return attemptGet(uri, args).andExpect(status().isOk());
   }
@@ -156,8 +164,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   }
 
   protected static ResultActions doPostWithTenantAndStatusCode(String uri, String tenant, Object body,
-                                                               int statusCode, Object... args)
-    throws Exception {
+                                                               int statusCode, Object... args) throws Exception {
     return attemptPostWithTenant(uri, tenant, body, args).andExpect(status().is(statusCode));
   }
 
@@ -167,6 +174,11 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
   protected static ResultActions doDelete(String uri, Object... args) throws Exception {
     return attemptDelete(uri, args).andExpect(status().isNoContent());
+  }
+
+  protected static ResultActions doDeleteWithTenantAndStatusCode(String uri, String tenant, Object body,
+                                                                 int statusCode, Object... args) throws Exception {
+    return attemptDeleteWithTenant(uri, tenant, body, args).andExpect(status().is(statusCode));
   }
 
   protected static HttpHeaders okapiHeaders() {
@@ -334,7 +346,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     assertThat(federatedIdentity.get().getProviderAlias()).isEqualTo(PROVIDER_ALIAS);
   }
 
-  protected void verifyKeycloakUserAndWithNoIdentityProviderCreated(String tenant, User user) {
+  protected void verifyKeycloakUserAndWithNoIdentityProviderExisting(String tenant, User user) {
     var verifyDto = verifyKeycloakUser(tenant, user);
 
     var kcUserId = keycloakService.findKeycloakUserWithUserIdAttr(tenant, user.getId())

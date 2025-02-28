@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,6 +31,7 @@ import org.folio.uk.integration.keycloak.config.KeycloakLoginClientProperties;
 import org.folio.uk.integration.keycloak.model.Client;
 import org.folio.uk.integration.keycloak.model.Credential;
 import org.folio.uk.integration.keycloak.model.FederatedIdentity;
+import org.folio.uk.integration.keycloak.model.KeycloakIdentityProviderDto;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.keycloak.model.ScopePermission;
 import org.folio.uk.integration.users.UserTenantsClient;
@@ -71,29 +73,57 @@ public class KeycloakService {
   }
 
   public void linkIdentityProviderToUser(User user, String kcUserId) {
+    applyIdentityProviderOnUser(user, kcUserId, dto -> {
+      if (isIdentityProviderAlreadyLinked(kcUserId, dto.tenant(), dto.providerAlias())) {
+        log.warn("Identity provider is already linked to user [userId: {}, kcUserId: {}, tenant: {}, "
+          + "memberTenant: {}, providerAlias: {}]", dto.userId(), kcUserId, dto.tenant(), dto.memberTenant(),
+          dto.providerAlias());
+        return;
+      }
+
+      var federatedIdentity = createFederatedIdentity(user);
+      callKeycloak(
+        () -> keycloakClient.linkIdentityProviderToUser(dto.tenant(), kcUserId, dto.providerAlias(), federatedIdentity,
+          getToken()),
+        () -> String.format("Failed to link identity provider to user [userId: %s, kcUserId: %s, tenant: %s, "
+          + "memberTenant: %s, providerAlias: %s]", dto.userId(), kcUserId, dto.tenant(), dto.memberTenant(),
+          dto.providerAlias()));
+    });
+  }
+
+  public void unlinkIdentityProviderFromUser(User user, String kcUserId) {
+    applyIdentityProviderOnUser(user, kcUserId, dto -> callKeycloak(
+      () -> keycloakClient.unlinkIdentityProviderFromUser(dto.tenant(), kcUserId, dto.providerAlias(), getToken()),
+      () -> String.format("Failed to unlink identity provider from user [userId: %s, kcUserId: %s, tenant: %s, "
+        + "memberTenant: %s, providerAlias: %s]", dto.userId(), kcUserId, dto.tenant(), dto.memberTenant(),
+        dto.providerAlias())));
+  }
+
+  private void applyIdentityProviderOnUser(User user, String kcUserId,
+                                           Consumer<KeycloakIdentityProviderDto> kcOperation) {
     var userId = user.getId();
     var tenant = getRealm();
 
     var memberTenantOptional = UserUtils.getOriginalTenantIdOptional(user);
     if (memberTenantOptional.isEmpty()) {
-      log.warn("Identity provider cannot be linked because member tenant is empty [userId: {}, kcUserId: {}, "
-        + "tenant: {}]", userId, kcUserId, tenant);
+      log.warn("Identity provider changes cannot be applied because member tenant is empty [userId: {}, "
+        + "kcUserId: {}, tenant: {}]", userId, kcUserId, tenant);
       return;
     }
 
     var memberTenant = memberTenantOptional.get();
-    log.info("Linking identity provider to user [userId: {}, kcUserId: {}, tenant: {}, memberTenant: {}]",
-      userId, kcUserId, tenant, memberTenant);
+    log.info("Applying identity provider changes on user [userId: {}, kcUserId: {}, tenant: {}, "
+      + "memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
 
     if (!StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
-      log.warn("Identity provider cannot be linked to non-shadow users [userId: {}, kcUserId: {}, tenant: {}, "
-        + "memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
+      log.warn("Identity provider changes cannot be applied to non-shadow users [userId: {}, kcUserId: {}, "
+        + "tenant: {}, memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
       return;
     }
 
     var userTenantOptional = userTenantsClient.lookupByTenantId(tenant).getUserTenants().stream().findFirst();
     if (userTenantOptional.isEmpty() || StringUtils.isEmpty(userTenantOptional.get().getCentralTenantId())) {
-      log.warn("Identity provider cannot be linked to user because userTenant is empty or has empty "
+      log.warn("Identity provider changes cannot be applied on user because userTenant is empty or has empty "
         + "centralTenantId, [userId: {}, kcUserId: {}, tenant: {}, memberTenant: {}]", userId, kcUserId, tenant,
         memberTenant);
       return;
@@ -104,26 +134,16 @@ public class KeycloakService {
       kcUserId, tenant, userTenant);
 
     if (!tenant.equals(userTenant.getCentralTenantId())) {
-      log.info("Identity provider cannot be linked to non-central tenant, [userId: {}, kcUserId: {}, "
+      log.info("Identity provider changes cannot be applied to non-central tenant [userId: {}, kcUserId: {}, "
         + "tenant: {}, memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
       return;
     }
 
     var providerAlias = memberTenant + keycloakFederatedAuthProperties.getIdentityProviderSuffix();
-    if (isIdentityProviderAlreadyLinked(kcUserId, tenant, providerAlias)) {
-      log.warn("Identity provider is already linked to user [userId: {}, kcUserId: {}, tenant: {}, "
-        + "memberTenant: {}, providerAlias: {}]", userId, kcUserId, tenant, memberTenant, providerAlias);
-      return;
-    }
+    kcOperation.accept(new KeycloakIdentityProviderDto(tenant, userId, memberTenant, providerAlias));
 
-    var federatedIdentity = createFederatedIdentity(user);
-    callKeycloak(
-      () -> keycloakClient.linkIdentityProviderToUser(tenant, kcUserId, providerAlias, federatedIdentity, getToken()),
-      () -> String.format("Failed to link identity provider to user [userId: %s, kcUserId: %s, tenant: %s, "
-        + "memberTenant: %s, providerAlias: %s]", userId, kcUserId, tenant, memberTenant, providerAlias));
-
-    log.info("Created identity provider for use [userId: {}, kcUserId: {}, tenant: {}, memberTenant: {}, "
-      + "providerAlias: {}]", userId, kcUserId, tenant, memberTenant, providerAlias);
+    log.info("Applied identity provider changes on user [userId: {}, kcUserId: {}, tenant: {}, "
+      + "memberTenant: {}, providerAlias: {}]", userId, kcUserId, tenant, memberTenant, providerAlias);
   }
 
   private boolean isIdentityProviderAlreadyLinked(String kcUserId, String tenant, String providerAlias) {

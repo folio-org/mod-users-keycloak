@@ -89,6 +89,15 @@
           ]
         },
         {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/users-keycloak/idp-migrations",
+          "permissionsRequired": [ "users-keycloak.idp-migrations.delete" ],
+          "modulePermissions": [
+            "users.collection.get",
+            "perms.users.all"
+          ]
+        },
+        {
           "methods": ["POST"],
           "pathPattern": "/users-keycloak/forgotten/password",
           "permissionsDesired": [],
@@ -274,9 +283,14 @@
       "permissionName": "users-keycloak.migrations.delete"
     },
     {
-      "description": "Create a new User Identity Provider (IDP) linking Migration operation",
+      "description": "Create a new User Identity Provider (IDP) linking migration operation",
       "displayName": "Users (keycloak) - create new user IDP linking migration operation",
       "permissionName": "users-keycloak.idp-migrations.post"
+    },
+    {
+      "description": "Create a new User Identity Provider (IDP) unlinking migration operation",
+      "displayName": "Users (keycloak) - create new user IDP unlinking migration operation",
+      "permissionName": "users-keycloak.idp-migrations.delete"
     },
     {
       "description": "Get user by ID",
@@ -351,6 +365,7 @@
         "users-keycloak.migrations.get",
         "users-keycloak.migrations.delete",
         "users-keycloak.idp-migrations.post",
+        "users-keycloak.idp-migrations.delete",
         "users-keycloak.item.get",
         "users-keycloak.item.post",
         "users-keycloak.collection.get",

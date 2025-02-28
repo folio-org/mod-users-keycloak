@@ -10,6 +10,7 @@ import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
@@ -71,7 +72,30 @@ class IdpMigrationIT extends BaseIntegrationTest {
     var usersIdp = createUsersIdp(tenant, Set.of(TestConstants.USER_ID));
     doPostWithTenantAndStatusCode("/users-keycloak/idp-migrations", tenant, usersIdp, SC_NO_CONTENT).andReturn();
 
-    verifyKeycloakUserAndIdentityProviderAfterTimeout();
+    await().atMost(15, TimeUnit.SECONDS).pollDelay(10, TimeUnit.SECONDS).until(() -> {
+      verifyKeycloakUserAndIdentityProvider(tenant, user);
+      return true;
+    });
+  }
+
+  @Test
+  @WireMockStub({
+    "/wiremock/stubs/users/create-shadow-user.json",
+    "/wiremock/stubs/users/get-user-tenants.json",
+    "/wiremock/stubs/users/get-shadow-users.json"
+  })
+  void unlinkUserIdpMigration_positive() throws Exception {
+    keycloakFederatedAuthProperties.setEnabled(true);
+
+    createAndVerifyShadowUserWithLinkedIdp();
+
+    var usersIdp = createUsersIdp(tenant, Set.of(TestConstants.USER_ID));
+    doDeleteWithTenantAndStatusCode("/users-keycloak/idp-migrations", tenant, usersIdp, SC_NO_CONTENT).andReturn();
+
+    await().atMost(15, TimeUnit.SECONDS).pollDelay(10, TimeUnit.SECONDS).until(() -> {
+      verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, user);
+      return true;
+    });
   }
 
   @Test
@@ -85,7 +109,7 @@ class IdpMigrationIT extends BaseIntegrationTest {
     var usersIdp = createUsersIdp(tenant, Set.of(TestConstants.USER_ID));
     doPostWithTenantAndStatusCode("/users-keycloak/idp-migrations", tenant, usersIdp, SC_NO_CONTENT).andReturn();
 
-    verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
+    verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, user);
   }
 
   @Test
@@ -99,7 +123,7 @@ class IdpMigrationIT extends BaseIntegrationTest {
     var usersIdp = createUsersIdp(TENANT_NAME, Set.of(TestConstants.USER_ID));
     doPostWithTenantAndStatusCode("/users-keycloak/idp-migrations", tenant, usersIdp, SC_BAD_REQUEST).andReturn();
 
-    verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
+    verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, user);
   }
 
   @Test
@@ -113,10 +137,18 @@ class IdpMigrationIT extends BaseIntegrationTest {
     var usersIdp = createUsersIdp(tenant, Set.of());
     doPostWithTenantAndStatusCode("/users-keycloak/idp-migrations", tenant, usersIdp, SC_BAD_REQUEST).andReturn();
 
-    verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
+    verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, user);
   }
 
   private void createAndVerifyShadowUserWithoutLinkedIdp() throws Exception {
+    createAndVerifyShadowUser(user -> verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, user));
+  }
+
+  private void createAndVerifyShadowUserWithLinkedIdp() throws Exception {
+    createAndVerifyShadowUser(user -> verifyKeycloakUserAndIdentityProvider(tenant, user));
+  }
+
+  private void createAndVerifyShadowUser(Consumer<User> verificationStep) throws Exception {
     tenant = CENTRAL_TENANT_NAME;
     user = TestConstants.shadowUser();
 
@@ -125,17 +157,10 @@ class IdpMigrationIT extends BaseIntegrationTest {
 
     assertSuccessfulUserCreation(resp, user);
 
-    verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
+    verificationStep.accept(user);
   }
 
   private UsersIdp createUsersIdp(String centralTenantId, Set<UUID> userIds) {
     return new UsersIdp().centralTenantId(centralTenantId).userIds(userIds);
-  }
-
-  private void verifyKeycloakUserAndIdentityProviderAfterTimeout() {
-    await().atMost(15, TimeUnit.SECONDS).pollDelay(10, TimeUnit.SECONDS).until(() -> {
-      verifyKeycloakUserAndIdentityProvider(tenant, user);
-      return true;
-    });
   }
 }

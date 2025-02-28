@@ -28,4 +28,15 @@ public class IdpMigrationController implements IdpMigrationApi {
       return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
     }
   }
+
+  @Override
+  public ResponseEntity<String> unlinkUserIdpMigration(UsersIdp usersIdp) {
+    try {
+      idpMigrationService.unlinkUserIdpMigration(usersIdp);
+      return ResponseEntity.status(NO_CONTENT).build();
+    } catch (IllegalStateException e) {
+      log.error("Caught a validation exception: ", e);
+      return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+    }
+  }
 }

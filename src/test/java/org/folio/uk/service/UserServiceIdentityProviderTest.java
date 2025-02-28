@@ -70,6 +70,23 @@ class UserServiceIdentityProviderTest {
   }
 
   @Test
+  void unlinkIdentityProviderFromUser_positive() {
+    when(folioExecutionContext.getTenantId()).thenReturn(CENTRAL_TENANT_NAME);
+    var userTenant = createUserTenant();
+    when(userTenantsClient.lookupByTenantId(CENTRAL_TENANT_NAME))
+      .thenReturn(new UserTenantCollection().userTenants(List.of(userTenant)));
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(keycloakFederatedAuthProperties.getIdentityProviderSuffix()).thenReturn(PROVIDER_SUFFIX);
+    var user = createShadowUser(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, TENANT_NAME));
+    keycloakService.unlinkIdentityProviderFromUser(user, KC_USER_ID);
+
+    verify(keycloakClient, never()).linkIdentityProviderToUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
+      eq(PROVIDER_ALIAS), any(FederatedIdentity.class), eq(AUTH_TOKEN));
+    verify(keycloakClient, atMostOnce()).unlinkIdentityProviderFromUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
+      eq(PROVIDER_ALIAS), eq(AUTH_TOKEN));
+  }
+
+  @Test
   void linkIdentityProviderToUser_positive_emptyMemberTenant() {
     // Empty member tenant (i.e. "originatenantid")
     var user = createStaffUser(Map.of());

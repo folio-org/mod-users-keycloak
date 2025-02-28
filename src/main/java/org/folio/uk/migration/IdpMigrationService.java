@@ -17,6 +17,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UsersIdp;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
@@ -38,39 +39,51 @@ public class IdpMigrationService {
   private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
 
   public void linkUserIdpMigration(UsersIdp usersIdp) {
+    applyUserIdpMigration(usersIdp, true, keycloakService::linkIdentityProviderToUser);
+  }
+
+  public void unlinkUserIdpMigration(UsersIdp usersIdp) {
+    applyUserIdpMigration(usersIdp, false, keycloakService::unlinkIdentityProviderFromUser);
+  }
+
+  public void applyUserIdpMigration(UsersIdp usersIdp, boolean isLinking, BiConsumer<User, String> kcOperation) {
     if (Boolean.FALSE.equals(keycloakFederatedAuthProperties.isEnabled())) {
-      log.info("Linking users to an IDP is disabled");
+      log.info("Applying user IDP migration is disabled");
       return;
     }
     var centralTenantId = usersIdp.getCentralTenantId();
-    if (!StringUtils.equals(folioExecutionContext.getTenantId(), centralTenantId)) {
-      throw new IllegalStateException("Cannot link users to an IDP, supplied tenantId doesn't match context tenantId");
+    var contextTenantId = folioExecutionContext.getTenantId();
+    if (!StringUtils.equals(centralTenantId, contextTenantId)) {
+      throw new IllegalStateException(String.format("Cannot apply user IDP migration, supplied centralTenantId '%s' "
+        + "does not match context tenantId '%s'", centralTenantId, contextTenantId));
     }
     var userIds = new ArrayList<>(usersIdp.getUserIds());
     if (CollectionUtils.isEmpty(userIds)) {
-      throw new IllegalStateException("Cannot link users to an IDP, no userIds is supplied in request body");
+      throw new IllegalStateException("Cannot apply user IDP migration, no userIds are supplied in request body");
     }
-    log.info("Linking {} user(s) in {} tenant", userIds.size(), centralTenantId);
+    log.info("Applying IDP migration to {} user(s) in {} tenant", userIds.size(), centralTenantId);
     var partitions = partition(userIds, idpMigrationProperties.getBatchSize()).stream()
-      .map(part -> runAsync(getRunnableWithCurrentFolioContext(() -> findAndLinkUserIdpByPart(part))))
+      .map(part -> runAsync(getRunnableWithCurrentFolioContext(
+        () -> findAndLinkUserIdpByPart(part, kcOperation))))
       .toArray(CompletableFuture[]::new);
-    allOf(partitions).whenComplete(migrationCompleteHandler(userIds.size()));
+    allOf(partitions).whenComplete(migrationCompleteHandler(isLinking, userIds.size()));
   }
 
-  private void findAndLinkUserIdpByPart(List<UUID> userIds) {
+  private void findAndLinkUserIdpByPart(List<UUID> userIds, BiConsumer<User, String> kcOperation) {
     var query = convertFieldListToCqlQuery(userIds, USER_ID, true);
     userService.findUsers(query, Integer.MAX_VALUE).getUsers().forEach(user ->
-      keycloakService.findKeycloakUserWithUserIdAttr(user.getId()).ifPresent(keycloakUser ->
-        keycloakService.linkIdentityProviderToUser(user, keycloakUser.getId())));
+      keycloakService.findKeycloakUserWithUserIdAttr(user.getId()).ifPresent(
+        keycloakUser -> kcOperation.accept(user, keycloakUser.getId())));
   }
 
-  private BiConsumer<Void, ? super Throwable> migrationCompleteHandler(int totalRecords) {
+  private BiConsumer<Void, ? super Throwable> migrationCompleteHandler(boolean isLinking, int totalRecords) {
     return (result, ex) -> {
+      var mode = isLinking ? "linking" : "unlinking";
       if (Objects.nonNull(ex)) {
-        log.error("User IDP linking Migration has failed", ex);
+        log.error("User IDP {} migration has failed", mode, ex);
         return;
       }
-      log.info("User IDP linking Migration has finished, total records: {}", totalRecords);
+      log.info("User IDP {} migration has finished, total records: {}", mode, totalRecords);
     };
   }
 }
