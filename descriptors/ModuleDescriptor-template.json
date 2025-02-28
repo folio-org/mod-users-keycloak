@@ -283,13 +283,13 @@
       "permissionName": "users-keycloak.migrations.delete"
     },
     {
-      "description": "Create a new User Identity Provider (IDP) linking migration operation",
-      "displayName": "Users (keycloak) - create new user IDP linking migration operation",
+      "description": "Perform a new User Identity Provider (IDP) linking migration",
+      "displayName": "Users (keycloak) - perform new user IDP linking migration operation",
       "permissionName": "users-keycloak.idp-migrations.post"
     },
     {
-      "description": "Create a new User Identity Provider (IDP) unlinking migration operation",
-      "displayName": "Users (keycloak) - create new user IDP unlinking migration operation",
+      "description": "Perform a new User Identity Provider (IDP) unlinking migration",
+      "displayName": "Users (keycloak) - perform new user IDP unlinking migration operation",
       "permissionName": "users-keycloak.idp-migrations.delete"
     },
     {
