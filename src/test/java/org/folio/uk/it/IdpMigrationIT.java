@@ -141,11 +141,11 @@ class IdpMigrationIT extends BaseIntegrationTest {
   }
 
   private void createAndVerifyShadowUserWithoutLinkedIdp() throws Exception {
-    createAndVerifyShadowUser(user -> verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, user));
+    createAndVerifyShadowUser(shadowUser -> verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, shadowUser));
   }
 
   private void createAndVerifyShadowUserWithLinkedIdp() throws Exception {
-    createAndVerifyShadowUser(user -> verifyKeycloakUserAndIdentityProvider(tenant, user));
+    createAndVerifyShadowUser(shadowUser -> verifyKeycloakUserAndIdentityProvider(tenant, shadowUser));
   }
 
   private void createAndVerifyShadowUser(Consumer<User> verificationStep) throws Exception {
