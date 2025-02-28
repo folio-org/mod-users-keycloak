@@ -40,6 +40,7 @@
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
     <openapi-generator.version>7.11.0</openapi-generator.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
+    <streamex.version>0.8.3</streamex.version>
   </properties>
 
   <dependencies>
@@ -172,6 +173,12 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>${org.json.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>one.util</groupId>
+      <artifactId>streamex</artifactId>
+      <version>${streamex.version}</version>
     </dependency>
 
     <!-- OAS generation -->

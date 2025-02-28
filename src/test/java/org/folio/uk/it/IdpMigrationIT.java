@@ -61,7 +61,7 @@ class IdpMigrationIT extends BaseIntegrationTest {
   @WireMockStub({
     "/wiremock/stubs/users/create-shadow-user.json",
     "/wiremock/stubs/users/get-user-tenants.json",
-    "/wiremock/stubs/users/get-shadow-user.json"
+    "/wiremock/stubs/users/get-shadow-users.json"
   })
   void linkUserIdpMigration_positive() throws Exception {
     createAndVerifyShadowUserWithoutLinkedIdp();
@@ -79,7 +79,7 @@ class IdpMigrationIT extends BaseIntegrationTest {
   void linkUserIdpMigration_positive_singleTenantUxDisabled() throws Exception {
     createAndVerifyShadowUserWithoutLinkedIdp();
 
-    // With SINGLE_TENANT_UX disabled
+    // With SINGLE_TENANT_UX=false (i.e. disabled)
     keycloakFederatedAuthProperties.setEnabled(false);
 
     var usersIdp = createUsersIdp(tenant, Set.of(TestConstants.USER_ID));
@@ -128,8 +128,8 @@ class IdpMigrationIT extends BaseIntegrationTest {
     verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
   }
 
-  private UsersIdp createUsersIdp(String tenant, Set<UUID> userIds) {
-    return new UsersIdp().tenantId(tenant).userIds(userIds);
+  private UsersIdp createUsersIdp(String centralTenantId, Set<UUID> userIds) {
+    return new UsersIdp().centralTenantId(centralTenantId).userIds(userIds);
   }
 
   private void verifyKeycloakUserAndIdentityProviderAfterTimeout() {

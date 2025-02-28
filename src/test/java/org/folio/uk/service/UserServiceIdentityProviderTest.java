@@ -71,7 +71,7 @@ class UserServiceIdentityProviderTest {
 
   @Test
   void linkIdentityProviderToUser_positive_emptyMemberTenant() {
-    // Empty member tenant ("originatenantid")
+    // Empty member tenant (i.e. "originatenantid")
     var user = createStaffUser(Map.of());
     keycloakService.linkIdentityProviderToUser(user, KC_USER_ID);
 

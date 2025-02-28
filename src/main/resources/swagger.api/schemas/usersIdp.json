@@ -4,7 +4,7 @@
   "description": "Users scheduled for IDP linking",
   "type": "object",
   "properties": {
-    "tenantId": {
+    "centralTenantId": {
       "description": "Central tenant id that will be used for linking the shadow users",
       "type": "string"
     },
@@ -19,7 +19,7 @@
     }
   },
   "required": [
-    "tenantId",
+    "centralTenantId",
     "userIds"
   ],
   "additionalProperties": true
