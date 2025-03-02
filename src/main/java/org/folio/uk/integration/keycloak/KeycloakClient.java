@@ -163,4 +163,18 @@ public interface KeycloakClient {
                                   @PathVariable("providerAlias") String providerAlias,
                                   @RequestBody FederatedIdentity federatedIdentity,
                                   @RequestHeader(AUTHORIZATION) String token);
+
+  /**
+   * Unlink an identity provider from user.
+   *
+   * @param realm - tenant identifier
+   * @param userId - keycloak user unique identifier
+   * @param providerAlias - keycloak identity provider alias
+   * @param token - authorization token
+   */
+  @DeleteMapping("/admin/realms/{realm}/users/{userId}/federated-identity/{providerAlias}")
+  void unlinkIdentityProviderFromUser(@PathVariable("realm") String realm,
+                                      @PathVariable("userId") String userId,
+                                      @PathVariable("providerAlias") String providerAlias,
+                                      @RequestHeader(AUTHORIZATION) String token);
 }

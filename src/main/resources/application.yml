@@ -102,6 +102,8 @@ application:
   migration:
     batch-size: ${MIGRATION_BATCH_SIZE:20}
     default-passwords-on-migration: ${DEFAULT_PASSWORDS_ON_MIGRATION:false}
+  idp-migration:
+    batch-size: ${IDP_MIGRATION_BATCH_SIZE:20}
   kafka:
     listener:
       system-user:

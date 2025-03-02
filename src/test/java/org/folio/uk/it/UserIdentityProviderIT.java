@@ -105,7 +105,7 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
 
     assertSuccessfulUserCreation(resp, user);
 
-    verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
+    verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, user);
   }
 
   @Test
@@ -122,6 +122,6 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
 
     assertSuccessfulUserCreation(resp, user);
 
-    verifyKeycloakUserAndWithNoIdentityProviderCreated(tenant, user);
+    verifyKeycloakUserAndWithNoIdentityProviderExisting(tenant, user);
   }
 }
