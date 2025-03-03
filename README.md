@@ -53,6 +53,7 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | KC_CONFIG_TTL                    | 3600s                      |  false   | Client credentials expiration timeout                                                                                                |
 | KC_LOGIN_CLIENT_SUFFIX           | -login-application         |  false   | Suffix of a Keycloak client who owns the authorization resources. It is used as `audience` for keycloak when evaluating permissions. |
 | MIGRATION_BATCH_SIZE             | 20                         |  false   | Batch size for user migration. Max value is 50                                                                                       |
+| IDP_MIGRATION_BATCH_SIZE         | 20                         |  false   | Batch size for user identity provider (IDP) linking migration. Max value is 50                                                       |
 | DEFAULT_PASSWORDS_ON_MIGRATION   | false                      |  false   | If specified to true migrated user’s password being set to their username otherwise migrated users not having any credentials set    |
 | INCLUDE_ONLY_VISIBLE_PERMISSIONS | true                       |  false   | Defines if onlyVisible (UI permissions/permission-set names) will be returned using `_self` endpoint                                 |
 | SINGLE_TENANT_UX                 | false                      |  false   | Defines if the module is running in single tenant UX mode                                                                            |

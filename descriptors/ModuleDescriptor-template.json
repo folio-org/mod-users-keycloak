@@ -80,6 +80,24 @@
           "permissionsRequired": [ "users-keycloak.migrations.delete" ]
         },
         {
+          "methods": [ "POST" ],
+          "pathPattern": "/users-keycloak/idp-migrations",
+          "permissionsRequired": [ "users-keycloak.idp-migrations.post" ],
+          "modulePermissions": [
+            "users.collection.get",
+            "perms.users.all"
+          ]
+        },
+        {
+          "methods": [ "DELETE" ],
+          "pathPattern": "/users-keycloak/idp-migrations",
+          "permissionsRequired": [ "users-keycloak.idp-migrations.delete" ],
+          "modulePermissions": [
+            "users.collection.get",
+            "perms.users.all"
+          ]
+        },
+        {
           "methods": ["POST"],
           "pathPattern": "/users-keycloak/forgotten/password",
           "permissionsDesired": [],
@@ -265,6 +283,16 @@
       "permissionName": "users-keycloak.migrations.delete"
     },
     {
+      "description": "Perform a new User Identity Provider (IDP) linking migration",
+      "displayName": "Users (keycloak) - perform new user IDP linking migration operation",
+      "permissionName": "users-keycloak.idp-migrations.post"
+    },
+    {
+      "description": "Perform a new User Identity Provider (IDP) unlinking migration",
+      "displayName": "Users (keycloak) - perform new user IDP unlinking migration operation",
+      "permissionName": "users-keycloak.idp-migrations.delete"
+    },
+    {
       "description": "Get user by ID",
       "displayName": "Users (keycloak) - get user keycloak",
       "permissionName": "users-keycloak.item.get"
@@ -336,6 +364,8 @@
         "users-keycloak.migrations.post",
         "users-keycloak.migrations.get",
         "users-keycloak.migrations.delete",
+        "users-keycloak.idp-migrations.post",
+        "users-keycloak.idp-migrations.delete",
         "users-keycloak.item.get",
         "users-keycloak.item.post",
         "users-keycloak.collection.get",

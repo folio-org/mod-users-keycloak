@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserTenant;
 import org.folio.uk.domain.dto.UserTenantCollection;
@@ -29,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@UnitTest
 @ExtendWith(MockitoExtension.class)
 class UserServiceIdentityProviderTest {
 
@@ -68,8 +70,25 @@ class UserServiceIdentityProviderTest {
   }
 
   @Test
+  void unlinkIdentityProviderFromUser_positive() {
+    when(folioExecutionContext.getTenantId()).thenReturn(CENTRAL_TENANT_NAME);
+    var userTenant = createUserTenant();
+    when(userTenantsClient.lookupByTenantId(CENTRAL_TENANT_NAME))
+      .thenReturn(new UserTenantCollection().userTenants(List.of(userTenant)));
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(keycloakFederatedAuthProperties.getIdentityProviderSuffix()).thenReturn(PROVIDER_SUFFIX);
+    var user = createShadowUser(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, TENANT_NAME));
+    keycloakService.unlinkIdentityProviderFromUser(user, KC_USER_ID);
+
+    verify(keycloakClient, never()).linkIdentityProviderToUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
+      eq(PROVIDER_ALIAS), any(FederatedIdentity.class), eq(AUTH_TOKEN));
+    verify(keycloakClient, atMostOnce()).unlinkIdentityProviderFromUser(CENTRAL_TENANT_NAME, KC_USER_ID,
+      PROVIDER_ALIAS, AUTH_TOKEN);
+  }
+
+  @Test
   void linkIdentityProviderToUser_positive_emptyMemberTenant() {
-    // Wrong user type
+    // Empty member tenant (i.e. "originatenantid")
     var user = createStaffUser(Map.of());
     keycloakService.linkIdentityProviderToUser(user, KC_USER_ID);
 
