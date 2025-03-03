@@ -158,7 +158,9 @@ public class KeycloakService {
     }
     // Shadow username is created in mod-consortia-keycloak project by UserServiceImpl::prepareShadowUser method
     // by appending "_{5 random strings}" suffix to the real username, this suffix is unlikely to change
-    var realUsername = user.getUsername().substring(0, user.getUsername().length() - RANDOM_STRING_COUNT);
+    // also note that Keycloak usernames are stored lowercased and in order for Federated Entity to align to the
+    // correct username in another realm both "userId" and "userName" member fields on DTO must also be lowercased
+    var realUsername = user.getUsername().substring(0, user.getUsername().length() - RANDOM_STRING_COUNT).toLowerCase();
     return FederatedIdentity.builder()
       .userId(realUsername)
       .userName(realUsername)
