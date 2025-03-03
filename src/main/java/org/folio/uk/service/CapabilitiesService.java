@@ -21,8 +21,11 @@ import org.folio.uk.domain.dto.ErrorResponse;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserCapabilitiesRequest;
 import org.folio.uk.exception.UnresolvedPermissionsException;
+import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.CapabilitiesClient;
 import org.folio.uk.integration.roles.UserCapabilitiesClient;
+import org.folio.uk.integration.roles.UserCapabilitySetClient;
+import org.folio.uk.integration.roles.UserRolesClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.support.RetryTemplate;
@@ -40,6 +43,9 @@ public class CapabilitiesService {
 
   private final CapabilitiesClient capabilitiesClient;
   private final UserCapabilitiesClient userCapabilitiesClient;
+  private final UserCapabilitySetClient userCapabilitySetClient;
+  private final UserRolesClient userRolesClient;
+  private final PolicyService policyService;
   private final ObjectMapper objectMapper;
   @Qualifier("capabilityRetryTemplate") private final RetryTemplate retryTemplate;
 
@@ -48,6 +54,35 @@ public class CapabilitiesService {
     var capabilities = findCapabilities(user, permissions);
     var ids = mapItems(capabilities, Capability::getId);
     assignCapabilities(user, ids);
+  }
+
+  public void unassignAll(UUID userId) {
+    log.info("Trying to unassign capability sets from the user: userId = {}", userId);
+    userCapabilitySetClient.findUserCapabilitySet(userId)
+      .ifPresent(userCapabilitySet -> {
+        if (userCapabilitySet.getTotalRecords() > 0) {
+          userCapabilitySetClient.deleteUserCapabilitySet(userId);
+        }
+      });
+
+    log.info("Trying to unassign capabilities from the user: userId = {}", userId);
+    userCapabilitiesClient.findUserCapabilities(userId)
+      .ifPresent(userCapabilities -> {
+        if (userCapabilities.getTotalRecords() > 0) {
+          userCapabilitiesClient.deleteUserCapabilities(userId);
+        }
+      });
+
+    log.info("Trying to unassign user from the role: userId = {}", userId);
+    userRolesClient.findUserRoles(userId)
+      .ifPresent(roles -> {
+        if (roles.getTotalRecords() > 0) {
+          userRolesClient.deleteUserRoles(userId);
+        }
+      });
+
+    log.info("Trying to delete policies related to the user: userId = {}", userId);
+    policyService.removePolicyByUserId(userId);
   }
 
   private void assignCapabilities(User user, List<UUID> capabilityIds) {
