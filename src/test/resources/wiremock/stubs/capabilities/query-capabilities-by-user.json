@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/users/.*/capability-sets",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "testtenant"
+      }
+    }
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "totalRecords": 0
+    }
+  }
+}
