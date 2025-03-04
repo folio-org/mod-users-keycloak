@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Users IDP Linking Schema",
+  "description": "Users scheduled for IDP linking",
+  "type": "object",
+  "properties": {
+    "centralTenantId": {
+      "description": "Central tenant id that will be used for linking the shadow users",
+      "type": "string"
+    },
+    "userIds": {
+      "description": "A list of user UUIDs that are to be scheduled for IDP linking in central tenant",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    }
+  },
+  "required": [
+    "centralTenantId",
+    "userIds"
+  ],
+  "additionalProperties": true
+}
