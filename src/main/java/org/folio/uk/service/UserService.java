@@ -52,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   public static final String PERMISSION_NAME_FIELD = "permissionName";
+
   private final UsersClient usersClient;
   private final UserRolesClient userRolesClient;
   private final UserCapabilitySetClient userCapabilitySetClient;
@@ -63,6 +64,7 @@ public class UserService {
   private final UserPermissionsClient userPermissionsClient;
   private final FolioExecutionContext folioExecutionContext;
   private final RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
+  private final CapabilitiesService capabilitiesService;
 
   public User createUser(User user, boolean keycloakOnly) {
     return createUser(user, null, keycloakOnly);
@@ -156,29 +158,7 @@ public class UserService {
 
   private void removeUserWithLinkedResources(UUID id) {
     usersClient.deleteUser(id);
-
-    userCapabilitySetClient.findUserCapabilitySet(id)
-      .ifPresent(userCapabilitySet -> {
-        if (userCapabilitySet.getTotalRecords() > 0) {
-          userCapabilitySetClient.deleteUserCapabilitySet(id);
-        }
-      });
-
-    userCapabilitiesClient.findUserCapabilities(id)
-      .ifPresent(userCapabilities -> {
-        if (userCapabilities.getTotalRecords() > 0) {
-          userCapabilitiesClient.deleteUserCapabilities(id);
-        }
-      });
-
-    userRolesClient.findUserRoles(id)
-      .ifPresent(roles -> {
-        if (roles.getTotalRecords() > 0) {
-          userRolesClient.deleteUserRoles(id);
-        }
-      });
-
-    policyService.removePolicyByUserId(id);
+    capabilitiesService.unassignAll(id);
   }
 
   private Optional<UUID> findUserIdKcAttribute(User user) {

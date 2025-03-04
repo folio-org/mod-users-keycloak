@@ -34,8 +34,11 @@ import org.folio.uk.domain.dto.Error;
 import org.folio.uk.domain.dto.ErrorResponse;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserCapabilitiesRequest;
+import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.CapabilitiesClient;
 import org.folio.uk.integration.roles.UserCapabilitiesClient;
+import org.folio.uk.integration.roles.UserCapabilitySetClient;
+import org.folio.uk.integration.roles.UserRolesClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -57,6 +60,9 @@ class CapabilitiesServiceTest {
 
   @MockBean private CapabilitiesClient capabilitiesClient;
   @MockBean private UserCapabilitiesClient userCapabilitiesClient;
+  @MockBean private UserCapabilitySetClient userCapabilitySetClient;
+  @MockBean private UserRolesClient userRolesClient;
+  @MockBean private PolicyService policyService;
   @MockBean private ObjectMapper objectMapper;
 
   @AfterEach

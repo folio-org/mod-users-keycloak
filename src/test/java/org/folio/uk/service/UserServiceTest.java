@@ -75,6 +75,8 @@ class UserServiceTest {
   @MockBean private PolicyService policyService;
   @MockBean private RolesKeycloakConfigurationProperties rolesKeycloakConfiguration;
   @MockBean private FolioExecutionContext folioExecutionContext;
+  @MockBean private CapabilitiesService capabilitiesService;
+
 
   @AfterEach
   void tearDown() {
@@ -208,10 +210,7 @@ class UserServiceTest {
     verify(usersClient).lookupUserById(userId);
     verify(usersClient).deleteUser(userId);
     verify(keycloakService).deleteUser(userId);
-    verify(userRolesClient).deleteUserRoles(userId);
-    verify(userCapabilitySetClient).deleteUserCapabilitySet(userId);
-    verify(userCapabilitiesClient).deleteUserCapabilities(userId);
-    verify(policyService).removePolicyByUserId(userId);
+    verify(capabilitiesService).unassignAll(userId);
   }
 
   @Test
@@ -240,7 +239,7 @@ class UserServiceTest {
     verify(userRolesClient, times(0)).deleteUserRoles(userId);
     verify(userCapabilitySetClient, times(0)).deleteUserCapabilitySet(userId);
     verify(userCapabilitiesClient, times(0)).deleteUserCapabilities(userId);
-    verify(policyService).removePolicyByUserId(userId);
+    verify(capabilitiesService).unassignAll(userId);
   }
 
   @Test
@@ -278,10 +277,7 @@ class UserServiceTest {
 
     verify(usersClient).deleteUser(userId);
     verify(keycloakService).deleteUser(userId);
-    verify(userRolesClient).deleteUserRoles(userId);
-    verify(userCapabilitySetClient).deleteUserCapabilitySet(userId);
-    verify(userCapabilitiesClient).deleteUserCapabilities(userId);
-    verify(policyService).removePolicyByUserId(userId);
+    verify(capabilitiesService).unassignAll(userId);
   }
 
   @Test

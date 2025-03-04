@@ -1,3 +1,8 @@
+## Version `v2.0.5` (14.03.2025)
+### Changes:
+* Upgrade keycloak-client to v26.0.4 (KEYCLOAK-25)
+---
+
 ## Version `v2.0.4` (31.01.2025)
 ### Changes:
 * Upgrade keycloak-client to v26.0.4 (KEYCLOAK-25)

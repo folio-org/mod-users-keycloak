@@ -56,7 +56,7 @@ public class SystemUserService {
     if (isEmpty(permissions)) {
       return;
     }
-    assignCapabilities(user, permissions);
+    reAssignCapabilities(user, permissions);
   }
 
   public void updateOnEvent(SystemUserEvent event) {
@@ -65,7 +65,7 @@ public class SystemUserService {
     }
     String username = event.getName();
     findUserByUsername(username).ifPresentOrElse(
-      user -> assignCapabilities(user, event.getPermissions()), () -> createOnEvent(event));
+      user -> reAssignCapabilities(user, event.getPermissions()), () -> createOnEvent(event));
   }
 
   public void deleteOnEvent(SystemUserEvent event) {
@@ -89,6 +89,11 @@ public class SystemUserService {
     }
     log.debug("User not found by username: {}", username);
     return Optional.empty();
+  }
+
+  private void reAssignCapabilities(User user, Set<String> permissions) {
+    capabilitiesService.unassignAll(user.getId());
+    capabilitiesService.assignCapabilitiesByPermissions(user, permissions);
   }
 
   private void assignCapabilities(User user, Set<String> permissions) {

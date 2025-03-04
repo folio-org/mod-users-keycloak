@@ -5,7 +5,6 @@ import static org.awaitility.Awaitility.await;
 import static org.folio.test.TestUtils.readString;
 import static org.folio.test.extensions.impl.KeycloakContainerExtension.getKeycloakAdminClient;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
-import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
@@ -77,7 +76,11 @@ class SystemUserIT extends BaseIntegrationTest {
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/find-module-system-user-by-query.json",
     "/wiremock/stubs/capabilities/query-capabilities-by-permissions.json",
-    "/wiremock/stubs/capabilities/assign-module-system-user-capabilities.json"
+    "/wiremock/stubs/capabilities/assign-module-system-user-capabilities.json",
+    "/wiremock/stubs/capabilities/query-capability-sets-by-user.json",
+    "/wiremock/stubs/capabilities/query-capabilities-by-user.json",
+    "/wiremock/stubs/policy/find-policy-by-username-empty.json",
+    "/wiremock/stubs/roles/query-roles-by-user.json"
   })
   void updateOnEvent() {
     kafkaTemplate.send(FOLIO_SYSTEM_USER_TOPIC, TestConstants.systemUserResourceUpdateEvent());
@@ -86,14 +89,18 @@ class SystemUserIT extends BaseIntegrationTest {
       .addCapabilityIdsItem(CAPABILITY_ID1);
 
     await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
-      verify(userCapabilitiesClient, only()).assignUserCapabilities(USER_ID, expectedRequest));
+      verify(userCapabilitiesClient).assignUserCapabilities(USER_ID, expectedRequest));
   }
 
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/create-module-system-user.json",
     "/wiremock/stubs/capabilities/query-capabilities-by-permission.json",
-    "/wiremock/stubs/capabilities/assign-module-system-user-capability.json"
+    "/wiremock/stubs/capabilities/assign-module-system-user-capability.json",
+    "/wiremock/stubs/capabilities/query-capability-sets-by-user.json",
+    "/wiremock/stubs/capabilities/query-capabilities-by-user.json",
+    "/wiremock/stubs/policy/find-policy-by-username-empty.json",
+    "/wiremock/stubs/roles/query-roles-by-user.json"
   })
   void createOnEvent() {
     kafkaTemplate.send(FOLIO_SYSTEM_USER_TOPIC, TestConstants.systemUserResourceEvent());
@@ -101,7 +108,7 @@ class SystemUserIT extends BaseIntegrationTest {
     var expectedRequest = new UserCapabilitiesRequest().userId(USER_ID).addCapabilityIdsItem(CAPABILITY_ID);
 
     await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
-      verify(userCapabilitiesClient, only()).assignUserCapabilities(USER_ID, expectedRequest)
+      verify(userCapabilitiesClient).assignUserCapabilities(USER_ID, expectedRequest)
     );
 
     var authToken = tokenService.issueToken();
