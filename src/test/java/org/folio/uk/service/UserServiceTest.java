@@ -77,7 +77,6 @@ class UserServiceTest {
   @MockBean private FolioExecutionContext folioExecutionContext;
   @MockBean private CapabilitiesService capabilitiesService;
 
-
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(usersClient, keycloakService, userPermissionsClient, servicePointsUserClient,
