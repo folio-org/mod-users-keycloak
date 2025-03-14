@@ -1,6 +1,15 @@
-## Version `v2.1.0` (in progress)
+## Version `v4.0.0` (in progress)
 ### Changes:
-* Error when deleting a user without Keycloak record (MODUSERSKC-67)
+---
+
+## Version `v3.0.0` (14.03.2025)
+### Changes:
+* PUB-SUB workaround for Eureka approach (MODUSERSKC-78)
+* Create migration endpoint to create Keycloak IP links (MODUSERSKC-75)
+* Upgrade Java to version 21 (MODUSERSKC-76)
+* Link Keycloak users across realms (MODUSERSKC-71)
+* Implement custom authenticator for Single Tenant UX login flow (KEYCLOAK-40)
+* Add feature flag for setting default credentials (MODUSERSKC-68)
 ---
 
 ## Version `v2.0.0` (01.11.2024)
