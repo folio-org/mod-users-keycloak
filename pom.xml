@@ -12,7 +12,7 @@
   <name>mod-users-keycloak</name>
   <groupId>org.folio</groupId>
   <artifactId>mod-users-keycloak</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
   <description>mod-users-keycloak</description>
   <packaging>jar</packaging>
 
