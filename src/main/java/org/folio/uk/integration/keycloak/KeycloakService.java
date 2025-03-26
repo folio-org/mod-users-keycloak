@@ -75,8 +75,9 @@ public class KeycloakService {
   public void linkIdentityProviderToUser(User user, String kcUserId) {
     applyIdentityProviderOnUser(user, kcUserId, dto -> {
       if (isIdentityProviderAlreadyLinked(kcUserId, dto.tenant(), dto.providerAlias())) {
-        log.info("linkIdentityProviderToUser: Updating an existing identity provider already for user [userId: {}, kcUserId: {}, " +
-          "tenant: {}, memberTenant: {}, providerAlias: {}]", dto.userId(), kcUserId, dto.tenant(), dto.memberTenant(), dto.providerAlias());
+        log.info("linkIdentityProviderToUser: Updating an existing identity provider already for user [userId: {}, "
+          + "kcUserId: {}, tenant: {}, memberTenant: {}, providerAlias: {}]", dto.userId(), kcUserId, dto.tenant(),
+          dto.memberTenant(), dto.providerAlias());
         unlinkIdentityProviderFromUser(dto, kcUserId);
         return;
       }
