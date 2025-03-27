@@ -166,7 +166,9 @@ class UserServiceIdentityProviderTest {
     var user = createShadowUser(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, TENANT_NAME));
     keycloakService.linkIdentityProviderToUser(user, KC_USER_ID);
 
-    verify(keycloakClient, never()).linkIdentityProviderToUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
+    verify(keycloakClient, atMostOnce()).unlinkIdentityProviderFromUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
+      eq(PROVIDER_ALIAS), eq(AUTH_TOKEN));
+    verify(keycloakClient, atMostOnce()).linkIdentityProviderToUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
       eq(PROVIDER_ALIAS), any(FederatedIdentity.class), eq(AUTH_TOKEN));
   }
 
