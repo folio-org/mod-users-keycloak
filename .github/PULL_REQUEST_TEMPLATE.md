@@ -1,12 +1,12 @@
-#### **Purpose**
+### **Purpose**
 Explain why these changes are needed and link the related issue (e.g., https://folio-org.atlassian.net/browse/PROJ-123).
 
-#### **Approach**
+### **Approach**
 Provide a brief technical summary of the changes.
 
 ---
 
-#### **Pre-Review Checklist**
+### **Pre-Review Checklist**
 
 - [ ] **Self-reviewed Code** — Reviewed code for issues, unnecessary parts, and overall quality.
 - [ ] **Change Notes** — NEWS.md updated with clear description and issue key.
