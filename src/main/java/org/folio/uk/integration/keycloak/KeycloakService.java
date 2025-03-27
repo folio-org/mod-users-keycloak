@@ -75,10 +75,10 @@ public class KeycloakService {
   public void linkIdentityProviderToUser(User user, String kcUserId) {
     applyIdentityProviderOnUser(user, kcUserId, dto -> {
       if (isIdentityProviderAlreadyLinked(kcUserId, dto.tenant(), dto.providerAlias())) {
-        log.warn("Identity provider is already linked to user [userId: {}, kcUserId: {}, tenant: {}, "
-          + "memberTenant: {}, providerAlias: {}]", dto.userId(), kcUserId, dto.tenant(), dto.memberTenant(),
-          dto.providerAlias());
-        return;
+        log.info("linkIdentityProviderToUser: Updating an existing identity provider link for user [userId: {}, "
+          + "kcUserId: {}, tenant: {}, memberTenant: {}, providerAlias: {}]", dto.userId(), kcUserId, dto.tenant(),
+          dto.memberTenant(), dto.providerAlias());
+        unlinkIdentityProviderFromUser(dto, kcUserId);
       }
 
       var federatedIdentity = createFederatedIdentity(user);
@@ -92,11 +92,15 @@ public class KeycloakService {
   }
 
   public void unlinkIdentityProviderFromUser(User user, String kcUserId) {
-    applyIdentityProviderOnUser(user, kcUserId, dto -> callKeycloak(
+    applyIdentityProviderOnUser(user, kcUserId, dto -> unlinkIdentityProviderFromUser(dto, kcUserId));
+  }
+
+  private void unlinkIdentityProviderFromUser(KeycloakIdentityProviderDto dto, String kcUserId) {
+    callKeycloak(
       () -> keycloakClient.unlinkIdentityProviderFromUser(dto.tenant(), kcUserId, dto.providerAlias(), getToken()),
       () -> String.format("Failed to unlink identity provider from user [userId: %s, kcUserId: %s, tenant: %s, "
         + "memberTenant: %s, providerAlias: %s]", dto.userId(), kcUserId, dto.tenant(), dto.memberTenant(),
-        dto.providerAlias())));
+        dto.providerAlias()));
   }
 
   private void applyIdentityProviderOnUser(User user, String kcUserId,
