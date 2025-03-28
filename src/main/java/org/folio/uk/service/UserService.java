@@ -38,12 +38,8 @@ import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
-import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
-import org.folio.uk.integration.roles.UserCapabilitiesClient;
-import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
-import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.users.UsersClient;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,10 +57,6 @@ public class UserService {
   public static final String PERMISSION_NAME_FIELD = "permissionName";
 
   private final UsersClient usersClient;
-  private final UserRolesClient userRolesClient;
-  private final UserCapabilitySetClient userCapabilitySetClient;
-  private final UserCapabilitiesClient userCapabilitiesClient;
-  private final PolicyService policyService;
   private final ServicePointsUserClient servicePointsUserClient;
   private final ServicePointsClient servicePointsClient;
   private final KeycloakService keycloakService;
@@ -157,6 +149,10 @@ public class UserService {
     log.info("Updating user: id = {}", id);
 
     usersClient.updateUser(id, user);
+    if (!UserType.STAFF.getValue().equals(user.getType())) {
+      return;
+    }
+
     var kcUser = keycloakService.findKeycloakUserWithUserIdAttr(id);
     if (kcUser.isPresent()) {
       keycloakService.updateUser(id, user);
