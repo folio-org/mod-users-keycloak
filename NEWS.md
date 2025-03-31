@@ -2,6 +2,11 @@
 ### Changes:
 ---
 
+## Version `v3.0.1` (31.03.2025)
+### Changes:
+* Implement possibility for user to login with updated username (MODCONSKC-7)
+---
+
 ## Version `v3.0.0` (14.03.2025)
 ### Changes:
 * PUB-SUB workaround for Eureka approach (MODUSERSKC-78)
