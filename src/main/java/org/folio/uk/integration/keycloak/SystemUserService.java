@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.spring.FolioExecutionContext;
@@ -143,8 +144,10 @@ public class SystemUserService {
     return String.format("%s_%s_%s", getFolioEnvName(), tenant, username);
   }
 
+  @SneakyThrows
   private String generateAndSavePassword(String key) {
     var secret = generateSecret(systemUserConfiguration.getPasswordLength());
+    Thread.sleep(2000); // Avoid throttling to AWS
     secureStore.set(key, secret);
     return secret;
   }
