@@ -1,5 +1,6 @@
 ## Version `v4.0.0` (in progress)
 ### Changes:
+* Set application\_name in spring.datasource.url ([https://folio-org.atlassian.net/browse/MODUSERSKC-84](MODUSERSKC-84))
 ---
 
 ## Version `v3.0.0` (14.03.2025)
