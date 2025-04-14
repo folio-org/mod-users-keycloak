@@ -23,7 +23,7 @@
     <lombok.version>1.18.38</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.9.9</hypersistence-utils-hibernate-63.version>
-    <swagger-annotations.version>2.2.29</swagger-annotations.version>
+    <swagger-annotations.version>2.2.30</swagger-annotations.version>
     <commons-lang3.version>3.17.0</commons-lang3.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
     <folio-spring-support.version>9.0.1</folio-spring-support.version>
