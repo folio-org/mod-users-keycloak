@@ -107,17 +107,17 @@ class SystemUserIT extends BaseIntegrationTest {
 
     var expectedRequest = new UserCapabilitiesRequest().userId(USER_ID).addCapabilityIdsItem(CAPABILITY_ID);
 
-    await().atMost(Durations.FIVE_SECONDS).untilAsserted(() ->
-      verify(userCapabilitiesClient).assignUserCapabilities(USER_ID, expectedRequest)
-    );
+    await().atMost(Durations.FIVE_SECONDS).untilAsserted(() -> {
+      verify(userCapabilitiesClient).assignUserCapabilities(USER_ID, expectedRequest);
 
-    var authToken = tokenService.issueToken();
-    var systemUsersList = keycloakClient.findUsersByUsername(TENANT_NAME, "mod-foo", true, authToken);
+      var authToken = tokenService.issueToken();
+      var systemUsersList = keycloakClient.findUsersByUsername(TENANT_NAME, "mod-foo", true, authToken);
 
-    assertThat(systemUsersList).hasSize(1);
-    var systemUser = systemUsersList.get(0);
-    assertThat(systemUser.getFirstName()).isEqualTo("System User - mod-foo");
-    assertThat(systemUser.getLastName()).isEqualTo("System");
-    assertThat(systemUser.getUserName()).isEqualTo("mod-foo");
+      assertThat(systemUsersList).hasSize(1);
+      var systemUser = systemUsersList.get(0);
+      assertThat(systemUser.getFirstName()).isEqualTo("System User - mod-foo");
+      assertThat(systemUser.getLastName()).isEqualTo("System");
+      assertThat(systemUser.getUserName()).isEqualTo("mod-foo");
+    });
   }
 }
