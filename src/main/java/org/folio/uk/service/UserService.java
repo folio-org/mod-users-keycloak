@@ -38,13 +38,10 @@ import org.folio.uk.integration.keycloak.KeycloakException;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
-import org.folio.uk.integration.policy.PolicyService;
 import org.folio.uk.integration.roles.RolesKeycloakConfigurationProperties;
-import org.folio.uk.integration.roles.UserCapabilitiesClient;
-import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
-import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.users.UsersClient;
+import org.folio.util.StringUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.retry.annotation.Backoff;
@@ -61,10 +58,6 @@ public class UserService {
   public static final String PERMISSION_NAME_FIELD = "permissionName";
 
   private final UsersClient usersClient;
-  private final UserRolesClient userRolesClient;
-  private final UserCapabilitySetClient userCapabilitySetClient;
-  private final UserCapabilitiesClient userCapabilitiesClient;
-  private final PolicyService policyService;
   private final ServicePointsUserClient servicePointsUserClient;
   private final ServicePointsClient servicePointsClient;
   private final KeycloakService keycloakService;
@@ -320,7 +313,8 @@ public class UserService {
   }
 
   private User findUserByUsername(String username) {
-    var userByUsername = usersClient.query("username==" + username, 1).getUsers();
+    var cql = "username==" + StringUtil.cqlEncode(username);
+    var userByUsername = usersClient.query(cql, 1).getUsers();
     if (isEmpty(userByUsername)) {
       throw new EntityNotFoundException(format("Failed to find user: service = mod-users, username = %s", username));
     }

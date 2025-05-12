@@ -58,7 +58,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @UnitTest
@@ -69,7 +68,6 @@ class UserServiceTest {
   private static final String USERNAME = "test-username";
 
   @Autowired private UserService userService;
-  @Autowired private ApplicationContext applicationContext;
   @MockitoBean private UsersClient usersClient;
   @MockitoBean private ServicePointsUserClient servicePointsUserClient;
   @MockitoBean private ServicePointsClient servicePointsClient;
@@ -106,18 +104,18 @@ class UserServiceTest {
 
   @Test
   void createUserSafe_positive_userAlreadyExistsInModUsers() {
-    var user = user();
+    var user = user("te*st");
     var users = new Users().addUsersItem(user).totalRecords(1);
 
     when(usersClient.createUser(user)).thenThrow(UnprocessableEntity.class);
-    when(usersClient.query("username==test-username", 1)).thenReturn(users);
+    when(usersClient.query("username==\"te\\*st\"", 1)).thenReturn(users);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
 
     assertThat(result).isEqualTo(user);
     verify(usersClient).createUser(user);
-    verify(usersClient).query("username==test-username", 1);
-    verify(keycloakService).findUserByUsername(USERNAME, false);
+    verify(usersClient).query("username==\"te\\*st\"", 1);
+    verify(keycloakService).findUserByUsername("te*st", false);
     verify(keycloakService).upsertUser(user, PASSWORD);
   }
 
@@ -133,7 +131,7 @@ class UserServiceTest {
 
     when(usersClient.createUser(user)).thenReturn(user);
     doThrow(keycloakException).when(keycloakService).upsertUser(user, PASSWORD);
-    when(usersClient.query("username==test-username", 1)).thenReturn(users);
+    when(usersClient.query("username==\"test-username\"", 1)).thenReturn(users);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
 
@@ -149,14 +147,14 @@ class UserServiceTest {
     var foundUsers = new Users().users(emptyList()).totalRecords(0);
 
     when(usersClient.createUser(user)).thenThrow(UnprocessableEntity.class);
-    when(usersClient.query("username==test-username", 1)).thenReturn(foundUsers);
+    when(usersClient.query("username==\"test-username\"", 1)).thenReturn(foundUsers);
 
     assertThatThrownBy(() -> userService.createUserSafe(user, PASSWORD, false))
       .isInstanceOf(EntityNotFoundException.class)
       .hasMessage("Failed to find user: service = mod-users, username = test-username");
 
     verify(usersClient).createUser(user);
-    verify(usersClient).query("username==test-username", 1);
+    verify(usersClient).query("username==\"test-username\"", 1);
     verify(keycloakService).findUserByUsername(USERNAME, false);
   }
 
@@ -444,8 +442,12 @@ class UserServiceTest {
   }
 
   private static User user() {
+    return user(USERNAME);
+  }
+
+  private static User user(String username) {
     return new User()
       .id(randomUUID())
-      .username(USERNAME);
+      .username(username);
   }
 }
