@@ -12,6 +12,7 @@ import org.folio.uk.domain.dto.User;
 import org.folio.uk.exception.UnprocessableEntityException;
 import org.folio.uk.integration.configuration.ConfigurationService;
 import org.folio.uk.integration.notify.NotificationService;
+import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -101,8 +102,9 @@ public class ForgottenUsernamePasswordService {
    * @return CQL query value
    */
   private String buildQuery(List<String> fields, String value) {
+    var equalsValue = "==" + StringUtil.cqlEncode(value);
     return fields.stream()
-      .map(field -> field + "==\"" + value + "\"")
+      .map(field -> field + equalsValue)
       .collect(Collectors.joining(" or "));
   }
 

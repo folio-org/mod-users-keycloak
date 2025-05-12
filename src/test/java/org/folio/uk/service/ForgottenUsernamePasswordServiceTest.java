@@ -44,9 +44,9 @@ class ForgottenUsernamePasswordServiceTest {
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(1).addUsersItem(TEST_USER));
 
-    service.resetForgottenPassword(new Identifier().id("test"));
+    service.resetForgottenPassword(new Identifier().id("te*st"));
 
-    verify(userService).findUsers(eq("personal.phone==\"test\""), eq(2));
+    verify(userService).findUsers(eq("personal.phone==\"te\\*st\""), eq(2));
     verify(passwordResetService).sendPasswordRestLink(eq(TEST_USER_ID));
   }
 
