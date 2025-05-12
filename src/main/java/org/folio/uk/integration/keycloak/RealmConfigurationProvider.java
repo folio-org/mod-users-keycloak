@@ -3,7 +3,7 @@ package org.folio.uk.integration.keycloak;
 import lombok.RequiredArgsConstructor;
 import org.folio.common.configuration.properties.FolioEnvironment;
 import org.folio.tools.store.SecureStore;
-import org.folio.tools.store.exception.NotFoundException;
+import org.folio.tools.store.exception.SecureStoreServiceException;
 import org.folio.uk.integration.keycloak.config.KeycloakProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakRealmConfiguration;
 import org.springframework.cache.annotation.CacheEvict;
@@ -51,7 +51,7 @@ public class RealmConfigurationProvider {
   private String retrieveKcClientSecret(String realm, String clientId) {
     try {
       return secureStore.get(buildKey(folioEnvironment.getEnvironment(), realm, clientId));
-    } catch (NotFoundException e) {
+    } catch (SecureStoreServiceException e) {
       throw new IllegalStateException(String.format(
         "Failed to get value from secure store [clientId: %s]", clientId), e);
     }
