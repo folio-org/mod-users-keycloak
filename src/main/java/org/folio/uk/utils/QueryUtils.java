@@ -10,13 +10,16 @@ import one.util.streamex.StreamEx;
 @UtilityClass
 public class QueryUtils {
 
-  private static final String CQL_MATCH_STRICT = "%s==%s";
-  private static final String CQL_MATCH = "%s=%s";
-  private static final String CQL_PREFIX = "(";
-  private static final String CQL_SUFFIX = ")";
-
+  /**
+   * Create a query like "id==(123e4567-e89b-12d3-a456-426614174000 or 123e4567-e89b-12d3-a456-426614174001)".
+   *
+   * @param fieldName must be a valid field name, validate beforehand to avoid CQL injection!
+   * @param strictMatch true for == operator, false for = operator
+   */
   public static String convertFieldListToCqlQuery(Collection<UUID> values, String fieldName, boolean strictMatch) {
-    var prefix = String.format(strictMatch ? CQL_MATCH_STRICT : CQL_MATCH, fieldName, CQL_PREFIX);
-    return StreamEx.of(values).joining(" or ", prefix, CQL_SUFFIX);
+    final var operator = strictMatch ? "==" : "=";
+    final var prefix = fieldName + operator + "(";
+    final var suffix = ")";
+    return StreamEx.of(values).joining(" or ", prefix, suffix);
   }
 }
