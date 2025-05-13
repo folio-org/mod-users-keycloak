@@ -187,7 +187,7 @@ class SystemUserServiceTest {
   @Test
   void updateOnEvent_positive_userFound() {
     var user = systemUser().id(CAPABILITY_ID);
-    when(userService.findUsers("username==mod-foo", 1)).thenReturn(new Users().addUsersItem(user));
+    when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users().addUsersItem(user));
 
     systemUserService.updateOnEvent(systemUserEvent(Set.of(PERMISSION)));
 
@@ -199,7 +199,7 @@ class SystemUserServiceTest {
   void updateOnEvent_positive_userNotFoundThenCreate() {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
     when(secureStore.lookup(MODULE_SYSTEM_USER_STORE_KEY)).thenReturn(Optional.empty());
-    when(userService.findUsers("username==mod-foo", 1)).thenReturn(new Users());
+    when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users());
     when(userService.createUserSafe(userCaptor.capture(), any(), eq(false))).then(firstArg());
     doNothing().when(secureStore).set(any(), any());
 
@@ -223,7 +223,7 @@ class SystemUserServiceTest {
   void deleteOnEvent_positive() {
     var userId = CAPABILITY_ID;
     var user = systemUser().id(userId);
-    when(userService.findUsers("username==mod-foo", 1)).thenReturn(new Users().addUsersItem(user));
+    when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users().addUsersItem(user));
 
     systemUserService.deleteOnEvent(systemUserEvent(Set.of()));
 
@@ -232,7 +232,7 @@ class SystemUserServiceTest {
 
   @Test
   void deleteOnEvent_positive_userNotFound() {
-    when(userService.findUsers("username==mod-foo", 1)).thenReturn(new Users());
+    when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users());
 
     systemUserService.deleteOnEvent(systemUserEvent(Set.of()));
 
@@ -245,7 +245,20 @@ class SystemUserServiceTest {
     var user = systemUser().id(userId);
 
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    when(userService.findUsers("username==test-system-user", 1)).thenReturn(new Users().addUsersItem(user));
+    when(userService.findUsers("username==\"test-system-user\"", 1)).thenReturn(new Users().addUsersItem(user));
+
+    systemUserService.delete();
+
+    verify(userService).deleteUser(userId);
+  }
+
+  @Test
+  void delete_positive_wildcard() {
+    var userId = CAPABILITY_ID;
+    var user = systemUser().id(userId);
+
+    when(folioExecutionContext.getTenantId()).thenReturn("foo*");
+    when(userService.findUsers("username==\"foo\\*-system-user\"", 1)).thenReturn(new Users().addUsersItem(user));
 
     systemUserService.delete();
 
@@ -255,7 +268,7 @@ class SystemUserServiceTest {
   @Test
   void delete_positive_usersNotFoundByUsername() {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    when(userService.findUsers("username==test-system-user", 1)).thenReturn(new Users());
+    when(userService.findUsers("username==\"test-system-user\"", 1)).thenReturn(new Users());
 
     systemUserService.delete();
 
