@@ -3,11 +3,11 @@
     "method": "GET",
     "urlPath": "/users",
     "headers": {
-      "x-okapi-tenant": { "equalTo": "testtenant" },
+      "x-okapi-tenant": { "equalTo": "centraltenant" },
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
     },
     "queryParameters": {
-      "query": { "equalTo": "username==\"testtenant-system-user\"" },
+      "query": { "equalTo": "username==\"centraltenant-system-user\"" },
       "limit": { "equalTo": "1" }
     }
   },
@@ -21,12 +21,12 @@
       "users": [
         {
           "id": "83eb1e14-c657-4db8-8ba4-119670fc3552",
-          "username": "testtenant-system-user",
+          "username": "centraltenant-system-user",
           "active": true,
           "personal": {
             "firstName": "System User",
             "lastName": "System",
-            "email": "testtenant-system-user@folio.org"
+            "email": "centraltenant-system-user@folio.org"
           }
         }
       ]

@@ -6,7 +6,7 @@
       "x-okapi-tenant": { "equalTo": "testtenant" }
     },
     "queryParameters": {
-      "query": { "equalTo": "username==mod-foo" },
+      "query": { "equalTo": "username==\"mod-foo\"" },
       "limit": { "equalTo": "1" }
     }
   },

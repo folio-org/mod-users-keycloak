@@ -19,6 +19,7 @@ import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.service.CapabilitiesService;
 import org.folio.uk.service.UserService;
+import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -75,7 +76,8 @@ public class SystemUserService {
 
   public void delete() {
     var username = generateValueByTemplate(systemUserConfiguration.getUsernameTemplate());
-    var users = userService.findUsers("username==" + username, 1).getUsers();
+    var query = "username==" + StringUtil.cqlEncode(username);
+    var users = userService.findUsers(query, 1).getUsers();
     if (CollectionUtils.isNotEmpty(users)) {
       var user = users.get(0);
       userService.deleteUser(user.getId());
@@ -83,7 +85,8 @@ public class SystemUserService {
   }
 
   private Optional<User> findUserByUsername(String username) {
-    var users = userService.findUsers("username==" + username, 1).getUsers();
+    var query = "username==" + StringUtil.cqlEncode(username);
+    var users = userService.findUsers(query, 1).getUsers();
     if (CollectionUtils.isNotEmpty(users)) {
       return Optional.of(users.get(0));
     }
