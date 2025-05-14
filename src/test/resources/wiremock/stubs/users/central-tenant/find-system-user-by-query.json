@@ -7,7 +7,7 @@
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
     },
     "queryParameters": {
-      "query": { "equalTo": "username==centraltenant-system-user" },
+      "query": { "equalTo": "username==\"centraltenant-system-user\"" },
       "limit": { "equalTo": "1" }
     }
   },
