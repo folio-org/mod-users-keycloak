@@ -1,6 +1,6 @@
-## Version `v4.0.0` (in progress)
+## Version `v3.0.2` (15.05.2025)
 ### Changes:
-* Mask special CQL characters in user queries ([https://folio-org.atlassian.net/browse/MODUSERSKC-86](MODUSERSKC-86))
+* Mask special CQL characters in user queries (MODUSERSKC-86)
 ---
 
 ## Version `v3.0.1` (31.03.2025)
