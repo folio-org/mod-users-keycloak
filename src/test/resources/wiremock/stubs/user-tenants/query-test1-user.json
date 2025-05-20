@@ -1,0 +1,46 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/user-tenants",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "testtenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    },
+    "queryParameters": {
+      "query": {
+        "contains": "test1"
+      },
+      "limit": {
+        "equalTo": "2"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "users": [
+        {
+          "username": "test1",
+          "id": "d3958402-2f80-421b-a527-9933245a3556",
+          "active": true,
+          "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+          "personal": {
+            "lastName": "Test1",
+            "firstName": "User",
+            "preferredFirstName": "",
+            "email": "test1@example.com",
+            "phone": ""
+          }
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/users",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "testtenant"
+      },
+      "x-okapi-token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    },
+    "queryParameters": {
+      "query": {
+        "contains": "twin1"
+      },
+      "limit": {
+        "equalTo": "2"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "users": [
+        {
+          "username": "twin1",
+          "id": "d3958402-2f80-421b-a527-9933245a3556",
+          "active": true,
+          "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+          "personal": {
+            "email": "test@example.com"
+          }
+        },
+        {
+          "username": "rick",
+          "id": "d3958402-2f80-421b-a527-9933245a3557",
+          "active": true,
+          "patronGroup": "503a81cd-6c26-400f-b620-14c08943697c",
+          "personal": {
+            "email": "twin1@example.com"
+          }
+        }
+      ],
+      "totalRecords": 2
+    }
+  }
+}
