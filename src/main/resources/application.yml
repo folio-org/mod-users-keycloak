@@ -113,7 +113,7 @@ application:
     system-user-event:
       retry-attempts: ${KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS:9223372036854775807}
       retry-delay: ${KAFKA_SYS_USER_TOPIC_RETRY_DELAY:1s}
-    system-user-capabilities:
+    system-user-role:
       retry-attempts: ${KAFKA_SYS_USER_CAPABILITIES_RETRY_ATTEMPTS:60}
       retry-delay: ${KAFKA_SYS_USER_CAPABILITIES_RETRY_DELAY:5s}
   federated-auth:
@@ -121,3 +121,8 @@ application:
     identity_provider_suffix: ${IDENTITY_PROVIDER_SUFFIX:-keycloak-oidc}
 
 okapi.url: ${OKAPI_URL:http://sidecar:8081}
+
+logging:
+  level:
+    org.apache.kafka.clients.consumer.internals.AbstractCoordinator: TRACE
+    org.apache.kafka.clients.consumer.internals.SubscriptionState: TRACE

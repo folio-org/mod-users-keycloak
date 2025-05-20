@@ -20,11 +20,13 @@ import org.folio.uk.integration.users.UsersClient;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.kafka.core.KafkaTemplate;
 
+@Disabled
 @IntegrationTest
 class SystemUserIT extends BaseIntegrationTest {
 

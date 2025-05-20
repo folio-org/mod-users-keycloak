@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -24,9 +23,8 @@ import org.folio.uk.configuration.SystemUserConfigurationProperties;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
-import org.folio.uk.exception.UnresolvedPermissionsException;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
-import org.folio.uk.service.CapabilitiesService;
+import org.folio.uk.integration.roles.dafaultrole.DefaultSystemUserRoleService;
 import org.folio.uk.service.UserService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -36,7 +34,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -59,7 +56,7 @@ class SystemUserServiceTest {
 
   @Mock private SecureStore secureStore;
   @Mock private UserService userService;
-  @Mock private CapabilitiesService capabilitiesService;
+  @Mock private DefaultSystemUserRoleService defaultSystemUserRoleService;
   @Mock private KeycloakService keycloakService;
   @Mock private FolioExecutionContext folioExecutionContext;
 
@@ -159,28 +156,6 @@ class SystemUserServiceTest {
     assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
 
-    verify(capabilitiesService).assignCapabilitiesByPermissions(any(User.class), eq(Set.of(PERMISSION)));
-    verify(secureStore).set(MODULE_SYSTEM_USER_STORE_KEY, capturedPassword);
-  }
-
-  @Test
-  void createOnEvent_negative_capabilityNotFound() {
-    Mockito.doThrow(new UnresolvedPermissionsException(null, List.of(PERMISSION))).when(capabilitiesService)
-      .assignCapabilitiesByPermissions(any(), any());
-    when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    when(secureStore.lookup(MODULE_SYSTEM_USER_STORE_KEY)).thenReturn(Optional.empty());
-    when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
-
-    assertThatThrownBy(() -> systemUserService.createOnEvent(systemUserEvent(Set.of(PERMISSION))))
-      .isInstanceOf(UnresolvedPermissionsException.class);
-
-    verify(userConfiguration).getPasswordLength();
-
-    var capturedPassword = passwordCaptor.getValue();
-    assertThat(passwordCaptor.getValue()).hasSize(userConfiguration.getPasswordLength());
-    assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
-    assertThat(userCaptor.getValue().getId()).isNotNull();
-
     verify(secureStore).set(MODULE_SYSTEM_USER_STORE_KEY, capturedPassword);
   }
 
@@ -191,7 +166,6 @@ class SystemUserServiceTest {
 
     systemUserService.updateOnEvent(systemUserEvent(Set.of(PERMISSION)));
 
-    verify(capabilitiesService).assignCapabilitiesByPermissions(user, Set.of(PERMISSION));
     verify(folioExecutionContext, never()).getTenantId();
   }
 
@@ -207,7 +181,6 @@ class SystemUserServiceTest {
 
     assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
-    verify(capabilitiesService).assignCapabilitiesByPermissions(any(User.class), eq(Set.of(PERMISSION)));
   }
 
   @Test
@@ -216,7 +189,6 @@ class SystemUserServiceTest {
 
     verify(folioExecutionContext, never()).getTenantId();
     verify(userService, never()).findUsers(any(), anyInt());
-    verify(capabilitiesService, never()).assignCapabilitiesByPermissions(any(), any());
   }
 
   @Test

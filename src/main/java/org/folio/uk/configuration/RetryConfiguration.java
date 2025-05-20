@@ -4,7 +4,7 @@ import feign.FeignException;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.folio.uk.exception.UnresolvedPermissionsException;
-import org.folio.uk.integration.kafka.configuration.CapabilitiesRetryConfiguration;
+import org.folio.uk.integration.kafka.configuration.SystemUserRoleRetryConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,9 +36,9 @@ public class RetryConfiguration {
     };
   }
 
-  @Bean(name = "capabilityRetryTemplate")
+  @Bean(name = "systemUserRoleRetryTemplate")
   public RetryTemplate capabilityRetryTemplate(
-    @Qualifier("methodLoggingRetryListener") RetryListener retryListener, CapabilitiesRetryConfiguration config) {
+    @Qualifier("methodLoggingRetryListener") RetryListener retryListener, SystemUserRoleRetryConfiguration config) {
     return new RetryTemplateBuilder().maxAttempts(config.getRetryAttempts())
       .fixedBackoff(config.getRetryDelay().toMillis())
       .withListener(retryListener)
