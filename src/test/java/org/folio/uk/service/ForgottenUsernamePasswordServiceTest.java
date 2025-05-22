@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
@@ -16,6 +17,7 @@ import org.folio.spring.FolioModuleMetadata;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.Identifier;
 import org.folio.uk.domain.dto.User;
+import org.folio.uk.domain.dto.UserTenant;
 import org.folio.uk.domain.dto.UserTenantCollection;
 import org.folio.uk.domain.dto.Users;
 import org.folio.uk.exception.UnprocessableEntityException;
@@ -159,4 +161,43 @@ class ForgottenUsernamePasswordServiceTest {
 
     verifyNoInteractions(notificationService);
   }
+
+  @Test
+  void resetForgottenPassword_crossTenant_positive() {
+    var userTenant = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .email("test@mail.com")
+      .tenantId("otherTenant");
+    var userTenantCollection = new UserTenantCollection()
+      .totalRecords(1)
+      .addUserTenantsItem(userTenant);
+    when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
+      ForgottenUsernamePasswordService.FORGOTTEN_PASSWORD_ALIASES))
+      .thenReturn(Collections.emptyMap());
+    when(userTenantsClient.query(anyString(), anyInt()))
+      .thenReturn(userTenantCollection);
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of("x-okapi-tenant", List.of("otherTenant")));
+    when(userService.findUsers(anyString(), anyInt()))
+      .thenReturn(new Users().totalRecords(1).addUsersItem(TEST_USER));
+
+    service.resetForgottenPassword(new Identifier().id("test@mail.com"));
+
+    verifyNoInteractions(notificationService);
+  }
+
+  @Test
+  void recoverForgottenUsername_crossTenant_negative_multipleUsersFound() {
+    var userTenantCollection = new UserTenantCollection()
+      .totalRecords(2);
+    when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
+      ForgottenUsernamePasswordService.FORGOTTEN_USERNAME_ALIASES))
+      .thenReturn(Collections.emptyMap());
+    when(userTenantsClient.query(anyString(), anyInt()))
+      .thenReturn(userTenantCollection);
+
+    service.recoverForgottenUsername(new Identifier().id("test"));
+
+    verifyNoInteractions(notificationService);
+  }
 }
+
