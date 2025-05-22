@@ -1,19 +1,30 @@
 package org.folio.uk.service;
 
+import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.MapUtils;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.uk.domain.dto.Identifier;
 import org.folio.uk.domain.dto.User;
+import org.folio.uk.domain.dto.UserTenant;
+import org.folio.uk.exception.MultipleEntityException;
 import org.folio.uk.exception.UnprocessableEntityException;
 import org.folio.uk.integration.configuration.ConfigurationService;
 import org.folio.uk.integration.notify.NotificationService;
+import org.folio.uk.integration.users.UserTenantsClient;
+import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class ForgottenUsernamePasswordService {
@@ -37,15 +48,55 @@ public class ForgottenUsernamePasswordService {
   private final PasswordResetService passwordResetService;
   private final NotificationService notificationService;
   private final UserService userService;
+  private final UserTenantsClient userTenantsClient;
+  private final FolioModuleMetadata folioModuleMetadata;
+  private final FolioExecutionContext folioExecutionContext;
 
   public void resetForgottenPassword(Identifier identifier) {
-    var user = locateUserByAlias(FORGOTTEN_PASSWORD_ALIASES, identifier, FORGOTTEN_PASSWORD_ERROR_KEY);
-    passwordResetService.sendPasswordRestLink(user.getId());
+    try {
+      UserTenant userTenant =
+        locateUserByAliasCrossTenant(FORGOTTEN_PASSWORD_ALIASES, identifier, FORGOTTEN_PASSWORD_ERROR_KEY);
+      if (userTenant == null) {
+        sendPasswordRestLinkByIdentifier(identifier);
+        return;
+      }
+      try (var ignored = new FolioExecutionContextSetter(
+        prepareContextForTenant(userTenant.getTenantId(), folioModuleMetadata, folioExecutionContext))) {
+        sendPasswordRestLinkByIdentifier(identifier);
+      }
+    } catch (MultipleEntityException e) {
+      log.warn("Multiple users found for forgotten password request, returning success without sending reset link: {}",
+        e.getMessage());
+    }
   }
 
   public void recoverForgottenUsername(Identifier identifier) {
+    try {
+      UserTenant userTenant =
+        locateUserByAliasCrossTenant(FORGOTTEN_USERNAME_ALIASES, identifier, FORGOTTEN_USERNAME_ERROR_KEY);
+      if (userTenant == null) {
+        sendLocateUserNotificationByIdentifier(identifier);
+        return;
+      }
+      try (var ignored = new FolioExecutionContextSetter(
+        prepareContextForTenant(userTenant.getTenantId(), folioModuleMetadata, folioExecutionContext))) {
+        sendLocateUserNotificationByIdentifier(identifier);
+      }
+    } catch (MultipleEntityException e) {
+      log.warn(
+        "Multiple users found for forgotten username request, returning success without sending notification: {}",
+        e.getMessage());
+    }
+  }
+
+  private void sendLocateUserNotificationByIdentifier(Identifier identifier) {
     var user = locateUserByAlias(FORGOTTEN_USERNAME_ALIASES, identifier, FORGOTTEN_USERNAME_ERROR_KEY);
     notificationService.sendLocateUserNotification(user);
+  }
+
+  private void sendPasswordRestLinkByIdentifier(Identifier identifier) {
+    var user = locateUserByAlias(FORGOTTEN_PASSWORD_ALIASES, identifier, FORGOTTEN_PASSWORD_ERROR_KEY);
+    passwordResetService.sendPasswordRestLink(user.getId());
   }
 
   /**
@@ -65,6 +116,24 @@ public class ForgottenUsernamePasswordService {
       .collect(Collectors.toList());
   }
 
+  private UserTenant locateUserByAliasCrossTenant(List<String> fieldAliases, Identifier identifier, String errorKey) {
+    var locateUserFields = getLocateUserFields(fieldAliases);
+
+    var query = buildQuery(locateUserFields, identifier.getId());
+    var userTenantResponse = userTenantsClient.query(query, 2);
+
+    if (userTenantResponse.getTotalRecords() > 1) {
+      var message = String.format("Multiple users associated with '%s'", identifier.getId());
+      throw new MultipleEntityException(message, errorKey);
+    }
+
+    if (userTenantResponse.getTotalRecords() == 0) {
+      return null;
+    }
+
+    return userTenantResponse.getUserTenants().getFirst();
+  }
+
   /**
    * Locates user by the given alias.
    *
@@ -76,7 +145,6 @@ public class ForgottenUsernamePasswordService {
     var locateUserFields = getLocateUserFields(fieldAliases);
 
     var query = buildQuery(locateUserFields, identifier.getId());
-
     var userResponse = userService.findUsers(query, 2);
 
     if (userResponse.getTotalRecords() == 0) {
@@ -84,7 +152,7 @@ public class ForgottenUsernamePasswordService {
       throw new NoSuchElementException("User is not found: " + identifier.getId());
     } else if (userResponse.getTotalRecords() > 1) {
       var message = String.format("Multiple users associated with '%s'", identifier.getId());
-      throw new UnprocessableEntityException(message, errorKey);
+      throw new MultipleEntityException(message, errorKey);
     }
 
     var user = userResponse.getUsers().get(0);
@@ -101,8 +169,9 @@ public class ForgottenUsernamePasswordService {
    * @return CQL query value
    */
   private String buildQuery(List<String> fields, String value) {
+    var equalsValue = "==" + StringUtil.cqlEncode(value);
     return fields.stream()
-      .map(field -> field + "==\"" + value + "\"")
+      .map(field -> field + equalsValue)
       .collect(Collectors.joining(" or "));
   }
 

@@ -1,26 +1,18 @@
-## Version `v2.0.5` (14.03.2025)
+## Version `v4.0.0` (in progress)
+### Changes:
+* Set application\_name in spring.datasource.url ([https://folio-org.atlassian.net/browse/MODUSERSKC-84](MODUSERSKC-84))
+* Mask special CQL characters in user queries ([https://folio-org.atlassian.net/browse/MODUSERSKC-86](MODUSERSKC-86))
+* Search users in all tenants when using "Forgot password" and "Forgot username" links ([https://folio-org.atlassian.net/browse/MODUSERSKC-83](MODUSERSKC-83))
+---
+
+## Version `v3.0.0` (14.03.2025)
 ### Changes:
 * PUB-SUB workaround for Eureka approach (MODUSERSKC-78)
----
-
-## Version `v2.0.4` (31.01.2025)
-### Changes:
-* Upgrade keycloak-client to v26.0.4 (KEYCLOAK-25)
----
-
-## Version `v2.0.3` (23.01.2025)
-### Changes:
-* Error when deleting a user without Keycloak record (MODUSERSKC-67)
----
-
-## Version `v2.0.2` (10.12.2024)
-### Changes:
-* Fix for 500 error when resetting password for some users (MODUSERSKC-62).
----
-
-## Version `v2.0.1` (28.11.2024)
-### Changes:
-* Backwards-compatible API for expand permissions parameter (MODUSERSKC-63)
+* Create migration endpoint to create Keycloak IP links (MODUSERSKC-75)
+* Upgrade Java to version 21 (MODUSERSKC-76)
+* Link Keycloak users across realms (MODUSERSKC-71)
+* Implement custom authenticator for Single Tenant UX login flow (KEYCLOAK-40)
+* Add feature flag for setting default credentials (MODUSERSKC-68)
 ---
 
 ## Version `v2.0.0` (01.11.2024)
