@@ -25,8 +25,9 @@
     <commons-lang3.version>3.17.0</commons-lang3.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
-    <folio-spring-support.version>8.2.1</folio-spring-support.version>
-    <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
+    <folio-spring-support.version>8.2.2</folio-spring-support.version>
+    <folio-java-checkstyle.version>1.1.0</folio-java-checkstyle.version>
+    <folio-util.version>35.4.0</folio-util.version>
     <application-poc-tools.version>2.1.1</application-poc-tools.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <org.json.version>20250107</org.json.version>
@@ -54,6 +55,12 @@
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-cql</artifactId>
       <version>${folio-spring-support.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>util</artifactId>
+      <version>${folio-util.version}</version>
     </dependency>
 
     <dependency>

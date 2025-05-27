@@ -131,7 +131,7 @@ public class ForgottenUsernamePasswordService {
       return null;
     }
 
-    return userTenantResponse.getUserTenants().getFirst();
+    return userTenantResponse.getUserTenants().get(0);
   }
 
   /**
