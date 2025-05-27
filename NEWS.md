@@ -1,4 +1,8 @@
-## Version `v3.0.2` (15.05.2025)
+## Version `v3.0.3` (27.05.2025)
+### Changes:
+* Search users in all tenants when using "Forgot password" and "Forgot username" links (MODUSERSKC-83)
+
+* ## Version `v3.0.2` (15.05.2025)
 ### Changes:
 * Mask special CQL characters in user queries (MODUSERSKC-86)
 ---
