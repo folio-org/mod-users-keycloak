@@ -1,4 +1,4 @@
-## Version `v2.0.6` (29.05.2025)
+## Version `v2.0.7` (29.05.2025)
 ### Changes:
 * Update Java build to 21
 ---
