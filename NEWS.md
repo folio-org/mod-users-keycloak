@@ -1,3 +1,8 @@
+## Version `v2.0.6` (29.05.2025)
+### Changes:
+* Update Java build to 21
+---
+
 ## Version `v2.0.6` (27.05.2025)
 ### Changes:
 * Mask special CQL characters in user queries (MODUSERSKC-86)
