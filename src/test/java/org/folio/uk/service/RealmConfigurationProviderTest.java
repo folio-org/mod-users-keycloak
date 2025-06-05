@@ -16,7 +16,7 @@ import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.test.types.UnitTest;
 import org.folio.tools.store.SecureStore;
-import org.folio.tools.store.exception.NotFoundException;
+import org.folio.tools.store.exception.SecureStoreServiceException;
 import org.folio.uk.integration.keycloak.RealmConfigurationProvider;
 import org.folio.uk.integration.keycloak.config.KeycloakProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakRealmConfiguration;
@@ -79,7 +79,7 @@ class RealmConfigurationProviderTest {
   void getRealmConfiguration_clientSecretNotFound() {
     when(keycloakConfigurationProperties.getClientId()).thenReturn(CLIENT_ID);
     when(folioEnvironment.getEnvironment()).thenReturn("test");
-    when(secureStore.get(KEY)).thenThrow(new NotFoundException("not found"));
+    when(secureStore.get(KEY)).thenThrow(new SecureStoreServiceException("not found"));
 
     assertThatThrownBy(() -> realmConfigurationProvider.getRealmConfiguration())
       .isInstanceOf(IllegalStateException.class)
@@ -106,7 +106,7 @@ class RealmConfigurationProviderTest {
   @Test
   void getClientConfiguration_clientSecretNotFound() {
     when(folioEnvironment.getEnvironment()).thenReturn("test");
-    when(secureStore.get(PASSWORD_RESET_KEY)).thenThrow(new NotFoundException("not found"));
+    when(secureStore.get(PASSWORD_RESET_KEY)).thenThrow(new SecureStoreServiceException("not found"));
 
     assertThatThrownBy(() -> realmConfigurationProvider.getClientConfiguration(TENANT_ID, PASSWORD_RESET_ID))
       .isInstanceOf(IllegalStateException.class)
