@@ -5,7 +5,6 @@ import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.FIVE_SECONDS;
 import static org.folio.test.extensions.impl.KeycloakContainerExtension.getKeycloakAdminClient;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
@@ -98,8 +97,8 @@ class SystemUserIT extends BaseIntegrationTest {
     expectedUserRoles.setRoleIds(List.of(UUID.fromString("00000000-1000-0000-0000-000000000000")));
 
     await().atMost(FIVE_SECONDS).untilAsserted(() -> {
-      verify(defaultRolesClient).createDefaultLoadableRole(eq(expectedLoadableRole));
-      verify(userRolesClient).assignRoleToUser(eq(expectedUserRoles));
+      verify(defaultRolesClient).createDefaultLoadableRole(expectedLoadableRole);
+      verify(userRolesClient).assignRoleToUser(expectedUserRoles);
     });
   }
 
@@ -124,8 +123,8 @@ class SystemUserIT extends BaseIntegrationTest {
     expectedUserRoles.setRoleIds(List.of(UUID.fromString("00000000-1000-0000-0000-000000000000")));
 
     await().atMost(FIVE_SECONDS).untilAsserted(() -> {
-      verify(defaultRolesClient).createDefaultLoadableRole(eq(expectedLoadableRole));
-      verify(userRolesClient).assignRoleToUser(eq(expectedUserRoles));
+      verify(defaultRolesClient).createDefaultLoadableRole(expectedLoadableRole);
+      verify(userRolesClient).assignRoleToUser(expectedUserRoles);
     });
 
     var authToken = tokenService.issueToken();
