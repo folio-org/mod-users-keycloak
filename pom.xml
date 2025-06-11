@@ -44,6 +44,21 @@
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
     <openapi-generator.version>7.13.0</openapi-generator.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
+
+    <sonar.exclusions>
+      <!--
+        exclude:
+         - exclude domain classes, which are essentially simple POJO classes
+           most of their body is generated with lombok. here is nothing to test or analyse
+         - rest resources (generated API)
+      -->
+      src/main/java/**/domain/**/*,
+      src/main/java/**/configuration/**/*,
+      src/main/java/**/rest/resource/**/*,
+      src/main/java/**/mapper/**/*,
+      src/main/java/**/integration/**/model/**/*,
+      src/main/java/**/*Application.java
+    </sonar.exclusions>
   </properties>
 
   <dependencies>
@@ -517,9 +532,11 @@
                most of their body is generated with lombok. here is nothing to test or analyse
              - rest resources (generated API)
           -->
-          src/main/java/**/domain/**,
-          src/main/java/**/model/**,
-          src/main/java/**/rest/resource/**,
+          src/main/java/**/domain/**/*,
+          src/main/java/**/configuration/**/*,
+          src/main/java/**/rest/resource/**/*,
+          src/main/java/**/mapper/**/*,
+          src/main/java/**/integration/**/model/**/*,
           src/main/java/**/*Application.java
         </sonar.exclusions>
         <sonar.coverage.jacoco.xmlReportPaths>
