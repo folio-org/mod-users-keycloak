@@ -4,6 +4,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.folio.common.configuration.properties.FolioEnvironment.getFolioEnvName;
 import static org.folio.tools.store.utils.SecretGenerator.generateSecret;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -17,7 +18,7 @@ import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
-import org.folio.uk.service.CapabilitiesService;
+import org.folio.uk.integration.roles.dafaultrole.DefaultSystemUserRoleService;
 import org.folio.uk.service.UserService;
 import org.folio.util.StringUtil;
 import org.springframework.stereotype.Service;
@@ -30,9 +31,9 @@ public class SystemUserService {
   private final SecureStore secureStore;
   private final UserService userService;
   private final KeycloakService keycloakService;
-  private final CapabilitiesService capabilitiesService;
   private final FolioExecutionContext executionContext;
   private final SystemUserConfigurationProperties systemUserConfiguration;
+  private final DefaultSystemUserRoleService defaultSystemUserRoleService;
 
   /**
    * Creates a system user for tenant.
@@ -57,16 +58,17 @@ public class SystemUserService {
     if (isEmpty(permissions)) {
       return;
     }
-    reAssignCapabilities(user, permissions);
+    recreateAndAssignRole(user, permissions);
   }
 
   public void updateOnEvent(SystemUserEvent event) {
     if (isEmpty(event.getPermissions())) {
       return;
     }
-    String username = event.getName();
+    var username = event.getName();
     findUserByUsername(username).ifPresentOrElse(
-      user -> reAssignCapabilities(user, event.getPermissions()), () -> createOnEvent(event));
+      user -> recreateAndAssignRole(user, event.getPermissions()),
+      () -> createOnEvent(event));
   }
 
   public void deleteOnEvent(SystemUserEvent event) {
@@ -88,19 +90,14 @@ public class SystemUserService {
     var query = "username==" + StringUtil.cqlEncode(username);
     var users = userService.findUsers(query, 1).getUsers();
     if (CollectionUtils.isNotEmpty(users)) {
-      return Optional.of(users.get(0));
+      return Optional.of(users.getFirst());
     }
     log.debug("User not found by username: {}", username);
     return Optional.empty();
   }
 
-  private void reAssignCapabilities(User user, Set<String> permissions) {
-    capabilitiesService.unassignAll(user.getId());
-    capabilitiesService.assignCapabilitiesByPermissions(user, permissions);
-  }
-
-  private void assignCapabilities(User user, Set<String> permissions) {
-    capabilitiesService.assignCapabilitiesByPermissions(user, permissions);
+  private void recreateAndAssignRole(User user, Set<String> permissions) {
+    defaultSystemUserRoleService.createAndAssignDefaultRole(user, new ArrayList<>(permissions));
   }
 
   private User createUser(String username, String firstName, String email, String type) {

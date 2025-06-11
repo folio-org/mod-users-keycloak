@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties("application.retry.system-user-capabilities")
-public class CapabilitiesRetryConfiguration {
+@ConfigurationProperties("application.retry.system-user-role")
+public class SystemUserRoleRetryConfiguration {
 
   /**
    * Retry delay for module user capabilities assignment.

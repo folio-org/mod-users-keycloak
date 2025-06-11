@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/roles/users",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "testtenant"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "userId": "de5bb75d-e696-4d43-9df8-289f39367079",
+          "roleIds": [
+            "00000000-1000-0000-0000-000000000000"
+          ]
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
