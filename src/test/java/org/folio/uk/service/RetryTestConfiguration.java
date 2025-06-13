@@ -10,7 +10,7 @@ import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.uk.configuration.RetryConfiguration;
 import org.folio.uk.configuration.SystemUserConfigurationProperties;
-import org.folio.uk.integration.kafka.configuration.CapabilitiesRetryConfiguration;
+import org.folio.uk.integration.kafka.configuration.SystemUserRoleRetryConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -34,8 +34,8 @@ public class RetryTestConfiguration {
   }
 
   @Bean
-  public CapabilitiesRetryConfiguration capabilitiesRetryConfiguration() {
-    var config = new CapabilitiesRetryConfiguration();
+  public SystemUserRoleRetryConfiguration capabilitiesRetryConfiguration() {
+    var config = new SystemUserRoleRetryConfiguration();
     config.setRetryDelay(Duration.ofMillis(50));
     config.setRetryAttempts(2);
     return config;

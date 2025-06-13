@@ -1,7 +1,7 @@
 {
   "request": {
-    "method": "PUT",
-    "urlPattern": "/users/.*/capabilities",
+    "method": "POST",
+    "urlPattern": "/roles/users",
     "headers": {
       "x-okapi-tenant": {
         "equalTo": "testtenant"
@@ -11,15 +11,15 @@
       {
         "equalToJson": {
           "userId": "de5bb75d-e696-4d43-9df8-289f39367079",
-          "capabilityIds": [
-            "b190defd-8e0e-4a04-ba14-448091f76b3f"
+          "roleIds": [
+            "00000000-1000-0000-0000-000000000000"
           ]
         }
       }
     ]
   },
   "response": {
-    "status": 204,
+    "status": 201,
     "headers": {
       "Content-Type": "application/json"
     }

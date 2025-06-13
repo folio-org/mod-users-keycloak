@@ -1,0 +1,48 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPattern": "/loadable-roles",
+    "headers": {
+      "x-okapi-tenant": {
+        "equalTo": "testtenant"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "name": "default-system-role-mod-foo",
+          "description": "Default system role for system user mod-foo",
+          "permissions": [
+            {
+              "permissionName": "foo.bar"
+            },
+            {
+              "permissionName": "foo.bar1"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "00000000-1000-0000-0000-000000000000",
+      "name": "default-system-role-mod-foo",
+      "description": "Default system role for mod-foo",
+      "permissions": [
+        {
+          "roleId": "00000000-1000-0000-0000-000000000000",
+          "permissionName": "foo.bar"
+        },
+        {
+          "roleId": "00000000-1000-0000-0000-000000000000",
+          "permissionName": "foo.bar1"
+        }
+      ]
+    }
+  }
+}
