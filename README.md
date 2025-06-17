@@ -8,8 +8,18 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 ## Table of contents
 
 * [Introduction](#introduction)
+  * [ModuleDescriptor](#moduledescriptor)
 * [API documentation](#api-documentation)
 * [Environment Variables](#environment-variables)
+  * [Kafka environment variables](#kafka-environment-variables)
+  * [System User Environment Variables](#system-user-environment-variables)
+  * [Secure storage environment variables](#secure-storage-environment-variables)
+    * [AWS-SSM](#aws-ssm)
+    * [Vault](#vault)
+    * [Folio Secure Store Proxy (FSSP)](#folio-secure-store-proxy-fssp)
+  * [Keycloak environment variables](#keycloak-environment-variables)
+  * [mod-configuration properties](#mod-configuration-properties)
+* [Loading of client IDs/secrets](#loading-of-client-idssecrets)
 
 ## Introduction
 
@@ -113,6 +123,19 @@ Required when `SECRET_STORE_STORE_TYPE=VAULT`
 | SECRET_STORE_VAULT_KEYSTORE_PASSWORD    | -             | the password used to access the JKS keystore (optional)                             |
 | SECRET_STORE_VAULT_KEYSTORE_FILE_PATH   | -             | the path to a JKS keystore file containing a client cert and private key            |
 | SECRET_STORE_VAULT_TRUSTSTORE_FILE_PATH | -             | the path to a JKS truststore file containing Vault server certs that can be trusted |
+
+#### Folio Secure Store Proxy (FSSP)
+
+Required when `SECRET_STORE_TYPE=FSSP`
+
+| Name                                   | Default value         | Description                                          |
+|:---------------------------------------|:----------------------|:-----------------------------------------------------|
+| SECRET_STORE_FSSP_ADDRESS              | -                     | The address (URL) of the FSSP service.               |
+| SECRET_STORE_FSSP_SECRET_PATH          | secure-store/entries  | The path in FSSP where secrets are stored/retrieved. |
+| SECRET_STORE_FSSP_ENABLE_SSL           | false                 | Whether to use SSL when connecting to FSSP.          |
+| SECRET_STORE_FSSP_TRUSTSTORE_PATH      | -                     | Path to the truststore file for SSL connections.     |
+| SECRET_STORE_FSSP_TRUSTSTORE_FILE_TYPE | -                     | The type of the truststore file (e.g., JKS, PKCS12). |
+| SECRET_STORE_FSSP_TRUSTSTORE_PASSWORD  | -                     | The password for the truststore file.                |
 
 ### Keycloak environment variables
 
