@@ -4,6 +4,7 @@
 * Mask special CQL characters in user queries ([https://folio-org.atlassian.net/browse/MODUSERSKC-86](MODUSERSKC-86))
 * Search users in all tenants when using "Forgot password" and "Forgot username" links ([https://folio-org.atlassian.net/browse/MODUSERSKC-83](MODUSERSKC-83))
 * Default loadable roles for system users (MODUSERSKC-93)
+* Introduce configuration for FSSP (APPPOCTOOL-59) 
 ---
 
 ## Version `v3.0.0` (14.03.2025)
