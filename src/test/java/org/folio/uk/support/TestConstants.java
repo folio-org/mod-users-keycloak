@@ -1,6 +1,7 @@
 package org.folio.uk.support;
 
 import static java.time.OffsetDateTime.parse;
+import static org.folio.uk.domain.dto.User.PreferredEmailCommunicationEnum.SUPPORT;
 import static org.folio.uk.utils.UserUtils.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,7 +49,8 @@ public class TestConstants {
       .patronGroup(USER_PATRON_GROUP_ID)
       .enrollmentDate(USER_ENROLLMENT_DATE)
       .expirationDate(USER_EXPIRATION_DATE)
-      .personal(person(email));
+      .personal(person(email))
+      .preferredEmailCommunication(Set.of(SUPPORT));
   }
 
   public static User shadowUser() {
@@ -69,7 +71,8 @@ public class TestConstants {
     return new Personal()
       .firstName("Bailey")
       .lastName("Zakir")
-      .email(email);
+      .email(email)
+      .pronouns("he/him");
   }
 
   public static SystemUserEvent systemUserEvent(Set<String> permissions) {

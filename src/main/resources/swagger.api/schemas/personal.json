@@ -24,6 +24,11 @@
       "description": "The user's email address",
       "type": "string"
     },
+    "pronouns": {
+      "description": "The user's pronouns",
+      "type": "string",
+      "maxLength": 300
+    },
     "phone": {
       "description": "The user's primary phone number",
       "type": "string"
