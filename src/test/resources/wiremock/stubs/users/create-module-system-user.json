@@ -21,7 +21,8 @@
             "firstName": "System user - mod-foo",
             "addresses": [ ]
           },
-          "customFields" : { }
+          "customFields" : { },
+          "preferredEmailCommunication" : [ ]
         }
       }
     ]
