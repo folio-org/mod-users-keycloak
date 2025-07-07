@@ -269,7 +269,7 @@ public class UserService {
     }
     try {
       String encodedPayload = tokenParts[1];
-      byte[] decodedJsonBytes = Base64.getDecoder().decode(encodedPayload);
+      byte[] decodedJsonBytes = Base64.getUrlDecoder().decode(encodedPayload);
       String decodedJson = new String(decodedJsonBytes);
 
       return new JSONObject(decodedJson);
