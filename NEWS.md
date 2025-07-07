@@ -1,6 +1,12 @@
+## Version 'v3.0.4' (07.07.2025)
+### Changes:
+* Add missing fields to user DTO (MODUSERSKC-94)
+---
+
 ## Version `v3.0.3` (27.05.2025)
 ### Changes:
 * Search users in all tenants when using "Forgot password" and "Forgot username" links (MODUSERSKC-83)
+---
 
 * ## Version `v3.0.2` (15.05.2025)
 ### Changes:
