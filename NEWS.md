@@ -1,3 +1,8 @@
+## Version 'v3.0.5' (10.07.2025)
+### Changes:
+* Use URL decoder for token payload
+---
+
 ## Version 'v3.0.4' (07.07.2025)
 ### Changes:
 * Add missing fields to user DTO (MODUSERSKC-94)
