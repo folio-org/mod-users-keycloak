@@ -103,6 +103,7 @@ public class KeycloakService {
         dto.providerAlias()));
   }
 
+  @SuppressWarnings("checkstyle:MethodLength")
   private void applyIdentityProviderOnUser(User user, String kcUserId,
                                            Consumer<KeycloakIdentityProviderDto> kcOperation) {
     var userId = user.getId();
@@ -212,7 +213,7 @@ public class KeycloakService {
         String.format("Too many keycloak users with '%s' attribute: %s", USER_ID_ATTR, id));
     }
 
-    return Optional.of(found.get(0));
+    return Optional.of(found.getFirst());
   }
 
   /**
@@ -231,7 +232,7 @@ public class KeycloakService {
     var foundUsers = callKeycloak(
       () -> keycloakClient.findUsersByUsername(realm, username, briefRepresentation, getToken()),
       () -> "Failed to find a user by username: " + username);
-    return isNotEmpty(foundUsers) ? Optional.of(foundUsers.get(0)) : Optional.empty();
+    return isNotEmpty(foundUsers) ? Optional.of(foundUsers.getFirst()) : Optional.empty();
   }
 
   /**
@@ -329,7 +330,7 @@ public class KeycloakService {
         throw new KeycloakException(format("Too many keycloak clients with clientId: %s", clientId));
       }
 
-      var client = found.get(0);
+      var client = found.getFirst();
       if (client == null) {
         throw new KeycloakException(format("Keycloak client is not found by clientId: %s", clientId));
       }
@@ -353,7 +354,7 @@ public class KeycloakService {
     var foundUsers = callKeycloak(
       () -> keycloakClient.findScopePermission(realm, clientId, permission, getToken()),
       () -> String.format("Failed to find a permission %s", permission));
-    return isNotEmpty(foundUsers) ? Optional.of(foundUsers.get(0)) : Optional.empty();
+    return isNotEmpty(foundUsers) ? Optional.of(foundUsers.getFirst()) : Optional.empty();
   }
 
   private void callKeycloak(Runnable method, Supplier<String> expMsgSupplier) {
@@ -467,6 +468,6 @@ public class KeycloakService {
     return Optional.ofNullable(user.getAttributes())
       .map(userAttributes -> userAttributes.get(USER_ID_ATTR))
       .filter(CollectionUtils::isNotEmpty)
-      .map(userAttributes -> userAttributes.get(0));
+      .map(List::getFirst);
   }
 }
