@@ -68,22 +68,10 @@ public class PasswordResetService {
       configurationService.getAllModuleConfigsValidated(MODULE_NAME, GENERATE_LINK_REQUIRED_CONFIGURATION);
     var user = lookupAndValidateUser(userId);
 
-    var expirationTimeFromConfig =
-      configMap.getOrDefault(LINK_EXPIRATION_TIME_CONFIG_KEY, LINK_EXPIRATION_TIME_DEFAULT);
-    var expirationUnitOfTimeFromConfig = configMap.getOrDefault(
-      LINK_EXPIRATION_UNIT_OF_TIME_CONFIG_KEY, LINK_EXPIRATION_UNIT_OF_TIME_DEFAULT);
-
-    long expirationTime = convertDateToMillisecondsOrElseThrow(expirationTimeFromConfig, expirationUnitOfTimeFromConfig,
-      () -> new UnprocessableEntityException("Can't convert time period to milliseconds", LINK_INVALID));
-
-    if (expirationTime > MAXIMUM_EXPIRATION_TIME) {
-      expirationTime = MAXIMUM_EXPIRATION_TIME;
-      expirationTimeFromConfig = String.valueOf(MAXIMUM_EXPIRATION_TIME_IN_WEEKS);
-      expirationUnitOfTimeFromConfig = ExpirationTimeUnit.WEEKS.name().toLowerCase();
-    }
+    ExpirationTimeRecord etr = getExpirationTime(configMap);
 
     var passwordResetActionId = UUID.randomUUID().toString();
-    var actionResponse = actionService.createPasswordResetAction(userId, expirationTime, passwordResetActionId);
+    var actionResponse = actionService.createPasswordResetAction(userId, etr.expirationTime(), passwordResetActionId);
     var passwordExists = defaultIfNull(actionResponse.getPasswordExists(), false);
 
     var tokenResponse = resetTokenService.generateResetToken(passwordResetActionId);
@@ -94,7 +82,7 @@ public class PasswordResetService {
     var eventConfigName = passwordExists ? RESET_PASSWORD_EVENT_CONFIG_NAME : CREATE_PASSWORD_EVENT_CONFIG_NAME;
 
     notificationService.sendResetLinkNotification(user, generatedLink,
-      eventConfigName, expirationTimeFromConfig, expirationUnitOfTimeFromConfig);
+      eventConfigName, etr.expirationTimeFromConfig(), etr.expirationUnitOfTimeFromConfig());
 
     return generatedLink;
   }
@@ -155,5 +143,26 @@ public class PasswordResetService {
       var message = String.format("User with id '%s' not found", userId);
       return new UnprocessableEntityException(message, LINK_INVALID);
     });
+  }
+
+  private static PasswordResetService.ExpirationTimeRecord getExpirationTime(Map<String, String> configMap) {
+    var expirationTimeFromConfig =
+      configMap.getOrDefault(LINK_EXPIRATION_TIME_CONFIG_KEY, LINK_EXPIRATION_TIME_DEFAULT);
+    var expirationUnitOfTimeFromConfig = configMap.getOrDefault(
+      LINK_EXPIRATION_UNIT_OF_TIME_CONFIG_KEY, LINK_EXPIRATION_UNIT_OF_TIME_DEFAULT);
+
+    long expirationTime = convertDateToMillisecondsOrElseThrow(expirationTimeFromConfig, expirationUnitOfTimeFromConfig,
+      () -> new UnprocessableEntityException("Can't convert time period to milliseconds", LINK_INVALID));
+
+    if (expirationTime > MAXIMUM_EXPIRATION_TIME) {
+      expirationTime = MAXIMUM_EXPIRATION_TIME;
+      expirationTimeFromConfig = String.valueOf(MAXIMUM_EXPIRATION_TIME_IN_WEEKS);
+      expirationUnitOfTimeFromConfig = ExpirationTimeUnit.WEEKS.name().toLowerCase();
+    }
+    return new ExpirationTimeRecord(expirationTime, expirationTimeFromConfig, expirationUnitOfTimeFromConfig);
+  }
+
+  private record ExpirationTimeRecord(long expirationTime, String expirationTimeFromConfig,
+    String expirationUnitOfTimeFromConfig) {
   }
 }

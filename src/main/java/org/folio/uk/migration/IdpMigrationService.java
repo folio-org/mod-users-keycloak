@@ -49,25 +49,21 @@ public class IdpMigrationService {
   }
 
   private void applyUserIdpMigration(UsersIdp usersIdp, BiConsumer<User, String> kcOperation) {
-    if (Boolean.FALSE.equals(keycloakFederatedAuthProperties.isEnabled())) {
+    if (!keycloakFederatedAuthProperties.isEnabled()) {
       log.info("Applying user IDP migration is disabled");
       return;
     }
-    var centralTenantId = usersIdp.getCentralTenantId();
-    var contextTenantId = folioExecutionContext.getTenantId();
-    if (!StringUtils.equals(centralTenantId, contextTenantId)) {
-      throw new IllegalStateException(String.format("Cannot apply user IDP migration, supplied centralTenantId '%s' "
-        + "does not match context tenantId '%s'", centralTenantId, contextTenantId));
-    }
+
+    validateUsersIdp(usersIdp);
+
     var userIds = new ArrayList<>(usersIdp.getUserIds());
-    if (CollectionUtils.isEmpty(userIds)) {
-      throw new IllegalStateException("Cannot apply user IDP migration, no userIds are supplied in request body");
-    }
-    log.info("Applying IDP migration to {} user(s) in {} tenant", userIds.size(), centralTenantId);
+    log.info("Applying IDP migration to {} user(s) in {} tenant", userIds.size(), usersIdp.getCentralTenantId());
+
     var partitions = partition(userIds, idpMigrationProperties.getBatchSize()).stream()
       .map(part -> runAsync(getRunnableWithCurrentFolioContext(
         () -> findAndLinkUserIdpByPart(part, kcOperation))))
       .toArray(CompletableFuture[]::new);
+
     allOf(partitions).whenComplete(migrationCompleteHandler(userIds.size()));
   }
 
@@ -86,5 +82,19 @@ public class IdpMigrationService {
       }
       log.info("User IDP migration has finished, total records: {}", totalRecords);
     };
+  }
+
+  private void validateUsersIdp(UsersIdp usersIdp) {
+    var centralTenantId = usersIdp.getCentralTenantId();
+    var contextTenantId = folioExecutionContext.getTenantId();
+
+    if (!StringUtils.equals(centralTenantId, contextTenantId)) {
+      throw new IllegalStateException(String.format("Cannot apply user IDP migration, supplied centralTenantId '%s' "
+        + "does not match context tenantId '%s'", centralTenantId, contextTenantId));
+    }
+
+    if (CollectionUtils.isEmpty(usersIdp.getUserIds())) {
+      throw new IllegalStateException("Cannot apply user IDP migration, no userIds are supplied in request body");
+    }
   }
 }
