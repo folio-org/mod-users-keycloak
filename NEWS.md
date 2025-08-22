@@ -6,6 +6,7 @@
 * Default loadable roles for system users (MODUSERSKC-93)
 * Introduce configuration for FSSP (APPPOCTOOL-59)
 * Add missing fields to user DTO ([https://folio-org.atlassian.net/browse/MODUSERSKC-94](MODUSERSKC-94))
+* SSO setting requires 'barcode' user attribute populated in Keycloak ([https://folio-org.atlassian.net/browse/MODUSERSKC-100](MODUSERSKC-100))
 ---
 
 ## Version `v3.0.0` (14.03.2025)
