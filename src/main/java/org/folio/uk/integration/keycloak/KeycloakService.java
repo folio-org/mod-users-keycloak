@@ -435,6 +435,7 @@ public class KeycloakService {
 
     result.setUserIdAttr(user.getId());
     result.setUserExternalSystemIdAttr(user.getExternalSystemId());
+    result.setUserBarcodeAttr(user.getBarcode());
 
     return result;
   }

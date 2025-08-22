@@ -6,6 +6,7 @@ import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import static org.folio.spring.integration.XOkapiHeaders.URL;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.extensions.impl.KeycloakContainerExtension.getKeycloakAdminClient;
+import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_BARCODE_ATTR;
 import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_EXTERNAL_SYSTEM_ID_ATTR;
 import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_ID_ATTR;
 import static org.folio.uk.support.TestConstants.CENTRAL_TENANT_NAME;
@@ -309,6 +310,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     assertThat(user.getId()).isNotNull();
     assertThat(attributes.get(USER_ID_ATTR)).contains(user.getId().toString());
     assertThat(attributes.get(USER_EXTERNAL_SYSTEM_ID_ATTR)).contains(user.getExternalSystemId());
+    assertThat(attributes.get(USER_BARCODE_ATTR)).contains(user.getBarcode());
   }
 
   protected CreateUserVerifyDto verifyKeycloakUser(String tenant, User user) {
@@ -322,6 +324,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     assertThat(user.getId()).isNotNull();
     assertThat(attributes.get(USER_ID_ATTR)).contains(user.getId().toString());
     assertThat(attributes.get(USER_EXTERNAL_SYSTEM_ID_ATTR)).contains(user.getExternalSystemId());
+    assertThat(attributes.get(USER_BARCODE_ATTR)).contains(user.getBarcode());
 
     return new CreateUserVerifyDto(authToken, kcUser);
   }
