@@ -85,7 +85,7 @@ application:
       trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD:}
       trust-store-type: ${KC_CLIENT_TLS_TRUSTSTORE_TYPE:}
   secret-store:
-    environment: ${SECURE_STORE_ENV:${ENV}}
+    environment: ${SECURE_STORE_ENV:${ENV:folio}}
     type: ${SECRET_STORE_TYPE}
     aws-ssm:
       region: ${SECRET_STORE_AWS_SSM_REGION:}
