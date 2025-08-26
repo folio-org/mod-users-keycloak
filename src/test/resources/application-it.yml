@@ -21,7 +21,6 @@ application:
       trust-store-password: secretpassword
       trust-store-type: JKS
   secret-store:
-    environment: folio
     type: EPHEMERAL
     ephemeral:
       content:
