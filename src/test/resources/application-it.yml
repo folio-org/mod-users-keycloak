@@ -22,6 +22,7 @@ application:
       trust-store-type: JKS
   secret-store:
     type: EPHEMERAL
+    environment: it-test
     ephemeral:
       content:
         it-test_master_folio-backend-admin-client: ${KC_ADMIN_CLIENT_SECRET}

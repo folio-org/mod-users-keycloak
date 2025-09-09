@@ -11,12 +11,12 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.folio.common.configuration.properties.FolioEnvironment;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.test.types.UnitTest;
 import org.folio.tools.store.SecureStore;
 import org.folio.tools.store.exception.SecureStoreServiceException;
+import org.folio.tools.store.properties.SecureStoreProperties;
 import org.folio.uk.integration.keycloak.RealmConfigurationProvider;
 import org.folio.uk.integration.keycloak.config.KeycloakProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakRealmConfiguration;
@@ -26,12 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @UnitTest
 @SpringBootTest(classes = {RealmConfigurationProvider.class,
@@ -50,9 +50,9 @@ class RealmConfigurationProviderTest {
 
   @Autowired private CacheManager cacheManager;
   @Autowired private RealmConfigurationProvider realmConfigurationProvider;
-  @MockBean private SecureStore secureStore;
-  @MockBean private FolioEnvironment folioEnvironment;
-  @MockBean private KeycloakProperties keycloakConfigurationProperties;
+  @MockitoBean private SecureStore secureStore;
+  @MockitoBean private SecureStoreProperties secureStoreProperties;
+  @MockitoBean private KeycloakProperties keycloakConfigurationProperties;
 
   @AfterEach
   void tearDown() {
@@ -62,7 +62,7 @@ class RealmConfigurationProviderTest {
   @Test
   void getRealmConfiguration_positive() {
     when(keycloakConfigurationProperties.getClientId()).thenReturn(CLIENT_ID);
-    when(folioEnvironment.getEnvironment()).thenReturn("test");
+    when(secureStoreProperties.getEnvironment()).thenReturn("test");
     when(secureStore.get(KEY)).thenReturn(SECRET);
 
     var actual = realmConfigurationProvider.getRealmConfiguration();
@@ -78,7 +78,7 @@ class RealmConfigurationProviderTest {
   @Test
   void getRealmConfiguration_clientSecretNotFound() {
     when(keycloakConfigurationProperties.getClientId()).thenReturn(CLIENT_ID);
-    when(folioEnvironment.getEnvironment()).thenReturn("test");
+    when(secureStoreProperties.getEnvironment()).thenReturn("test");
     when(secureStore.get(KEY)).thenThrow(new SecureStoreServiceException("not found"));
 
     assertThatThrownBy(() -> realmConfigurationProvider.getRealmConfiguration())
@@ -90,7 +90,7 @@ class RealmConfigurationProviderTest {
 
   @Test
   void getClientConfiguration_positive() {
-    when(folioEnvironment.getEnvironment()).thenReturn("test");
+    when(secureStoreProperties.getEnvironment()).thenReturn("test");
     when(secureStore.get(PASSWORD_RESET_KEY)).thenReturn(SECRET);
 
     var actual = realmConfigurationProvider.getClientConfiguration(TENANT_ID, PASSWORD_RESET_ID);
@@ -105,7 +105,7 @@ class RealmConfigurationProviderTest {
 
   @Test
   void getClientConfiguration_clientSecretNotFound() {
-    when(folioEnvironment.getEnvironment()).thenReturn("test");
+    when(secureStoreProperties.getEnvironment()).thenReturn("test");
     when(secureStore.get(PASSWORD_RESET_KEY)).thenThrow(new SecureStoreServiceException("not found"));
 
     assertThatThrownBy(() -> realmConfigurationProvider.getClientConfiguration(TENANT_ID, PASSWORD_RESET_ID))
@@ -117,7 +117,7 @@ class RealmConfigurationProviderTest {
 
   @Test
   void evictAllClientConfigurations_positive() {
-    when(folioEnvironment.getEnvironment()).thenReturn("test");
+    when(secureStoreProperties.getEnvironment()).thenReturn("test");
     when(secureStore.get(PASSWORD_RESET_KEY)).thenReturn(SECRET);
 
     realmConfigurationProvider.getClientConfiguration(TENANT_ID, PASSWORD_RESET_ID);
