@@ -6,6 +6,7 @@
 ## Version 'v3.0.6' (18.09.2025)
 ### Changes:
 * SSO setting requires 'barcode' user attribute populated in Keycloak (MODUSERSKC-100)
+* Use SECURE_STORE_ENV, not ENV, for secure store key (MODUSERSKC-99)
 ---
 
 ## Version 'v3.0.5' (10.07.2025)
