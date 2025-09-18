@@ -1,3 +1,8 @@
+## Version 'v3.0.6' (18.09.2025)
+### Changes:
+* SSO setting requires 'barcode' user attribute populated in Keycloak (MODUSERSKC-100)
+---
+
 ## Version 'v3.0.5' (10.07.2025)
 ### Changes:
 * Use URL decoder for token payload
