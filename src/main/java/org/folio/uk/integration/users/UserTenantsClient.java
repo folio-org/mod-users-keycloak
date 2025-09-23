@@ -13,8 +13,12 @@ public interface UserTenantsClient {
   @GetMapping(value = "?userId={id}")
   UserTenantCollection lookupByUserId(@PathVariable("id") UUID userId);
 
-  @GetMapping
-  UserTenantCollection query(@RequestParam("query") String query, @RequestParam("limit") Integer limit);
+  @GetMapping(value = "?limit=1")
+  UserTenantCollection getOne();
+
+  @GetMapping(value = "?queryOp=or")
+  UserTenantCollection getUserTenants(@RequestParam Integer limit, @RequestParam String userName,
+    @RequestParam String email, @RequestParam String phoneNumber);
 
   @GetMapping(value = "?tenantId={id}")
   UserTenantCollection lookupByTenantId(@PathVariable("id") String tenantId);

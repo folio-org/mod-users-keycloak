@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @UnitTest
 @ExtendWith(MockitoExtension.class)
 class ForgottenUsernamePasswordServiceTest {
+
   private static final User TEST_USER = new User().username("test").id(UUID.randomUUID()).active(true);
   private static final UUID TEST_USER_ID = TEST_USER.getId();
 
@@ -50,8 +51,7 @@ class ForgottenUsernamePasswordServiceTest {
     when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
       ForgottenUsernamePasswordService.FORGOTTEN_PASSWORD_ALIASES))
       .thenReturn(Map.of("phoneNumber", "personal.phone"));
-    when(userTenantsClient.query(anyString(), anyInt()))
-      .thenReturn(new UserTenantCollection().totalRecords(0));
+    when(userTenantsClient.getOne()).thenReturn(new UserTenantCollection().totalRecords(0));
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(1).addUsersItem(TEST_USER));
 
@@ -66,8 +66,7 @@ class ForgottenUsernamePasswordServiceTest {
     when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
       ForgottenUsernamePasswordService.FORGOTTEN_PASSWORD_ALIASES))
       .thenReturn(Collections.emptyMap());
-    when(userTenantsClient.query(anyString(), anyInt()))
-      .thenReturn(new UserTenantCollection().totalRecords(0));
+    when(userTenantsClient.getOne()).thenReturn(new UserTenantCollection().totalRecords(0));
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(1).addUsersItem(TEST_USER));
 
@@ -84,8 +83,7 @@ class ForgottenUsernamePasswordServiceTest {
     when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
       ForgottenUsernamePasswordService.FORGOTTEN_PASSWORD_ALIASES))
       .thenReturn(Collections.emptyMap());
-    when(userTenantsClient.query(anyString(), anyInt()))
-      .thenReturn(new UserTenantCollection().totalRecords(0));
+    when(userTenantsClient.getOne()).thenReturn(new UserTenantCollection().totalRecords(0));
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(2).addUsersItem(TEST_USER).addUsersItem(new User().username("another")));
 
@@ -104,7 +102,7 @@ class ForgottenUsernamePasswordServiceTest {
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(
         new Users().totalRecords(1).addUsersItem(inactiveUser));
-    when(userTenantsClient.query(anyString(), anyInt()))
+    when(userTenantsClient.getOne())
       .thenReturn(new UserTenantCollection().totalRecords(0));
 
     assertThatThrownBy(() -> service.resetForgottenPassword(new Identifier().id("test")))
@@ -120,7 +118,7 @@ class ForgottenUsernamePasswordServiceTest {
       .thenReturn(Map.of("email", "personal.email"));
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(1).addUsersItem(TEST_USER));
-    when(userTenantsClient.query(anyString(), anyInt()))
+    when(userTenantsClient.getOne())
       .thenReturn(new UserTenantCollection().totalRecords(0));
 
     service.recoverForgottenUsername(new Identifier().id("test"));
@@ -136,7 +134,7 @@ class ForgottenUsernamePasswordServiceTest {
       .thenReturn(Collections.emptyMap());
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(1).addUsersItem(TEST_USER));
-    when(userTenantsClient.query(anyString(), anyInt()))
+    when(userTenantsClient.getOne())
       .thenReturn(new UserTenantCollection().totalRecords(0));
 
     service.recoverForgottenUsername(new Identifier().id("test"));
@@ -152,8 +150,7 @@ class ForgottenUsernamePasswordServiceTest {
     when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
       ForgottenUsernamePasswordService.FORGOTTEN_USERNAME_ALIASES))
       .thenReturn(Collections.emptyMap());
-    when(userTenantsClient.query(anyString(), anyInt()))
-      .thenReturn(new UserTenantCollection().totalRecords(0));
+    when(userTenantsClient.getOne()).thenReturn(new UserTenantCollection().totalRecords(0));
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(2).addUsersItem(TEST_USER).addUsersItem(new User().username("another")));
 
@@ -164,40 +161,56 @@ class ForgottenUsernamePasswordServiceTest {
 
   @Test
   void resetForgottenPassword_crossTenant_positive() {
-    var userTenant = new UserTenant()
+    var canaryUser = new UserTenant()
       .userId(TEST_USER_ID.toString())
       .email("test@mail.com")
-      .tenantId("otherTenant");
-    var userTenantCollection = new UserTenantCollection()
-      .totalRecords(1)
-      .addUserTenantsItem(userTenant);
+      .tenantId("otherTenant")
+      .centralTenantId("centralTenant");
+    var canaryCollection = new UserTenantCollection()
+      .addUserTenantsItem(canaryUser)
+      .totalRecords(1);
+    var locatedUserTenant = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .email("test@mail.com")
+      .tenantId("otherTenant")
+      .centralTenantId("centralTenant");
+    var locatedCollection = new UserTenantCollection()
+      .addUserTenantsItem(locatedUserTenant)
+      .totalRecords(1);
     when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
       ForgottenUsernamePasswordService.FORGOTTEN_PASSWORD_ALIASES))
       .thenReturn(Collections.emptyMap());
-    when(userTenantsClient.query(anyString(), anyInt()))
-      .thenReturn(userTenantCollection);
+    when(userTenantsClient.getOne()).thenReturn(canaryCollection);
+    when(userTenantsClient.getUserTenants(2, "test@mail.com", "test@mail.com", "test@mail.com"))
+      .thenReturn(locatedCollection);
+    when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of("x-okapi-tenant", List.of("otherTenant")));
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(1).addUsersItem(TEST_USER));
 
     service.resetForgottenPassword(new Identifier().id("test@mail.com"));
 
+    verify(passwordResetService).sendPasswordRestLink(eq(TEST_USER_ID));
     verifyNoInteractions(notificationService);
   }
 
   @Test
   void recoverForgottenUsername_crossTenant_negative_multipleUsersFound() {
-    var userTenantCollection = new UserTenantCollection()
-      .totalRecords(2);
-    when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
-      ForgottenUsernamePasswordService.FORGOTTEN_USERNAME_ALIASES))
-      .thenReturn(Collections.emptyMap());
-    when(userTenantsClient.query(anyString(), anyInt()))
-      .thenReturn(userTenantCollection);
+    var canaryUser = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .tenantId("memberTenant")
+      .centralTenantId("centralTenant");
+    var canaryCollection = new UserTenantCollection()
+      .addUserTenantsItem(canaryUser)
+      .totalRecords(1);
+
+    when(userTenantsClient.getOne()).thenReturn(canaryCollection);
+    when(userTenantsClient.getUserTenants(2, "test", "test", "test"))
+      .thenReturn(new UserTenantCollection().totalRecords(2));
+    when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
 
     service.recoverForgottenUsername(new Identifier().id("test"));
 
     verifyNoInteractions(notificationService);
   }
 }
-
