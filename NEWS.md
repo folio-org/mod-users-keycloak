@@ -8,6 +8,7 @@
 * Add missing fields to user DTO ([https://folio-org.atlassian.net/browse/MODUSERSKC-94](MODUSERSKC-94))
 * SSO setting requires 'barcode' user attribute populated in Keycloak (MODUSERSKC-100)
 * Use SECURE_STORE_ENV, not ENV, for secure store key (MODUSERSKC-99)
+* Use query parameters for retrieving `/user-tenants` (MODUSERSKC-104)
 ---
 
 ## Version `v3.0.0` (14.03.2025)
