@@ -190,7 +190,7 @@ class ForgottenUsernamePasswordServiceTest {
 
     service.resetForgottenPassword(new Identifier().id("test@mail.com"));
 
-    verify(passwordResetService).sendPasswordRestLink(eq(TEST_USER_ID));
+    verify(passwordResetService).sendPasswordRestLink(TEST_USER_ID);
     verifyNoInteractions(notificationService);
   }
 
