@@ -5,6 +5,7 @@ import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextFo
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ForgottenUsernamePasswordService {
+
   public static final String MODULE_NAME_CONFIG = "USERSBL";
   private static final String LOCATE_USER_USERNAME = "userName";
   private static final String LOCATE_USER_PHONE_NUMBER = "phoneNumber";
@@ -54,8 +56,7 @@ public class ForgottenUsernamePasswordService {
 
   public void resetForgottenPassword(Identifier identifier) {
     try {
-      UserTenant userTenant =
-        locateUserByAliasCrossTenant(FORGOTTEN_PASSWORD_ALIASES, identifier, FORGOTTEN_PASSWORD_ERROR_KEY);
+      var userTenant = locateUserByAliasCrossTenant(identifier, FORGOTTEN_PASSWORD_ERROR_KEY);
       if (userTenant == null) {
         sendPasswordRestLinkByIdentifier(identifier);
         return;
@@ -72,8 +73,7 @@ public class ForgottenUsernamePasswordService {
 
   public void recoverForgottenUsername(Identifier identifier) {
     try {
-      UserTenant userTenant =
-        locateUserByAliasCrossTenant(FORGOTTEN_USERNAME_ALIASES, identifier, FORGOTTEN_USERNAME_ERROR_KEY);
+      var userTenant = locateUserByAliasCrossTenant(identifier, FORGOTTEN_USERNAME_ERROR_KEY);
       if (userTenant == null) {
         sendLocateUserNotificationByIdentifier(identifier);
         return;
@@ -116,29 +116,67 @@ public class ForgottenUsernamePasswordService {
       .collect(Collectors.toList());
   }
 
-  private UserTenant locateUserByAliasCrossTenant(List<String> fieldAliases, Identifier identifier, String errorKey) {
-    var locateUserFields = getLocateUserFields(fieldAliases);
-
-    var query = buildQuery(locateUserFields, identifier.getId());
-    var userTenantResponse = userTenantsClient.query(query, 2);
-
-    if (userTenantResponse.getTotalRecords() > 1) {
-      var message = String.format("Multiple users associated with '%s'", identifier.getId());
-      throw new MultipleEntityException(message, errorKey);
-    }
-
-    if (userTenantResponse.getTotalRecords() == 0) {
+  private UserTenant locateUserByAliasCrossTenant(Identifier identifier, String errorKey) {
+    var response = userTenantsClient.getOne();
+    if (isConsortiaModeNotActive(response)) { //check if consortia mode is not active
       return null;
     }
 
-    return userTenantResponse.getUserTenants().getFirst();
+    var canaryUser = response.getUserTenants().getFirst();
+    return getUserTenant(identifier, errorKey, canaryUser);
+  }
+
+  /**
+   * Retrieves the appropriate {@link UserTenant} based on the current tenant context.
+   *
+   *<p>
+   * If the current tenant is the central tenant, attempts to find a user tenant by the given identifier. Throws
+   * {@link MultipleEntityException} if multiple user tenants are found. Returns {@code null} if no user tenants are
+   * found. If the current tenant is a member tenant, returns the provided canary user.
+   *
+   * @param identifier the identifier used to locate the user tenant
+   * @param errorKey the error key for exception handling
+   * @param canaryUser a user tenant used to determine tenant type and as a fallback
+   * @return the located {@link UserTenant}, or {@code null} if not found
+   * @throws MultipleEntityException if multiple user tenants are found for the identifier
+   */
+  private UserTenant getUserTenant(Identifier identifier, String errorKey, UserTenant canaryUser) {
+    // if any user's centralTenant is current tenantId from folioExecutionContext - it is central tenant
+    // else - it is member tenant
+    if (isCentralTenant(canaryUser)) {
+      var id = identifier.getId();
+      var userTenantResponse = userTenantsClient.getUserTenants(2, id, id, id);
+
+      if (userTenantResponse.getTotalRecords() > 1) {
+        log.warn("Multiple users found: tenant = {}, id = {} ", folioExecutionContext.getTenantId(),
+          identifier.getId());
+        var message = String.format("Multiple users associated with '%s'", identifier.getId());
+        throw new MultipleEntityException(message, errorKey);
+      }
+
+      if (userTenantResponse.getTotalRecords() == 0) {
+        return null;
+      }
+
+      return userTenantResponse.getUserTenants().getFirst();
+    } else {
+      return canaryUser;
+    }
+  }
+
+  private static boolean isConsortiaModeNotActive(org.folio.uk.domain.dto.UserTenantCollection tenantCollection) {
+    return tenantCollection.getTotalRecords() == 0;
+  }
+
+  private boolean isCentralTenant(UserTenant canaryUser) {
+    return Objects.equals(folioExecutionContext.getTenantId(), canaryUser.getCentralTenantId());
   }
 
   /**
    * Locates user by the given alias.
    *
    * @param fieldAliases list of aliases to use
-   * @param identifier   an identity with a value
+   * @param identifier an identity with a value
    * @return Located user
    */
   private User locateUserByAlias(List<String> fieldAliases, Identifier identifier, String errorKey) {
@@ -165,7 +203,7 @@ public class ForgottenUsernamePasswordService {
    * Builds CQL query to search a value in the given fields.
    *
    * @param fields a list of fields to be used for search
-   * @param value  a value to search
+   * @param value a value to search
    * @return CQL query value
    */
   private String buildQuery(List<String> fields, String value) {
