@@ -1,3 +1,8 @@
+## Version 'v3.0.7' (24.09.2025)
+### Changes:
+* Use query parameters for retrieving /user-tenants (MODUSERSKC-104)
+---
+
 ## Version 'v3.0.6' (18.09.2025)
 ### Changes:
 * SSO setting requires 'barcode' user attribute populated in Keycloak (MODUSERSKC-100)
