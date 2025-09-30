@@ -1,3 +1,8 @@
+## Version 'v3.0.8' (30.09.2025)
+### Changes:
+* Use SECURE_STORE_ENV, not ENV, for secure store key (MODUSERSKC-99)
+---
+
 ## Version 'v3.0.7' (24.09.2025)
 ### Changes:
 * Use query parameters for retrieving /user-tenants (MODUSERSKC-104)
