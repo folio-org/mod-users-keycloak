@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -164,7 +165,7 @@ class ForgottenUsernamePasswordServiceTest {
     var canaryUser = new UserTenant()
       .userId(TEST_USER_ID.toString())
       .email("test@mail.com")
-      .tenantId("otherTenant")
+      .tenantId("memberTenant")
       .centralTenantId("centralTenant");
     var canaryCollection = new UserTenantCollection()
       .addUserTenantsItem(canaryUser)
@@ -172,21 +173,23 @@ class ForgottenUsernamePasswordServiceTest {
     var locatedUserTenant = new UserTenant()
       .userId(TEST_USER_ID.toString())
       .email("test@mail.com")
-      .tenantId("otherTenant")
+      .username("testuser")
+      .phoneNumber("1234567890")
+      .mobilePhoneNumber("0987654321")
+      .tenantId("memberTenant")
       .centralTenantId("centralTenant");
     var locatedCollection = new UserTenantCollection()
       .addUserTenantsItem(locatedUserTenant)
       .totalRecords(1);
-    when(configurationService.queryModuleConfigsByCodes(ForgottenUsernamePasswordService.MODULE_NAME_CONFIG,
-      ForgottenUsernamePasswordService.FORGOTTEN_PASSWORD_ALIASES))
-      .thenReturn(Collections.emptyMap());
+
     when(userTenantsClient.getOne()).thenReturn(canaryCollection);
-    when(userTenantsClient.getUserTenants(2, "test@mail.com", "test@mail.com", "test@mail.com"))
+    lenient().when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
+    when(folioExecutionContext.getOkapiHeaders())
+      .thenReturn(Map.of("x-okapi-tenant", List.of("centralTenant"), "x-okapi-url", List.of("http://localhost")));
+    when(userTenantsClient.getUserTenants(2, "test@mail.com", "test@mail.com", "test@mail.com", "test@mail.com"))
       .thenReturn(locatedCollection);
-    when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of("x-okapi-tenant", List.of("otherTenant")));
-    when(userService.findUsers(anyString(), anyInt()))
-      .thenReturn(new Users().totalRecords(1).addUsersItem(TEST_USER));
+    when(userTenantsClient.getUserTenants(2, "testuser", "test@mail.com", "1234567890", "0987654321"))
+      .thenReturn(new UserTenantCollection().totalRecords(1));
 
     service.resetForgottenPassword(new Identifier().id("test@mail.com"));
 
@@ -205,11 +208,115 @@ class ForgottenUsernamePasswordServiceTest {
       .totalRecords(1);
 
     when(userTenantsClient.getOne()).thenReturn(canaryCollection);
-    when(userTenantsClient.getUserTenants(2, "test", "test", "test"))
+    lenient().when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
+    when(folioExecutionContext.getOkapiHeaders())
+      .thenReturn(Map.of("x-okapi-tenant", List.of("centralTenant"), "x-okapi-url", List.of("http://localhost")));
+    when(userTenantsClient.getUserTenants(2, "test", "test", "test", "test"))
       .thenReturn(new UserTenantCollection().totalRecords(2));
-    when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
 
     service.recoverForgottenUsername(new Identifier().id("test"));
+
+    verifyNoInteractions(notificationService);
+  }
+
+  @Test
+  void resetForgottenPassword_crossTenant_negative_duplicateContacts() {
+    var canaryUser = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .email("test@mail.com")
+      .tenantId("memberTenant")
+      .centralTenantId("centralTenant");
+    var canaryCollection = new UserTenantCollection()
+      .addUserTenantsItem(canaryUser)
+      .totalRecords(1);
+    var locatedUserTenant = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .username("testuser")
+      .email("duplicate@mail.com")
+      .phoneNumber("1234567890")
+      .mobilePhoneNumber("0987654321")
+      .tenantId("memberTenant")
+      .centralTenantId("centralTenant");
+    var locatedCollection = new UserTenantCollection()
+      .addUserTenantsItem(locatedUserTenant)
+      .totalRecords(1);
+
+    when(userTenantsClient.getOne()).thenReturn(canaryCollection);
+    when(folioExecutionContext.getOkapiHeaders())
+      .thenReturn(Map.of("x-okapi-tenant", List.of("centralTenant"), "x-okapi-url", List.of("http://localhost")));
+    when(userTenantsClient.getUserTenants(2, "test@mail.com", "test@mail.com", "test@mail.com", "test@mail.com"))
+      .thenReturn(locatedCollection);
+    when(userTenantsClient.getUserTenants(2, "testuser", "duplicate@mail.com", "1234567890", "0987654321"))
+      .thenReturn(new UserTenantCollection().totalRecords(2));
+
+    service.resetForgottenPassword(new Identifier().id("test@mail.com"));
+
+    verifyNoInteractions(passwordResetService);
+    verifyNoInteractions(notificationService);
+  }
+
+  @Test
+  void resetForgottenPassword_crossTenant_positive_nullContactFields() {
+    var canaryUser = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .email("test@mail.com")
+      .tenantId("memberTenant")
+      .centralTenantId("centralTenant");
+    var canaryCollection = new UserTenantCollection()
+      .addUserTenantsItem(canaryUser)
+      .totalRecords(1);
+    var locatedUserTenant = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .email("test@mail.com")
+      .tenantId("memberTenant")
+      .centralTenantId("centralTenant");
+    var locatedCollection = new UserTenantCollection()
+      .addUserTenantsItem(locatedUserTenant)
+      .totalRecords(1);
+
+    when(userTenantsClient.getOne()).thenReturn(canaryCollection);
+    when(folioExecutionContext.getOkapiHeaders())
+      .thenReturn(Map.of("x-okapi-tenant", List.of("centralTenant"), "x-okapi-url", List.of("http://localhost")));
+    when(userTenantsClient.getUserTenants(2, "test@mail.com", "test@mail.com", "test@mail.com", "test@mail.com"))
+      .thenReturn(locatedCollection);
+    when(userTenantsClient.getUserTenants(2, null, "test@mail.com", null, null))
+      .thenReturn(new UserTenantCollection().totalRecords(1));
+
+    service.resetForgottenPassword(new Identifier().id("test@mail.com"));
+
+    verify(passwordResetService).sendPasswordRestLink(TEST_USER_ID);
+    verifyNoInteractions(notificationService);
+  }
+
+  @Test
+  void recoverForgottenUsername_crossTenant_negative_duplicateContacts() {
+    var canaryUser = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .email("test@mail.com")
+      .tenantId("memberTenant")
+      .centralTenantId("centralTenant");
+    var canaryCollection = new UserTenantCollection()
+      .addUserTenantsItem(canaryUser)
+      .totalRecords(1);
+    var locatedUserTenant = new UserTenant()
+      .userId(TEST_USER_ID.toString())
+      .email("test@mail.com")
+      .phoneNumber("1234567890")
+      .tenantId("memberTenant")
+      .centralTenantId("centralTenant");
+    var locatedCollection = new UserTenantCollection()
+      .addUserTenantsItem(locatedUserTenant)
+      .totalRecords(1);
+
+    when(userTenantsClient.getOne()).thenReturn(canaryCollection);
+    when(folioExecutionContext.getOkapiHeaders())
+      .thenReturn(Map.of("x-okapi-tenant", List.of("centralTenant"), "x-okapi-url", List.of("http://localhost")));
+    when(userTenantsClient.getUserTenants(2, "test@mail.com", "test@mail.com", "test@mail.com", "test@mail.com"))
+      .thenReturn(locatedCollection);
+    when(userTenantsClient.getUserTenants(2, null, "test@mail.com", "1234567890", null))
+      .thenReturn(new UserTenantCollection().totalRecords(2));
+
+    service.recoverForgottenUsername(new Identifier().id("test@mail.com"));
 
     verifyNoInteractions(notificationService);
   }

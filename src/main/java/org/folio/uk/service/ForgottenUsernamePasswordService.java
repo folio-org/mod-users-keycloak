@@ -1,11 +1,12 @@
 package org.folio.uk.service;
 
+import static java.lang.String.format;
 import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.MapUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.exception.NotFoundException;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.uk.domain.dto.Identifier;
 import org.folio.uk.domain.dto.User;
@@ -56,15 +58,17 @@ public class ForgottenUsernamePasswordService {
 
   public void resetForgottenPassword(Identifier identifier) {
     try {
-      var userTenant = locateUserByAliasCrossTenant(identifier, FORGOTTEN_PASSWORD_ERROR_KEY);
-      if (userTenant == null) {
+      // check if we are in consortia mode by checking if user-tenants API returns any records
+      var centralTenantId = getCentralTenantIdIfConsortiaMode();
+
+      if (centralTenantId == null) {
+        // single mode: use traditional user search in current tenant
         sendPasswordRestLinkByIdentifier(identifier);
         return;
       }
-      try (var ignored = new FolioExecutionContextSetter(
-        prepareContextForTenant(userTenant.getTenantId(), folioModuleMetadata, folioExecutionContext))) {
-        sendPasswordRestLinkByIdentifier(identifier);
-      }
+
+      // consortia mode: perform validation and send email using central tenant data
+      handleConsortiaPasswordReset(identifier, centralTenantId);
     } catch (MultipleEntityException e) {
       log.warn("Multiple users found for forgotten password request, returning success without sending reset link: {}",
         e.getMessage());
@@ -73,15 +77,17 @@ public class ForgottenUsernamePasswordService {
 
   public void recoverForgottenUsername(Identifier identifier) {
     try {
-      var userTenant = locateUserByAliasCrossTenant(identifier, FORGOTTEN_USERNAME_ERROR_KEY);
-      if (userTenant == null) {
+      // check if we are in consortia mode by checking if user-tenants API returns any records
+      var centralTenantId = getCentralTenantIdIfConsortiaMode();
+
+      if (centralTenantId == null) {
+        // single mode: use traditional user search in current tenant
         sendLocateUserNotificationByIdentifier(identifier);
         return;
       }
-      try (var ignored = new FolioExecutionContextSetter(
-        prepareContextForTenant(userTenant.getTenantId(), folioModuleMetadata, folioExecutionContext))) {
-        sendLocateUserNotificationByIdentifier(identifier);
-      }
+
+      // consortia mode: perform validation and send notification using central tenant data
+      handleConsortiaUsernameRecovery(identifier, centralTenantId);
     } catch (MultipleEntityException e) {
       log.warn(
         "Multiple users found for forgotten username request, returning success without sending notification: {}",
@@ -116,60 +122,160 @@ public class ForgottenUsernamePasswordService {
       .collect(Collectors.toList());
   }
 
-  private UserTenant locateUserByAliasCrossTenant(Identifier identifier, String errorKey) {
+  /**
+   * Checks if we are operating in consortia mode and returns the central tenant ID.
+   *
+   * <p>
+   * In consortia mode, the user-tenants API will return at least one record. The central tenant ID is extracted from
+   * the first record.
+   *
+   * @return central tenant ID if in consortia mode, null if in single mode
+   */
+  private String getCentralTenantIdIfConsortiaMode() {
     var response = userTenantsClient.getOne();
-    if (isConsortiaModeNotActive(response)) { //check if consortia mode is not active
+    if (response.getTotalRecords() == 0) {
+      // single mode: user-tenants API returns no records
       return null;
     }
 
+    // defensive check for empty list
+    if (response.getUserTenants().isEmpty()) {
+      return null;
+    }
+
+    // consortia mode: extract central tenant ID from any user-tenant record
     var canaryUser = response.getUserTenants().getFirst();
-    return getUserTenant(identifier, errorKey, canaryUser);
+    return canaryUser.getCentralTenantId();
   }
 
   /**
-   * Retrieves the appropriate {@link UserTenant} based on the current tenant context.
+   * Handles password reset in consortia mode.
    *
-   *<p>
-   * If the current tenant is the central tenant, attempts to find a user tenant by the given identifier. Throws
-   * {@link MultipleEntityException} if multiple user tenants are found. Returns {@code null} if no user tenants are
-   * found. If the current tenant is a member tenant, returns the provided canary user.
+   * <p>
+   * Finds and validates user in central tenant, then sends password reset link.
    *
-   * @param identifier the identifier used to locate the user tenant
-   * @param errorKey the error key for exception handling
-   * @param canaryUser a user tenant used to determine tenant type and as a fallback
-   * @return the located {@link UserTenant}, or {@code null} if not found
-   * @throws MultipleEntityException if multiple user tenants are found for the identifier
+   * @param identifier the identifier provided by the user
+   * @param centralTenantId the central tenant ID
+   * @throws MultipleEntityException if duplicates are found
    */
-  private UserTenant getUserTenant(Identifier identifier, String errorKey, UserTenant canaryUser) {
-    // if any user's centralTenant is current tenantId from folioExecutionContext - it is central tenant
-    // else - it is member tenant
-    if (isCentralTenant(canaryUser)) {
-      var id = identifier.getId();
-      var userTenantResponse = userTenantsClient.getUserTenants(2, id, id, id);
+  private void handleConsortiaPasswordReset(Identifier identifier, String centralTenantId) {
+    var userTenant = findAndValidateUserInConsortia(identifier, centralTenantId, FORGOTTEN_PASSWORD_ERROR_KEY);
 
-      if (userTenantResponse.getTotalRecords() > 1) {
-        log.warn("Multiple users found: tenant = {}, id = {} ", folioExecutionContext.getTenantId(),
-          identifier.getId());
-        var message = String.format("Multiple users associated with '%s'", identifier.getId());
-        throw new MultipleEntityException(message, errorKey);
-      }
+    // send password reset link using the userId from UserTenant
+    var userId = UUID.fromString(userTenant.getUserId());
+    var userHomeTenantId = userTenant.getTenantId();
 
-      if (userTenantResponse.getTotalRecords() == 0) {
-        return null;
-      }
-
-      return userTenantResponse.getUserTenants().getFirst();
-    } else {
-      return canaryUser;
+    // send email in the user's home tenant context
+    try (var ignored = new FolioExecutionContextSetter(
+      prepareContextForTenant(userHomeTenantId, folioModuleMetadata, folioExecutionContext))) {
+      passwordResetService.sendPasswordRestLink(userId);
     }
   }
 
-  private static boolean isConsortiaModeNotActive(org.folio.uk.domain.dto.UserTenantCollection tenantCollection) {
-    return tenantCollection.getTotalRecords() == 0;
+  /**
+   * Handles username recovery in consortia mode.
+   *
+   * <p>
+   * Finds and validates user in central tenant, then sends username notification.
+   *
+   * @param identifier the identifier provided by the user
+   * @param centralTenantId the central tenant ID
+   * @throws MultipleEntityException if duplicates are found
+   */
+  private void handleConsortiaUsernameRecovery(Identifier identifier, String centralTenantId) {
+    var userTenant = findAndValidateUserInConsortia(identifier, centralTenantId, FORGOTTEN_USERNAME_ERROR_KEY);
+
+    // send username notification using the userId from UserTenant
+    var userId = UUID.fromString(userTenant.getUserId());
+    var userHomeTenantId = userTenant.getTenantId();
+
+    // send notification in the user's home tenant context
+    try (var ignored = new FolioExecutionContextSetter(
+      prepareContextForTenant(userHomeTenantId, folioModuleMetadata, folioExecutionContext))) {
+
+      // look up the full User object to send notification
+      var user = userService.getUser(userId)
+        .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+      notificationService.sendLocateUserNotification(user);
+    }
   }
 
-  private boolean isCentralTenant(UserTenant canaryUser) {
-    return Objects.equals(folioExecutionContext.getTenantId(), canaryUser.getCentralTenantId());
+  /**
+   * Finds and validates a user in consortia mode using a two-step process.
+   *
+   * <p>
+   * Step 1: Search in central tenant by provided identifier - If multiple users found → throw error (duplicate on
+   * provided contact) - If no users found → throw NoSuchElementException - If one user found → proceed to Step 2
+   *
+   * <p>
+   * Step 2: Validate all contacts of the found user are unique - If multiple users found → throw error (other contacts
+   * are duplicated) - If one user found → return the UserTenant
+   *
+   * @param identifier the identifier provided by the user
+   * @param centralTenantId the central tenant ID
+   * @param errorKey the error key for exception handling
+   * @return the validated UserTenant
+   * @throws MultipleEntityException if duplicates are found
+   * @throws NotFoundException if no user is found
+   */
+  private UserTenant findAndValidateUserInConsortia(Identifier identifier, String centralTenantId, String errorKey) {
+    var providedId = identifier.getId();
+    try (var ignored = new FolioExecutionContextSetter(
+      prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext))) {
+
+      // step 1: Search by provided identifier in all fields (OR query)
+      var searchResponse = userTenantsClient.getUserTenants(2, providedId, providedId, providedId,
+        providedId);
+
+      if (searchResponse.getTotalRecords() > 1) {
+        log.warn("Multiple users found with provided identifier: tenant = {}, identifier = {}",
+          centralTenantId, providedId);
+        throw new MultipleEntityException(format("Multiple users associated with '%s'", providedId), errorKey);
+      }
+
+      if (searchResponse.getTotalRecords() == 0) {
+        log.warn("No user-tenants (consortia mode) found with provided identifier: tenant = {}, identifier = {}",
+          centralTenantId, providedId);
+        throw new NotFoundException("User is not found: " + providedId);
+      }
+
+      var userTenant = searchResponse.getUserTenants().getFirst();
+
+      // step 2: Validate all contacts of the found user are unique
+      validateAllContactsAreUnique(userTenant, providedId, errorKey);
+      return userTenant;
+    }
+  }
+
+  /**
+   * Validates that all contact fields of the user are unique in the central tenant.
+   *
+   * <p>
+   * This method must be called within the central tenant context. It searches by ALL contact fields of the user to
+   * ensure no other users share any contact.
+   *
+   * @param userTenant the user tenant with contact information
+   * @param providedIdentifier the original identifier provided by the user (for logging)
+   * @param errorKey the error key for exception handling
+   * @throws MultipleEntityException if any contact field is shared with other users
+   */
+  private void validateAllContactsAreUnique(UserTenant userTenant, String providedIdentifier, String errorKey) {
+    var username = userTenant.getUsername();
+    var email = userTenant.getEmail();
+    var phoneNumber = userTenant.getPhoneNumber();
+    var mobilePhoneNumber = userTenant.getMobilePhoneNumber();
+
+    // search by ALL contact fields (OR query)
+    var response = userTenantsClient.getUserTenants(2, username, email, phoneNumber,
+      mobilePhoneNumber);
+
+    if (response.getTotalRecords() > 1) {
+      // another user shares at least one contact field with this user
+      log.warn("Multiple users found with same contact information: tenant = {}, providedIdentifier = {}",
+        folioExecutionContext.getTenantId(), providedIdentifier);
+      var message = format("Multiple users associated with '%s'", providedIdentifier);
+      throw new MultipleEntityException(message, errorKey);
+    }
   }
 
   /**
@@ -189,7 +295,7 @@ public class ForgottenUsernamePasswordService {
       // mapped to an error with 400 status code instead of 404 for backward compatibility purposes with bl-users API
       throw new NoSuchElementException("User is not found: " + identifier.getId());
     } else if (userResponse.getTotalRecords() > 1) {
-      var message = String.format("Multiple users associated with '%s'", identifier.getId());
+      var message = format("Multiple users associated with '%s'", identifier.getId());
       throw new MultipleEntityException(message, errorKey);
     }
 
@@ -215,7 +321,7 @@ public class ForgottenUsernamePasswordService {
 
   private static void validateActiveUser(Identifier entity, User user) {
     if (user != null && !user.getActive()) {
-      var message = String.format("Users associated with '%s' is not active", entity.getId());
+      var message = format("Users associated with '%s' is not active", entity.getId());
       throw new UnprocessableEntityException(message, FORGOTTEN_PASSWORD_FOUND_INACTIVE);
     }
   }
