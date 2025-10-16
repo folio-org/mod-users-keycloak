@@ -110,7 +110,8 @@ class ForgottenUsernamePasswordServiceTest {
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(1).addUsersItem(inactiveUser));
 
-    assertThatThrownBy(() -> service.resetForgottenPassword(new Identifier().id("test")))
+    var identifier = new Identifier().id("test");
+    assertThatThrownBy(() -> service.resetForgottenPassword(identifier))
       .isInstanceOf(UnprocessableEntityException.class);
 
     verifyNoInteractions(passwordResetService);
@@ -270,7 +271,8 @@ class ForgottenUsernamePasswordServiceTest {
       .thenReturn(new UserTenantCollection().totalRecords(1));
     when(userService.getUser(TEST_USER_ID)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> service.recoverForgottenUsername(new Identifier().id(TEST_EMAIL)))
+    var identifier = new Identifier().id(TEST_EMAIL);
+    assertThatThrownBy(() -> service.recoverForgottenUsername(identifier))
       .isInstanceOf(NoSuchElementException.class)
       .hasMessageContaining("User not found: " + TEST_USER_ID);
   }
@@ -283,7 +285,8 @@ class ForgottenUsernamePasswordServiceTest {
     when(userTenantsClient.getUserTenants(2, TEST_EMAIL, TEST_EMAIL, TEST_EMAIL, TEST_EMAIL))
       .thenReturn(new UserTenantCollection().totalRecords(0));
 
-    assertThatThrownBy(() -> service.recoverForgottenUsername(new Identifier().id(TEST_EMAIL)))
+    var identifier = new Identifier().id(TEST_EMAIL);
+    assertThatThrownBy(() -> service.recoverForgottenUsername(identifier))
       .isInstanceOf(NotFoundException.class)
       .hasMessageContaining("User is not found: " + TEST_EMAIL);
   }
@@ -294,7 +297,8 @@ class ForgottenUsernamePasswordServiceTest {
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(0));
 
-    assertThatThrownBy(() -> service.recoverForgottenUsername(new Identifier().id("test")))
+    var identifier = new Identifier().id("test");
+    assertThatThrownBy(() -> service.recoverForgottenUsername(identifier))
       .isInstanceOf(NoSuchElementException.class)
       .hasMessageContaining("User is not found: test");
   }
@@ -305,7 +309,8 @@ class ForgottenUsernamePasswordServiceTest {
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(0));
 
-    assertThatThrownBy(() -> service.resetForgottenPassword(new Identifier().id("test")))
+    var identifier = new Identifier().id("test");
+    assertThatThrownBy(() -> service.resetForgottenPassword(identifier))
       .isInstanceOf(NoSuchElementException.class)
       .hasMessageContaining("User is not found: test");
   }
