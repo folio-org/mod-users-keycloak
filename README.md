@@ -48,26 +48,27 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 
 ## Environment Variables
 
-| Name                             | Default value              | Required | Description                                                                                                                          |
-|:---------------------------------|:---------------------------|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------|
-| DB_HOST                          | localhost                  |  false   | Postgres hostname                                                                                                                    |
-| DB_PORT                          | 5432                       |  false   | Postgres port                                                                                                                        |
-| DB_USERNAME                      | postgres                   |  false   | Postgres username                                                                                                                    |
-| DB_PASSWORD                      | postgres                   |  false   | Postgres username password                                                                                                           |
-| DB_DATABASE                      | postgres                   |  false   | Postgres database name                                                                                                               |
-| KC_URL                           | -                          |   true   | Keycloak URL used to perform HTTP requests by `KeycloakClient`.                                                                      |
-| KC_ADMIN_CLIENT_ID               | folio-backend-admin-client |   true   | Keycloak client id                                                                                                                   |
-| KC_ADMIN_GRANT_TYPE              | client_credentials         |  false   | Defines grant type for issuing Keycloak token                                                                                        |
-| KC_PASSWORD_RESET_CLIENT_ID      | password-reset-client      |  false   | Keycloak password reset client                                                                                                       |
-| KC_ADMIN_TOKEN_TTL               | 60s                        |  false   | ttl value for Keycloak token to persist in cache                                                                                     |
-| KC_CONFIG_TTL                    | 3600s                      |  false   | Client credentials expiration timeout                                                                                                |
-| KC_LOGIN_CLIENT_SUFFIX           | -login-application         |  false   | Suffix of a Keycloak client who owns the authorization resources. It is used as `audience` for keycloak when evaluating permissions. |
-| MIGRATION_BATCH_SIZE             | 20                         |  false   | Batch size for user migration. Max value is 50                                                                                       |
-| IDP_MIGRATION_BATCH_SIZE         | 20                         |  false   | Batch size for user identity provider (IDP) linking migration. Max value is 50                                                       |
-| DEFAULT_PASSWORDS_ON_MIGRATION   | false                      |  false   | If specified to true migrated user’s password being set to their username otherwise migrated users not having any credentials set    |
-| INCLUDE_ONLY_VISIBLE_PERMISSIONS | true                       |  false   | Defines if onlyVisible (UI permissions/permission-set names) will be returned using `_self` endpoint                                 |
-| SINGLE_TENANT_UX                 | false                      |  false   | Defines if the module is running in single tenant UX mode                                                                            |
-| IDENTITY_PROVIDER_SUFFIX         | -keycloak-oidc             |  false   | Suffix of a Keycloak OIDC identity provider who will perform federated authentication requests. Used if SINGLE_TENANT_UX is enabled  |
+| Name                                    | Default value                   | Required | Description                                                                                                                          |
+|:----------------------------------------|:--------------------------------|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------|
+| DB_HOST                                 | localhost                       |  false   | Postgres hostname                                                                                                                    |
+| DB_PORT                                 | 5432                            |  false   | Postgres port                                                                                                                        |
+| DB_USERNAME                             | postgres                        |  false   | Postgres username                                                                                                                    |
+| DB_PASSWORD                             | postgres                        |  false   | Postgres username password                                                                                                           |
+| DB_DATABASE                             | postgres                        |  false   | Postgres database name                                                                                                               |
+| KC_URL                                  | -                               |   true   | Keycloak URL used to perform HTTP requests by `KeycloakClient`.                                                                      |
+| KC_ADMIN_CLIENT_ID                      | folio-backend-admin-client      |   true   | Keycloak client id                                                                                                                   |
+| KC_ADMIN_GRANT_TYPE                     | client_credentials              |  false   | Defines grant type for issuing Keycloak token                                                                                        |
+| KC_PASSWORD_RESET_CLIENT_ID             | password-reset-client           |  false   | Keycloak password reset client                                                                                                       |
+| KC_ADMIN_TOKEN_TTL                      | 60s                             |  false   | ttl value for Keycloak token to persist in cache                                                                                     |
+| KC_CONFIG_TTL                           | 3600s                           |  false   | Client credentials expiration timeout                                                                                                |
+| KC_LOGIN_CLIENT_SUFFIX                  | -login-application              |  false   | Suffix of a Keycloak client who owns the authorization resources. It is used as `audience` for keycloak when evaluating permissions. |
+| MIGRATION_BATCH_SIZE                    | 20                              |  false   | Batch size for user migration. Max value is 50                                                                                       |
+| IDP_MIGRATION_BATCH_SIZE                | 20                              |  false   | Batch size for user identity provider (IDP) linking migration. Max value is 50                                                       |
+| DEFAULT_PASSWORDS_ON_MIGRATION          | false                           |  false   | If specified to true migrated user’s password being set to their username otherwise migrated users not having any credentials set    |
+| INCLUDE_ONLY_VISIBLE_PERMISSIONS        | true                            |  false   | Defines if onlyVisible (UI permissions/permission-set names) will be returned using `_self` endpoint                                 |
+| SINGLE_TENANT_UX                        | false                           |  false   | Defines if the module is running in single tenant UX mode                                                                            |
+| IDENTITY_PROVIDER_SUFFIX                | -keycloak-oidc                  |  false   | Suffix of a Keycloak OIDC identity provider who will perform federated authentication requests. Used if SINGLE_TENANT_UX is enabled  |
+| OKAPI_URL                               | http://sidecar:8081             |  false   | Okapi url                                                                                                                            |
 
 ### Kafka environment variables
 
