@@ -23,11 +23,11 @@
     <lombok.version>1.18.42</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.11.0</hypersistence-utils-hibernate-63.version>
-    <swagger-annotations.version>2.2.39</swagger-annotations.version>
+    <swagger-annotations.version>2.2.40</swagger-annotations.version>
     <commons-lang3.version>3.17.0</commons-lang3.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.8</openapi-tools.jackson-databind-nullable.version>
     <folio-spring-support.version>10.0.0-SNAPSHOT</folio-spring-support.version>
-    <folio-java-checkstyle.version>1.2.0-SNAPSHOT</folio-java-checkstyle.version>
+    <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
     <folio-util.version>35.4.0</folio-util.version>
     <application-poc-tools.version>3.1.0-SNAPSHOT</application-poc-tools.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
@@ -42,7 +42,7 @@
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <openapi-generator.version>7.16.0</openapi-generator.version>
+    <openapi-generator.version>7.17.0</openapi-generator.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
 
     <sonar.exclusions>
