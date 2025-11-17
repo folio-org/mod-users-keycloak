@@ -22,7 +22,7 @@
     <maven.compiler.target>21</maven.compiler.target>
     <lombok.version>1.18.42</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <hypersistence-utils-hibernate-63.version>3.11.0</hypersistence-utils-hibernate-63.version>
+    <hypersistence-utils-hibernate-63.version>3.12.0</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.40</swagger-annotations.version>
     <commons-lang3.version>3.17.0</commons-lang3.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.8</openapi-tools.jackson-databind-nullable.version>
@@ -38,7 +38,7 @@
     </users-keycloak.yaml-file>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>12.1.1</maven-checkstyle.version>
+    <maven-checkstyle.version>12.1.2</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.2.0</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
