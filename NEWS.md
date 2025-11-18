@@ -10,6 +10,7 @@
 * Use SECURE_STORE_ENV, not ENV, for secure store key (MODUSERSKC-99)
 * Use query parameters for retrieving `/user-tenants` (MODUSERSKC-104)
 * Cross-tenant multiple users have shared contact cannot receive password/username recovery email (MODUSERSKC-106)
+* improve logging and API for forgotten password and username endpoints (MODUSERSKC-111)
 ---
 
 ## Version `v3.0.0` (14.03.2025)

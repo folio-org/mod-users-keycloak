@@ -70,8 +70,11 @@ public class ForgottenUsernamePasswordService {
       // consortia mode: perform validation and send email using central tenant data
       handleConsortiaPasswordReset(identifier, centralTenantId);
     } catch (MultipleEntityException e) {
-      log.warn("Multiple users found for forgotten password request, returning success without sending reset link: {}",
-        e.getMessage());
+      log.warn("Multiple users found for identifier '{}', no password reset link sent", identifier.getId());
+    } catch (NoSuchElementException | NotFoundException e) {
+      log.warn("No user found for identifier '{}', no password reset link sent", identifier.getId());
+    } catch (UnprocessableEntityException e) {
+      log.warn("Inactive user account for identifier '{}', no password reset link sent", identifier.getId());
     }
   }
 
@@ -89,9 +92,11 @@ public class ForgottenUsernamePasswordService {
       // consortia mode: perform validation and send notification using central tenant data
       handleConsortiaUsernameRecovery(identifier, centralTenantId);
     } catch (MultipleEntityException e) {
-      log.warn(
-        "Multiple users found for forgotten username request, returning success without sending notification: {}",
-        e.getMessage());
+      log.warn("Multiple users found for identifier '{}', no username notification sent", identifier.getId());
+    } catch (NoSuchElementException | NotFoundException e) {
+      log.warn("No user found for identifier '{}', no username notification sent", identifier.getId());
+    } catch (UnprocessableEntityException e) {
+      log.warn("Inactive user account for identifier '{}', no username notification sent", identifier.getId());
     }
   }
 
