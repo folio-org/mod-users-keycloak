@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
+import org.folio.test.TestUtils;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
@@ -14,6 +15,8 @@ import org.folio.uk.service.PasswordResetService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 @IntegrationTest
@@ -42,34 +45,18 @@ public class ForgottenUsernamePasswordIT extends BaseIntegrationTest {
     verify(passwordResetService).sendPasswordRestLink(UUID.fromString("d3958402-2f80-421b-a527-9933245a3556"));
   }
 
-  @Test
-  @WireMockStub(scripts = "/wiremock/stubs/users/query-users-notfound.json")
-  @WireMockStub(scripts = "/wiremock/stubs/config/get-forgottenData-configs.json")
-  @WireMockStub(scripts = "/wiremock/stubs/user-tenants/query-users-notfound.json")
-  public void postResetForgottenPassword_negative_notFoundUser() throws Exception {
-    attemptPost("/users-keycloak/forgotten/password", new Identifier().id("unknownuser"))
-      .andExpect(status().isNoContent());
+  @ParameterizedTest
+  @CsvSource({
+    "wiremock/stubs/users/query-users-notfound.json, unknownuser",
+    "wiremock/stubs/users/query-user-multiplefound.json, twin1",
+    "wiremock/stubs/users/query-inactive-user.json, userinactive"
+  })
+  void postResetForgottenPassword_negative(String userStub, String userId) throws Exception {
+    wmAdminClient.addStubMapping(TestUtils.readString(userStub));
+    wmAdminClient.addStubMapping(TestUtils.readString("wiremock/stubs/config/get-forgottenData-configs.json"));
+    wmAdminClient.addStubMapping(TestUtils.readString("wiremock/stubs/user-tenants/query-users-notfound.json"));
 
-    verifyNoInteractions(passwordResetService);
-  }
-
-  @Test
-  @WireMockStub(scripts = "/wiremock/stubs/users/query-user-multiplefound.json")
-  @WireMockStub(scripts = "/wiremock/stubs/config/get-forgottenData-configs.json")
-  @WireMockStub(scripts = "/wiremock/stubs/user-tenants/query-users-notfound.json")
-  public void postResetForgottenPassword_negative_multipleUsersFound() throws Exception {
-    attemptPost("/users-keycloak/forgotten/password", new Identifier().id("twin1"))
-      .andExpect(status().isNoContent());
-
-    verifyNoInteractions(passwordResetService);
-  }
-
-  @Test
-  @WireMockStub(scripts = "/wiremock/stubs/users/query-inactive-user.json")
-  @WireMockStub(scripts = "/wiremock/stubs/config/get-forgottenData-configs.json")
-  @WireMockStub(scripts = "/wiremock/stubs/user-tenants/query-users-notfound.json")
-  public void postResetForgottenPassword_negative_inactiveUser() throws Exception {
-    attemptPost("/users-keycloak/forgotten/password", new Identifier().id("userinactive"))
+    attemptPost("/users-keycloak/forgotten/password", new Identifier().id(userId))
       .andExpect(status().isNoContent());
 
     verifyNoInteractions(passwordResetService);
@@ -98,7 +85,7 @@ public class ForgottenUsernamePasswordIT extends BaseIntegrationTest {
   @WireMockStub(scripts = "/wiremock/stubs/users/query-users-notfound.json")
   @WireMockStub(scripts = "/wiremock/stubs/config/get-forgottenData-configs.json")
   @WireMockStub(scripts = "/wiremock/stubs/user-tenants/query-users-notfound.json")
-  public void postRecoverForgottenUsername_negative_notFoundUser() throws Exception {
+  void postRecoverForgottenUsername_negative_notFoundUser() throws Exception {
     attemptPost("/users-keycloak/forgotten/username", new Identifier().id("unknownuser"))
       .andExpect(status().isNoContent());
   }
