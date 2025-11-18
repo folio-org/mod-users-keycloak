@@ -1,10 +1,8 @@
 package org.folio.uk.it;
 
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
@@ -50,9 +48,7 @@ public class ForgottenUsernamePasswordIT extends BaseIntegrationTest {
   @WireMockStub(scripts = "/wiremock/stubs/user-tenants/query-users-notfound.json")
   public void postResetForgottenPassword_negative_notFoundUser() throws Exception {
     attemptPost("/users-keycloak/forgotten/password", new Identifier().id("unknownuser"))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.total_records", is(1)))
-      .andExpect(jsonPath("$.errors[0].message", is("User is not found: unknownuser")));
+      .andExpect(status().isNoContent());
 
     verifyNoInteractions(passwordResetService);
   }
@@ -74,10 +70,9 @@ public class ForgottenUsernamePasswordIT extends BaseIntegrationTest {
   @WireMockStub(scripts = "/wiremock/stubs/user-tenants/query-users-notfound.json")
   public void postResetForgottenPassword_negative_inactiveUser() throws Exception {
     attemptPost("/users-keycloak/forgotten/password", new Identifier().id("userinactive"))
-      .andExpect(status().isUnprocessableEntity())
-      .andExpect(jsonPath("$.total_records", is(1)))
-      .andExpect(jsonPath("$.errors[0].message", is("Users associated with 'userinactive' is not active")))
-      .andExpect(jsonPath("$.errors[0].code", is("forgotten.password.found.inactive")));
+      .andExpect(status().isNoContent());
+
+    verifyNoInteractions(passwordResetService);
   }
 
   @Test
@@ -100,14 +95,20 @@ public class ForgottenUsernamePasswordIT extends BaseIntegrationTest {
   }
 
   @Test
+  @WireMockStub(scripts = "/wiremock/stubs/users/query-users-notfound.json")
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-forgottenData-configs.json")
+  @WireMockStub(scripts = "/wiremock/stubs/user-tenants/query-users-notfound.json")
+  public void postRecoverForgottenUsername_negative_notFoundUser() throws Exception {
+    attemptPost("/users-keycloak/forgotten/username", new Identifier().id("unknownuser"))
+      .andExpect(status().isNoContent());
+  }
+
+  @Test
   @WireMockStub(scripts = "/wiremock/stubs/users/query-inactive-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/config/get-forgottenData-configs.json")
   @WireMockStub(scripts = "/wiremock/stubs/user-tenants/query-users-notfound.json")
   public void postRecoverForgottenUsername_negative_inactiveUser() throws Exception {
     attemptPost("/users-keycloak/forgotten/username", new Identifier().id("userinactive"))
-      .andExpect(status().isUnprocessableEntity())
-      .andExpect(jsonPath("$.total_records", is(1)))
-      .andExpect(jsonPath("$.errors[0].message", is("Users associated with 'userinactive' is not active")))
-      .andExpect(jsonPath("$.errors[0].code", is("forgotten.password.found.inactive")));
+      .andExpect(status().isNoContent());
   }
 }

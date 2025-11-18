@@ -1,6 +1,5 @@
 package org.folio.uk.service;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.uk.service.ForgottenUsernamePasswordService.FORGOTTEN_PASSWORD_ALIASES;
 import static org.folio.uk.service.ForgottenUsernamePasswordService.FORGOTTEN_USERNAME_ALIASES;
 import static org.folio.uk.service.ForgottenUsernamePasswordService.MODULE_NAME_CONFIG;
@@ -16,19 +15,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.exception.NotFoundException;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.Identifier;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserTenant;
 import org.folio.uk.domain.dto.UserTenantCollection;
 import org.folio.uk.domain.dto.Users;
-import org.folio.uk.exception.UnprocessableEntityException;
 import org.folio.uk.integration.configuration.ConfigurationService;
 import org.folio.uk.integration.notify.NotificationService;
 import org.folio.uk.integration.users.UserTenantsClient;
@@ -110,9 +106,7 @@ class ForgottenUsernamePasswordServiceTest {
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(1).addUsersItem(inactiveUser));
 
-    var identifier = new Identifier().id("test");
-    assertThatThrownBy(() -> service.resetForgottenPassword(identifier))
-      .isInstanceOf(UnprocessableEntityException.class);
+    service.resetForgottenPassword(new Identifier().id("test"));
 
     verifyNoInteractions(passwordResetService);
   }
@@ -271,10 +265,9 @@ class ForgottenUsernamePasswordServiceTest {
       .thenReturn(new UserTenantCollection().totalRecords(1));
     when(userService.getUser(TEST_USER_ID)).thenReturn(Optional.empty());
 
-    var identifier = new Identifier().id(TEST_EMAIL);
-    assertThatThrownBy(() -> service.recoverForgottenUsername(identifier))
-      .isInstanceOf(NoSuchElementException.class)
-      .hasMessageContaining("User not found: " + TEST_USER_ID);
+    service.recoverForgottenUsername(new Identifier().id(TEST_EMAIL));
+
+    verifyNoInteractions(notificationService);
   }
 
   @Test
@@ -285,10 +278,9 @@ class ForgottenUsernamePasswordServiceTest {
     when(userTenantsClient.getUserTenants(2, TEST_EMAIL, TEST_EMAIL, TEST_EMAIL, TEST_EMAIL))
       .thenReturn(new UserTenantCollection().totalRecords(0));
 
-    var identifier = new Identifier().id(TEST_EMAIL);
-    assertThatThrownBy(() -> service.recoverForgottenUsername(identifier))
-      .isInstanceOf(NotFoundException.class)
-      .hasMessageContaining("User is not found: " + TEST_EMAIL);
+    service.recoverForgottenUsername(new Identifier().id(TEST_EMAIL));
+
+    verifyNoInteractions(notificationService);
   }
 
   @Test
@@ -297,10 +289,9 @@ class ForgottenUsernamePasswordServiceTest {
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(0));
 
-    var identifier = new Identifier().id("test");
-    assertThatThrownBy(() -> service.recoverForgottenUsername(identifier))
-      .isInstanceOf(NoSuchElementException.class)
-      .hasMessageContaining("User is not found: test");
+    service.recoverForgottenUsername(new Identifier().id("test"));
+
+    verifyNoInteractions(notificationService);
   }
 
   @Test
@@ -309,10 +300,9 @@ class ForgottenUsernamePasswordServiceTest {
     when(userService.findUsers(anyString(), anyInt()))
       .thenReturn(new Users().totalRecords(0));
 
-    var identifier = new Identifier().id("test");
-    assertThatThrownBy(() -> service.resetForgottenPassword(identifier))
-      .isInstanceOf(NoSuchElementException.class)
-      .hasMessageContaining("User is not found: test");
+    service.resetForgottenPassword(new Identifier().id("test"));
+
+    verifyNoInteractions(passwordResetService);
   }
 
   @Test
