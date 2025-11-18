@@ -310,7 +310,11 @@ paths:
 
   /users-keycloak/forgotten/password:
     post:
-      description: called when a user has forgotten a password
+      description: >
+        Called when a user has forgotten a password. Always returns 204 No Content
+        regardless of whether a user exists, to prevent username/email enumeration.
+        If a matching active user is found, a password reset link is sent.
+        Otherwise, the request is logged but no email is sent.
       operationId: resetForgottenPassword
       tags:
         - forgotten-username-password
@@ -323,16 +327,16 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/noContent'
-        '400':
-          $ref: '#/components/responses/badRequest'
-        '422':
-          $ref: '#/components/responses/unprocessableEntity'
         '500':
           $ref: '#/components/responses/internalServerError'
 
   /users-keycloak/forgotten/username:
     post:
-      description: called when a user has forgotten a username
+      description: >
+        Called when a user has forgotten a username. Always returns 204 No Content
+        regardless of whether a user exists, to prevent username/email enumeration.
+        If a matching active user is found, a username reminder is sent.
+        Otherwise, the request is logged but no email is sent.
       operationId: recoverForgottenUsername
       tags:
         - forgotten-username-password
@@ -344,15 +348,7 @@ paths:
               $ref: '#/components/schemas/identifier'
       responses:
         '204':
-          description: "Successful call to forgotten username"
-          content:
-            text/plain:
-              schema:
-                type: string
-        '400':
-          $ref: '#/components/responses/badRequest'
-        '422':
-          $ref: '#/components/responses/unprocessableEntity'
+          $ref: '#/components/responses/noContent'
         '500':
           $ref: '#/components/responses/internalServerError'
 
