@@ -101,14 +101,14 @@ public class UserService {
   }
 
   public Optional<User> getUser(UUID id) {
-    log.info("Retrieving user with: id = {}", id);
+    log.debug("Retrieving user with: id = {}", id);
 
     return usersClient.lookupUserById(id);
   }
 
   public CompositeUser getUserBySelfReference(List<IncludedField> include, boolean expandPermissions,
                                               boolean overrideUser) {
-    log.info("Retrieving user by self reference with parameters: include = {}, expandPermissions = {}",
+    log.debug("Retrieving user by self reference with parameters: include = {}, expandPermissions = {}",
       () -> StringUtils.join(emptyIfNull(include), ", "), () -> expandPermissions);
 
     var userId = getUserId();
@@ -130,7 +130,7 @@ public class UserService {
   }
 
   private CompositeUser getRealUserByReference(User shadowUser, String originalTenantId, boolean expandPermissions) {
-    log.info("Overriding self reference to use a real shadowUser with: tenant = {}", originalTenantId);
+    log.debug("Overriding self reference to use a real shadowUser with: tenant = {}", originalTenantId);
     var userId = shadowUser.getId();
 
     try (var ignored = new FolioExecutionContextSetter(
@@ -147,7 +147,7 @@ public class UserService {
   }
 
   public void updateUser(UUID id, User user) {
-    log.info("Updating user: id = {}", id);
+    log.debug("Updating user: id = {}", id);
 
     usersClient.updateUser(id, user);
     var kcUser = keycloakService.findKeycloakUserWithUserIdAttr(id);
@@ -160,7 +160,7 @@ public class UserService {
   }
 
   public void deleteUser(UUID id) {
-    log.info("Deleting user with: id = {}", id);
+    log.debug("Deleting user with: id = {}", id);
 
     usersClient.lookupUserById(id)
       .ifPresentOrElse(user -> removeUserWithLinkedResources(id),
@@ -170,7 +170,7 @@ public class UserService {
   }
 
   public void deleteUserById(UUID id) {
-    log.info("Deleting user with: id = {}", id);
+    log.debug("Deleting user with: id = {}", id);
     removeUserWithLinkedResources(id);
     keycloakService.deleteUser(id);
   }
@@ -280,7 +280,7 @@ public class UserService {
 
   private User createUserPrivate(User user, boolean keycloakOnly,
                                  Function<User, User> modUsersMethodCall, Consumer<User> keycloakMethodCall) {
-    log.info("Creating user: id = {}, username = {}", user.getId(), user.getUsername());
+    log.debug("Creating user: id = {}, username = {}", user.getId(), user.getUsername());
     var created = user;
     if (!keycloakOnly) {
       created = modUsersMethodCall.apply(created);
@@ -295,7 +295,7 @@ public class UserService {
       return usersClient.createUser(user);
     } catch (FeignException.UnprocessableEntity e) {
       var username = user.getUsername();
-      log.warn("User already exists: username = {}, message = {}", username, e.getMessage());
+      log.info("User already exists: username = {}, message = {}", username, e.getMessage());
       return findUserByUsername(username);
     }
   }
