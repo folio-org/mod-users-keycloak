@@ -1,3 +1,9 @@
+## Version 'v3.0.9' (02.12.2025)
+### Changes:
+* Cross-tenant multiple users have shared contact cannot receive password/username recovery email (MODUSERSKC-106)
+* Improve logging and API for forgotten password and username endpoints (MODUSERSKC-111)
+---
+
 ## Version 'v3.0.8' (30.09.2025)
 ### Changes:
 * Use SECURE_STORE_ENV, not ENV, for secure store key (MODUSERSKC-99)
