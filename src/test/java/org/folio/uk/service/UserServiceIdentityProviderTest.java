@@ -231,7 +231,6 @@ class UserServiceIdentityProviderTest {
       .hasMessageContaining("Cannot find real user by id in member tenant");
   }
 
-
   private User createShadowUser(Map<String, Object> customFields) {
     return new User()
       .id(UUID.fromString(USER_ID))

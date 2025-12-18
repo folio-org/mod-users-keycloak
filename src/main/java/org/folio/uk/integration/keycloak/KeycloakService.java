@@ -12,7 +12,7 @@ import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextFo
 import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_ID_ATTR;
 
 import feign.FeignException;
-
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,8 +20,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -173,7 +171,8 @@ public class KeycloakService {
       prepareContextForTenant(memberTenant, folioModuleMetadata, folioExecutionContext))) {
       log.info("Retrieving real user with the shadow user id: {}, member tenant: {}", user.getId(), memberTenant);
       var realUser = usersClient.lookupUserById(user.getId())
-        .orElseThrow(() -> new EntityNotFoundException("Cannot find real user by id in member tenant: %s".formatted(memberTenant)));
+        .orElseThrow(() ->
+          new EntityNotFoundException("Cannot find real user by id in member tenant: %s".formatted(memberTenant)));
 
       return FederatedIdentity.builder()
         .userId(realUser.getUsername())
