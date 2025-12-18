@@ -8,9 +8,11 @@ import static java.util.UUID.fromString;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.folio.common.utils.KeycloakPermissionUtils.toPermissionName;
+import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
 import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_ID_ATTR;
 
 import feign.FeignException;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,11 +20,15 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.model.UserType;
 import org.folio.uk.exception.RequestValidationException;
@@ -35,6 +41,7 @@ import org.folio.uk.integration.keycloak.model.KeycloakIdentityProviderDto;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.keycloak.model.ScopePermission;
 import org.folio.uk.integration.users.UserTenantsClient;
+import org.folio.uk.integration.users.UsersClient;
 import org.folio.uk.utils.UserUtils;
 import org.springframework.stereotype.Component;
 
@@ -43,10 +50,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KeycloakService {
 
-  private static final int RANDOM_STRING_COUNT = 6;
+  private final UsersClient usersClient;
   private final KeycloakClient keycloakClient;
   private final TokenService tokenService;
   private final UserTenantsClient userTenantsClient;
+  private final FolioModuleMetadata folioModuleMetadata;
   private final FolioExecutionContext folioExecutionContext;
   private final KeycloakLoginClientProperties loginClientProperties;
   private final KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
@@ -81,7 +89,7 @@ public class KeycloakService {
         unlinkIdentityProviderFromUser(dto, kcUserId);
       }
 
-      var federatedIdentity = createFederatedIdentity(user);
+      var federatedIdentity = createFederatedIdentity(dto.memberTenant(), user);
       callKeycloak(
         () -> keycloakClient.linkIdentityProviderToUser(dto.tenant(), kcUserId, dto.providerAlias(), federatedIdentity,
           getToken()),
@@ -157,19 +165,21 @@ public class KeycloakService {
       .anyMatch(getProviderAlias -> getProviderAlias.equals(providerAlias));
   }
 
-  private FederatedIdentity createFederatedIdentity(User user) {
+  private FederatedIdentity createFederatedIdentity(String memberTenant, User user) {
     if (StringUtils.isEmpty(user.getUsername())) {
-      throw new IllegalStateException(String.format("Username is missing, userId: %s", user.getId()));
+      throw new IllegalStateException("Username is missing, userId: %s".formatted(user.getId()));
     }
-    // Shadow username is created in mod-consortia-keycloak project by UserServiceImpl::prepareShadowUser method
-    // by appending "_{5 random strings}" suffix to the real username, this suffix is unlikely to change
-    // also note that Keycloak usernames are stored lowercased and in order for Federated Entity to align to the
-    // correct username in another realm both "userId" and "userName" member fields on DTO must also be lowercased
-    var realUsername = user.getUsername().substring(0, user.getUsername().length() - RANDOM_STRING_COUNT).toLowerCase();
-    return FederatedIdentity.builder()
-      .userId(realUsername)
-      .userName(realUsername)
-      .build();
+    try (var ignored = new FolioExecutionContextSetter(
+      prepareContextForTenant(memberTenant, folioModuleMetadata, folioExecutionContext))) {
+      log.info("Retrieving real user with the shadow user id: {}, member tenant: {}", user.getId(), memberTenant);
+      var realUser = usersClient.lookupUserById(user.getId())
+        .orElseThrow(() -> new EntityNotFoundException("Cannot find real user by id in member tenant: %s".formatted(memberTenant)));
+
+      return FederatedIdentity.builder()
+        .userId(realUser.getUsername())
+        .userName(realUser.getUsername())
+        .build();
+    }
   }
 
   public void createUserForMigration(User user, String password, List<String> userTenants) {

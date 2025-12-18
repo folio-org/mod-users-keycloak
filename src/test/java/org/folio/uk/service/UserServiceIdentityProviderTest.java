@@ -1,17 +1,23 @@
 package org.folio.uk.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.uk.utils.UserUtils.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atMostOnce;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.persistence.EntityNotFoundException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserTenant;
@@ -24,6 +30,8 @@ import org.folio.uk.integration.keycloak.config.KeycloakFederatedAuthProperties;
 import org.folio.uk.integration.keycloak.config.KeycloakLoginClientProperties;
 import org.folio.uk.integration.keycloak.model.FederatedIdentity;
 import org.folio.uk.integration.users.UserTenantsClient;
+import org.folio.uk.integration.users.UsersClient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,10 +56,20 @@ class UserServiceIdentityProviderTest {
   @Mock private KeycloakClient keycloakClient;
   @Mock private TokenService tokenService;
   @Mock private UserTenantsClient userTenantsClient;
+  @Mock private UsersClient usersClient;
   @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private FolioModuleMetadata folioModuleMetadata;
   @Mock private KeycloakLoginClientProperties loginClientProperties;
   @Mock private KeycloakFederatedAuthProperties keycloakFederatedAuthProperties;
   @InjectMocks private KeycloakService keycloakService;
+
+  @BeforeEach
+  void setUp() {
+    var headers = new HashMap<String, java.util.Collection<String>>();
+    headers.put("x-okapi-tenant", List.of(CENTRAL_TENANT_NAME));
+    lenient().when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
+    lenient().when(folioExecutionContext.getAllHeaders()).thenReturn(headers);
+  }
 
   @Test
   void linkIdentityProviderToUser_positive() {
@@ -62,6 +80,8 @@ class UserServiceIdentityProviderTest {
     when(keycloakClient.getUserIdentityProvider(CENTRAL_TENANT_NAME, KC_USER_ID, AUTH_TOKEN)).thenReturn(List.of());
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
     when(keycloakFederatedAuthProperties.getIdentityProviderSuffix()).thenReturn(PROVIDER_SUFFIX);
+    var realUser = new User().id(UUID.fromString(USER_ID)).username(REAL_USERNAME);
+    when(usersClient.lookupUserById(UUID.fromString(USER_ID))).thenReturn(Optional.of(realUser));
     var user = createShadowUser(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, TENANT_NAME));
     keycloakService.linkIdentityProviderToUser(user, KC_USER_ID);
 
@@ -163,6 +183,8 @@ class UserServiceIdentityProviderTest {
       .thenReturn(List.of(createUserIdentityProvider()));
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
     when(keycloakFederatedAuthProperties.getIdentityProviderSuffix()).thenReturn(PROVIDER_SUFFIX);
+    var realUser = new User().id(UUID.fromString(USER_ID)).username(REAL_USERNAME);
+    when(usersClient.lookupUserById(UUID.fromString(USER_ID))).thenReturn(Optional.of(realUser));
     var user = createShadowUser(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, TENANT_NAME));
     keycloakService.linkIdentityProviderToUser(user, KC_USER_ID);
 
@@ -171,6 +193,44 @@ class UserServiceIdentityProviderTest {
     verify(keycloakClient, atMostOnce()).linkIdentityProviderToUser(eq(CENTRAL_TENANT_NAME), eq(KC_USER_ID),
       eq(PROVIDER_ALIAS), any(FederatedIdentity.class), eq(AUTH_TOKEN));
   }
+
+  @Test
+  void linkIdentityProviderToUser_negative_emptyUsername() {
+    when(folioExecutionContext.getTenantId()).thenReturn(CENTRAL_TENANT_NAME);
+    var userTenant = createUserTenant();
+    when(userTenantsClient.lookupByTenantId(CENTRAL_TENANT_NAME))
+      .thenReturn(new UserTenantCollection().userTenants(List.of(userTenant)));
+    when(keycloakClient.getUserIdentityProvider(CENTRAL_TENANT_NAME, KC_USER_ID, AUTH_TOKEN)).thenReturn(List.of());
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(keycloakFederatedAuthProperties.getIdentityProviderSuffix()).thenReturn(PROVIDER_SUFFIX);
+    var user = new User()
+      .id(UUID.fromString(USER_ID))
+      .username("")
+      .type(UserType.SHADOW.getValue())
+      .customFields(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, TENANT_NAME));
+
+    assertThatThrownBy(() -> keycloakService.linkIdentityProviderToUser(user, KC_USER_ID))
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("Username is missing");
+  }
+
+  @Test
+  void linkIdentityProviderToUser_negative_realUserNotFound() {
+    when(folioExecutionContext.getTenantId()).thenReturn(CENTRAL_TENANT_NAME);
+    var userTenant = createUserTenant();
+    when(userTenantsClient.lookupByTenantId(CENTRAL_TENANT_NAME))
+      .thenReturn(new UserTenantCollection().userTenants(List.of(userTenant)));
+    when(keycloakClient.getUserIdentityProvider(CENTRAL_TENANT_NAME, KC_USER_ID, AUTH_TOKEN)).thenReturn(List.of());
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(keycloakFederatedAuthProperties.getIdentityProviderSuffix()).thenReturn(PROVIDER_SUFFIX);
+    when(usersClient.lookupUserById(UUID.fromString(USER_ID))).thenReturn(Optional.empty());
+    var user = createShadowUser(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, TENANT_NAME));
+
+    assertThatThrownBy(() -> keycloakService.linkIdentityProviderToUser(user, KC_USER_ID))
+      .isInstanceOf(EntityNotFoundException.class)
+      .hasMessageContaining("Cannot find real user by id in member tenant");
+  }
+
 
   private User createShadowUser(Map<String, Object> customFields) {
     return new User()
