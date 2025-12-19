@@ -56,7 +56,8 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
   @Test
   @WireMockStub({
     "/wiremock/stubs/users/create-shadow-user.json",
-    "/wiremock/stubs/users/get-user-tenants.json"
+    "/wiremock/stubs/users/get-user-tenants.json",
+    "/wiremock/stubs/users/get-user.json"
   })
   void create_positive() throws Exception {
     tenant = CENTRAL_TENANT_NAME;
@@ -73,7 +74,8 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
   @Test
   @WireMockStub({
     "/wiremock/stubs/users/create-shadow-user.json",
-    "/wiremock/stubs/users/get-user-tenants.json"
+    "/wiremock/stubs/users/get-user-tenants.json",
+    "/wiremock/stubs/users/get-user.json",
   })
   void update_positive() throws Exception {
     tenant = CENTRAL_TENANT_NAME;

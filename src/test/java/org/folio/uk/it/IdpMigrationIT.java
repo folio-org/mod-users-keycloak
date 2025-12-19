@@ -62,6 +62,7 @@ class IdpMigrationIT extends BaseIntegrationTest {
   @WireMockStub({
     "/wiremock/stubs/users/create-shadow-user.json",
     "/wiremock/stubs/users/get-user-tenants.json",
+    "/wiremock/stubs/users/get-user.json",
     "/wiremock/stubs/users/get-shadow-users.json"
   })
   void linkUserIdpMigration_positive() throws Exception {
@@ -82,6 +83,7 @@ class IdpMigrationIT extends BaseIntegrationTest {
   @WireMockStub({
     "/wiremock/stubs/users/create-shadow-user.json",
     "/wiremock/stubs/users/get-user-tenants.json",
+    "/wiremock/stubs/users/get-user.json",
     "/wiremock/stubs/users/get-shadow-users.json"
   })
   void unlinkUserIdpMigration_positive() throws Exception {
