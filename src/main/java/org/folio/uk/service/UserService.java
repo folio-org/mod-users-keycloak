@@ -76,7 +76,7 @@ public class UserService {
     return createUserPrivate(user, keycloakOnly, this::createUserInUserServiceSafe,
       createdUser -> {
         var kcUserId = keycloakService.upsertUser(createdUser, password);
-        if (StringUtils.isNotEmpty(kcUserId) && Boolean.TRUE.equals(keycloakFederatedAuthProperties.isEnabled())) {
+        if (StringUtils.isNotEmpty(kcUserId) && keycloakFederatedAuthProperties.isEnabled()) {
           keycloakService.linkIdentityProviderToUser(user, kcUserId);
         }
       });
@@ -117,7 +117,7 @@ public class UserService {
 
     // When overrideUser is set to true the shadow user will be used to retrieve the real user
     // with its permissions and service points to support the ECS login into member tenants
-    if (Boolean.TRUE.equals(overrideUser) && StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
+    if (overrideUser && StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
       var originalTenantIdOptional = getOriginalTenantIdOptional(user);
       if (originalTenantIdOptional.isPresent()) {
         return getRealUserByReference(user, originalTenantIdOptional.get(), expandPermissions);
