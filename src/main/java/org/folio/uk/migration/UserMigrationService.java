@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
@@ -44,7 +45,6 @@ import org.folio.uk.mapper.UserMigrationMapper;
 import org.folio.uk.migration.properties.UserMigrationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.utils.CollectionUtils;
 
 @Log4j2
 @Service
@@ -104,7 +104,7 @@ public class UserMigrationService {
 
   private void addShadowUsers(List<String> userIds) {
     var shadowUsers = usersClient.query(TYPE_SHADOW, Integer.MAX_VALUE);
-    if (Objects.isNull(shadowUsers) || CollectionUtils.isNullOrEmpty(shadowUsers.getUsers())) {
+    if (Objects.isNull(shadowUsers) || CollectionUtils.isEmpty(shadowUsers.getUsers())) {
       return;
     }
     var shadowUserIds = shadowUsers.getUsers().stream()
