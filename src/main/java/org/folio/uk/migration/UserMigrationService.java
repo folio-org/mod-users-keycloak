@@ -14,6 +14,7 @@ import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -88,14 +89,15 @@ public class UserMigrationService {
   public UserMigrationJob createMigration() {
     var migration = buildUserMigrationsEntity();
     var userIds = permissionService.findUsersIdsWithPermissions();
-    addShadowUsers(userIds);
+    var combinedUserIds = new ArrayList<>(userIds);
+    addShadowUsers(combinedUserIds);
 
-    validateRunningMigrations(userIds);
-    migration.setTotalRecords(userIds.size());
+    validateRunningMigrations(combinedUserIds);
+    migration.setTotalRecords(combinedUserIds.size());
     repository.save(migration);
     repository.flush();
 
-    startMigration(userIds, migration);
+    startMigration(combinedUserIds, migration);
 
     return mapper.toDto(migration);
   }
