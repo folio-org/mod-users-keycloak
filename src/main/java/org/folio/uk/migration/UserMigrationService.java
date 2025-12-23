@@ -15,6 +15,7 @@ import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -42,6 +43,7 @@ import org.folio.uk.mapper.UserMigrationMapper;
 import org.folio.uk.migration.properties.UserMigrationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.utils.CollectionUtils;
 
 @Log4j2
 @Service
@@ -50,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserMigrationService {
 
   private static final String INVALID_EMAIL_ERROR_MESSAGE = "Invalid email address.";
+  private static final String TYPE_SHADOW = "type==shadow";
 
   private final PermissionService permissionService;
   private final UserMigrationProperties migrationProperties;
@@ -83,9 +86,9 @@ public class UserMigrationService {
   }
 
   public UserMigrationJob createMigration() {
-
     var migration = buildUserMigrationsEntity();
     var userIds = permissionService.findUsersIdsWithPermissions();
+    addShadowUsers(userIds);
 
     validateRunningMigrations(userIds);
     migration.setTotalRecords(userIds.size());
@@ -95,6 +98,22 @@ public class UserMigrationService {
     startMigration(userIds, migration);
 
     return mapper.toDto(migration);
+  }
+
+  private void addShadowUsers(List<String> userIds) {
+    var shadowUsers = usersClient.query(TYPE_SHADOW, Integer.MAX_VALUE);
+    if (Objects.isNull(shadowUsers) || CollectionUtils.isNullOrEmpty(shadowUsers.getUsers())) {
+      return;
+    }
+    var shadowUserIds = shadowUsers.getUsers().stream()
+      .filter(Objects::nonNull)
+      .map(User::getId)
+      .filter(Objects::nonNull)
+      .map(UUID::toString)
+      .distinct()
+      .toList();
+    userIds.addAll(shadowUserIds);
+    log.info("Added shadow user ids: {}", shadowUserIds.size());
   }
 
   private void startMigration(List<String> userIds, UserMigrationJobEntity job) {

@@ -3,6 +3,7 @@ package org.folio.uk.integration.permission;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,6 @@ public class PermissionService {
     }
     return response.getPermissionUsers().stream()
       .map(PermissionUser::getUserId)
-      .collect(Collectors.toList());
+      .collect(Collectors.toCollection(ArrayList::new));
   }
 }

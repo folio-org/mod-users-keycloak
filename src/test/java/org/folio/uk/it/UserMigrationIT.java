@@ -8,6 +8,7 @@ import static org.folio.uk.support.TestValues.readValue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,10 +53,45 @@ class UserMigrationIT extends BaseIntegrationTest {
   @Sql("classpath:/sql/truncate-migration.sql")
   @WireMockStub(scripts = {
     "/wiremock/stubs/perms/search-users-migration.json",
-    "/wiremock/stubs/users/search-users-migration.json",
+    "/wiremock/stubs/users/search-users-and-shadow-users-migration.json",
+    "/wiremock/stubs/users/search-shadow-users-migration.json",
     "/wiremock/stubs/users/search-users-tenants-migration.json",
   })
-  void migrateUsers_positive() throws Exception {
+  void migrateUsers_positive_with_shadow_users() throws Exception {
+    var mvcResult = doPost("/users-keycloak/migrations", null).andReturn();
+    var resp = parseResponse(mvcResult, UserMigrationJob.class);
+
+    assertThat(resp.getId()).isNotNull();
+    assertThat(resp.getStartedAt()).isNotNull();
+    assertThat(resp.getStatus()).isEqualTo(UserMigrationJobStatus.IN_PROGRESS);
+    assertThat(resp.getTotalRecords()).isEqualTo(21);
+
+    var status = await().atMost(Duration.ofSeconds(10))
+      .until(() -> getJobStatusById(resp.getId()), equalTo(UserMigrationJobStatus.FINISHED));
+    assertThat(status).isEqualTo(UserMigrationJobStatus.FINISHED);
+
+    var users = readValue("json/user/search-users-migration.json", Users.class);
+    var shadowUsers = readValue("json/user/search-shadow-users-migration.json", Users.class);
+    var migratedUser = users.getUsers().getFirst();
+    var migratedShadowUser = shadowUsers.getUsers().getFirst();
+
+    var passwordCaptor = ArgumentCaptor.forClass(String.class);
+    verify(keycloakService, times(2)).createUserForMigration(any(), passwordCaptor.capture(), any());
+    assertThat(passwordCaptor.getValue()).isNull();
+
+    verifyKeycloakUser(migratedUser);
+    verifyKeycloakUser(migratedShadowUser);
+  }
+
+  @Test
+  @Sql("classpath:/sql/truncate-migration.sql")
+  @WireMockStub(scripts = {
+    "/wiremock/stubs/perms/search-users-migration.json",
+    "/wiremock/stubs/users/search-users-migration.json",
+    "/wiremock/stubs/users/search-empty-shadow-users-migration.json",
+    "/wiremock/stubs/users/search-users-tenants-migration.json",
+  })
+  void migrateUsers_positive_without_shadow_users() throws Exception {
     var mvcResult = doPost("/users-keycloak/migrations", null).andReturn();
     var resp = parseResponse(mvcResult, UserMigrationJob.class);
 
@@ -69,10 +105,10 @@ class UserMigrationIT extends BaseIntegrationTest {
     assertThat(status).isEqualTo(UserMigrationJobStatus.FINISHED);
 
     var users = readValue("json/user/search-users-migration.json", Users.class);
-    var migratedUser = users.getUsers().get(0);
+    var migratedUser = users.getUsers().getFirst();
 
     var passwordCaptor = ArgumentCaptor.forClass(String.class);
-    verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
+    verify(keycloakService, times(1)).createUserForMigration(any(), passwordCaptor.capture(), any());
     assertThat(passwordCaptor.getValue()).isNull();
 
     verifyKeycloakUser(migratedUser);
@@ -83,6 +119,7 @@ class UserMigrationIT extends BaseIntegrationTest {
   @WireMockStub(scripts = {
     "/wiremock/stubs/perms/search-users-migration.json",
     "/wiremock/stubs/users/search-users-migration.json",
+    "/wiremock/stubs/users/search-empty-shadow-users-migration.json",
     "/wiremock/stubs/users/search-users-tenants-migration.json",
   })
   void migrateUsers_positive_if_default_passwords_on_migration_equals_true() throws Exception {
@@ -100,7 +137,7 @@ class UserMigrationIT extends BaseIntegrationTest {
     assertThat(status).isEqualTo(UserMigrationJobStatus.FINISHED);
 
     var users = readValue("json/user/search-users-migration.json", Users.class);
-    var migratedUser = users.getUsers().get(0);
+    var migratedUser = users.getUsers().getFirst();
 
     var passwordCaptor = ArgumentCaptor.forClass(String.class);
     verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
@@ -113,6 +150,7 @@ class UserMigrationIT extends BaseIntegrationTest {
   @Sql("classpath:/sql/truncate-migration.sql")
   @WireMockStub(scripts = {
     "/wiremock/stubs/perms/search-users-migration.json",
+    "/wiremock/stubs/users/search-empty-shadow-users-migration.json",
     "/wiremock/stubs/users/search-users-migration-fail.json"
   })
   void migrateUsers_negative_failed() throws Exception {
@@ -133,6 +171,7 @@ class UserMigrationIT extends BaseIntegrationTest {
   @Sql("classpath:/sql/truncate-migration.sql")
   @WireMockStub(scripts = {
     "/wiremock/stubs/perms/search-users-migration-empty.json",
+    "/wiremock/stubs/users/search-empty-shadow-users-migration.json",
     "/wiremock/stubs/users/search-users-migration.json"
   })
   void migrateUsers_negative() throws Exception {
@@ -144,6 +183,7 @@ class UserMigrationIT extends BaseIntegrationTest {
   @Sql("classpath:/sql/populate-migration-schema.sql")
   @WireMockStub(scripts = {
     "/wiremock/stubs/perms/search-users-migration.json",
+    "/wiremock/stubs/users/search-empty-shadow-users-migration.json",
     "/wiremock/stubs/users/search-users-migration.json"
   })
   void migrateUsers_negative_exists() throws Exception {
