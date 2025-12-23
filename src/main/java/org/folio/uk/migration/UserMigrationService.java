@@ -14,10 +14,10 @@ import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -88,9 +88,7 @@ public class UserMigrationService {
 
   public UserMigrationJob createMigration() {
     var migration = buildUserMigrationsEntity();
-    var userIds = permissionService.findUsersIdsWithPermissions();
-    var combinedUserIds = new ArrayList<>(userIds);
-    addShadowUsers(combinedUserIds);
+    var combinedUserIds = getCombinedUserIds();
 
     validateRunningMigrations(combinedUserIds);
     migration.setTotalRecords(combinedUserIds.size());
@@ -102,7 +100,13 @@ public class UserMigrationService {
     return mapper.toDto(migration);
   }
 
-  private void addShadowUsers(List<String> userIds) {
+  private List<String> getCombinedUserIds() {
+    var userIds = permissionService.findUsersIdsWithPermissions();
+    addShadowUsers(userIds);
+    return userIds.stream().toList();
+  }
+
+  private void addShadowUsers(Set<String> userIds) {
     var shadowUsers = usersClient.query(TYPE_SHADOW, Integer.MAX_VALUE);
     if (Objects.isNull(shadowUsers) || CollectionUtils.isEmpty(shadowUsers.getUsers())) {
       return;
