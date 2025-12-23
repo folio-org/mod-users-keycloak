@@ -70,16 +70,16 @@ class UserMigrationIT extends BaseIntegrationTest {
       .until(() -> getJobStatusById(resp.getId()), equalTo(UserMigrationJobStatus.FINISHED));
     assertThat(status).isEqualTo(UserMigrationJobStatus.FINISHED);
 
-    var users = readValue("json/user/search-users-migration.json", Users.class);
-    var shadowUsers = readValue("json/user/search-shadow-users-migration.json", Users.class);
-    var migratedUser = users.getUsers().getFirst();
-    var migratedShadowUser = shadowUsers.getUsers().getFirst();
-
     var passwordCaptor = ArgumentCaptor.forClass(String.class);
     verify(keycloakService, times(2)).createUserForMigration(any(), passwordCaptor.capture(), any());
     assertThat(passwordCaptor.getValue()).isNull();
 
+    var users = readValue("json/user/search-users-migration.json", Users.class);
+    var migratedUser = users.getUsers().getFirst();
     verifyKeycloakUser(migratedUser);
+
+    var shadowUsers = readValue("json/user/search-shadow-users-migration.json", Users.class);
+    var migratedShadowUser = shadowUsers.getUsers().getFirst();
     verifyKeycloakUser(migratedShadowUser);
   }
 
@@ -104,13 +104,12 @@ class UserMigrationIT extends BaseIntegrationTest {
       .until(() -> getJobStatusById(resp.getId()), equalTo(UserMigrationJobStatus.FINISHED));
     assertThat(status).isEqualTo(UserMigrationJobStatus.FINISHED);
 
-    var users = readValue("json/user/search-users-migration.json", Users.class);
-    var migratedUser = users.getUsers().getFirst();
-
     var passwordCaptor = ArgumentCaptor.forClass(String.class);
     verify(keycloakService, times(1)).createUserForMigration(any(), passwordCaptor.capture(), any());
     assertThat(passwordCaptor.getValue()).isNull();
 
+    var users = readValue("json/user/search-users-migration.json", Users.class);
+    var migratedUser = users.getUsers().getFirst();
     verifyKeycloakUser(migratedUser);
   }
 
@@ -138,7 +137,6 @@ class UserMigrationIT extends BaseIntegrationTest {
 
     var users = readValue("json/user/search-users-migration.json", Users.class);
     var migratedUser = users.getUsers().getFirst();
-
     var passwordCaptor = ArgumentCaptor.forClass(String.class);
     verify(keycloakService).createUserForMigration(any(), passwordCaptor.capture(), any());
     assertThat(passwordCaptor.getValue()).isEqualTo(migratedUser.getUsername());
