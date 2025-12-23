@@ -14,6 +14,8 @@ spring:
 
 application:
   environment: it-test
+  migration:
+    batch-size: 30 # Increase the batch size to ease mocking
   keycloak:
     tls:
       enabled: true

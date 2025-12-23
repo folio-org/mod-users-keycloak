@@ -15,12 +15,15 @@ import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
@@ -50,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserMigrationService {
 
   private static final String INVALID_EMAIL_ERROR_MESSAGE = "Invalid email address.";
+  private static final String TYPE_SHADOW = "type==shadow";
 
   private final PermissionService permissionService;
   private final UserMigrationProperties migrationProperties;
@@ -83,18 +87,39 @@ public class UserMigrationService {
   }
 
   public UserMigrationJob createMigration() {
-
     var migration = buildUserMigrationsEntity();
-    var userIds = permissionService.findUsersIdsWithPermissions();
+    var combinedUserIds = getCombinedUserIds();
 
-    validateRunningMigrations(userIds);
-    migration.setTotalRecords(userIds.size());
+    validateRunningMigrations(combinedUserIds);
+    migration.setTotalRecords(combinedUserIds.size());
     repository.save(migration);
     repository.flush();
 
-    startMigration(userIds, migration);
+    startMigration(combinedUserIds, migration);
 
     return mapper.toDto(migration);
+  }
+
+  private List<String> getCombinedUserIds() {
+    var userIds = permissionService.findUsersIdsWithPermissions();
+    addShadowUsers(userIds);
+    return userIds.stream().toList();
+  }
+
+  private void addShadowUsers(Set<String> userIds) {
+    var shadowUsers = usersClient.query(TYPE_SHADOW, Integer.MAX_VALUE);
+    if (Objects.isNull(shadowUsers) || CollectionUtils.isEmpty(shadowUsers.getUsers())) {
+      return;
+    }
+    var shadowUserIds = shadowUsers.getUsers().stream()
+      .filter(Objects::nonNull)
+      .map(User::getId)
+      .filter(Objects::nonNull)
+      .map(UUID::toString)
+      .distinct()
+      .toList();
+    userIds.addAll(shadowUserIds);
+    log.info("Added shadow user ids: {}", shadowUserIds.size());
   }
 
   private void startMigration(List<String> userIds, UserMigrationJobEntity job) {

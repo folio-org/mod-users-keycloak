@@ -3,7 +3,8 @@ package org.folio.uk.integration.permission;
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -19,13 +20,13 @@ public class PermissionService {
 
   private final PermissionClient client;
 
-  public List<String> findUsersIdsWithPermissions() {
+  public Set<String> findUsersIdsWithPermissions() {
     var response = client.findByQuery("id=* NOT permissions==[]", ALL_RECORDS, null);
     if (isNull(response) || isEmpty(response.getPermissionUsers())) {
-      return List.of();
+      return new LinkedHashSet<>();
     }
     return response.getPermissionUsers().stream()
       .map(PermissionUser::getUserId)
-      .collect(Collectors.toList());
+      .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }
