@@ -1,3 +1,9 @@
+## Version 'v3.0.10' (24.12.2025)
+### Changes:
+* Make adjustment to rely on the real username for creating Identity Provider Link (MODUSERSKC-115)
+* Adjust user's migration to include shadow users (MODUSERSKC-116)
+---
+
 ## Version 'v3.0.9' (02.12.2025)
 ### Changes:
 * Cross-tenant multiple users have shared contact cannot receive password/username recovery email (MODUSERSKC-106)
