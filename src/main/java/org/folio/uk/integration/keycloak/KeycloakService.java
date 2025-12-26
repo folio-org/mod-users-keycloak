@@ -174,9 +174,14 @@ public class KeycloakService {
         .orElseThrow(() ->
           new EntityNotFoundException("Cannot find real user by id in member tenant: %s".formatted(memberTenant)));
 
+      if (StringUtils.isBlank(realUser.getUsername())) {
+        throw new IllegalStateException("Username is missing for real user with id: %s in member tenant: %s"
+          .formatted(user.getId(), memberTenant));
+      }
+      String lowerCasedUsername = realUser.getUsername().toLowerCase();
       return FederatedIdentity.builder()
-        .userId(realUser.getUsername())
-        .userName(realUser.getUsername())
+        .userId(lowerCasedUsername)
+        .userName(lowerCasedUsername)
         .build();
     }
   }
