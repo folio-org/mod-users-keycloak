@@ -1,3 +1,8 @@
+## Version 'v3.0.11' (26.12.2025)
+### Changes:
+* Cannot login by user which has primary affiliation in Member tenant and "camel" case username (MODUSERSKC-119)
+---
+
 ## Version 'v3.0.10' (24.12.2025)
 ### Changes:
 * Make adjustment to rely on the real username for creating Identity Provider Link (MODUSERSKC-115)
