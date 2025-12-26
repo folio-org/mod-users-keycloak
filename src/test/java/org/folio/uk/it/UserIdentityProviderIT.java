@@ -75,6 +75,24 @@ class UserIdentityProviderIT extends BaseIntegrationTest {
   @WireMockStub({
     "/wiremock/stubs/users/create-shadow-user.json",
     "/wiremock/stubs/users/get-user-tenants.json",
+    "/wiremock/stubs/users/get-user-username-uppercased.json"
+  })
+  void create_positive_username_uppercased() throws Exception {
+    tenant = CENTRAL_TENANT_NAME;
+    user = TestConstants.shadowUser();
+
+    var mvcResult = doPostWithTenant("/users-keycloak/users", tenant, user).andReturn();
+    var resp = parseResponse(mvcResult, User.class);
+
+    assertSuccessfulUserCreation(resp, user);
+
+    verifyKeycloakUserAndIdentityProvider(tenant, user);
+  }
+
+  @Test
+  @WireMockStub({
+    "/wiremock/stubs/users/create-shadow-user.json",
+    "/wiremock/stubs/users/get-user-tenants.json",
     "/wiremock/stubs/users/get-user.json",
   })
   void update_positive() throws Exception {
