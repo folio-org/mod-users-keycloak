@@ -1,3 +1,8 @@
+## Version 'v3.0.12' (06.01.2026)
+### Changes:
+* Remove @Transactional for UserService (MODUSERSKC-117)
+---
+
 ## Version 'v3.0.11' (26.12.2025)
 ### Changes:
 * Cannot login by user which has primary affiliation in Member tenant and "camel" case username (MODUSERSKC-119)
