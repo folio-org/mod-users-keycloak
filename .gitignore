@@ -32,3 +32,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### AI tools ###
+.claude/
+.codemie/
+

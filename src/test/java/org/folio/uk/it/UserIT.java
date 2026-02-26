@@ -74,7 +74,7 @@ class UserIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/get-user-by-self.json",
-    "/wiremock/stubs/users/get-perms-by-self.json",
+    "/wiremock/stubs/users/get-all-perms-by-self.json",
     "/wiremock/stubs/inventory/get-service-points-user.json",
     "/wiremock/stubs/inventory/get-service-point.json"
   })
@@ -90,7 +90,7 @@ class UserIT extends BaseIntegrationTest {
 
     var user = parseResponse(response, CompositeUser.class);
     assertThat(user.getUser().getId()).isEqualTo(USER_ID_FROM_TOKEN);
-    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all"));
+    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all", "be.all"));
     assertThat(user.getServicePointsUser().getId()).isEqualTo("e66e30fd-0473-4a3f-910b-7921817eb3ea");
     assertThat(user.getServicePointsUser().getServicePoints().get(0).getId()).isEqualTo(
       "7c5abc9f-f3d7-4856-b8d7-6712462ca007");
@@ -99,7 +99,7 @@ class UserIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/get-user-by-self.json",
-    "/wiremock/stubs/users/get-perms-by-self.json",
+    "/wiremock/stubs/users/get-all-perms-by-self.json",
     "/wiremock/stubs/inventory/get-service-points-user.json",
     "/wiremock/stubs/inventory/get-service-point.json"
   })
@@ -115,14 +115,15 @@ class UserIT extends BaseIntegrationTest {
 
     var user = parseResponse(response, CompositeUser.class);
     assertThat(user.getUser().getId()).isEqualTo(USER_ID_FROM_TOKEN);
-    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of(Map.of(PERMISSION_NAME_FIELD, "ui.all")));
+    assertThat(user.getPermissions().getPermissions()).isEqualTo(
+      List.of(Map.of(PERMISSION_NAME_FIELD, "ui.all"), Map.of(PERMISSION_NAME_FIELD, "be.all")));
     assertThat(user.getServicePointsUser().getId()).isEqualTo("e66e30fd-0473-4a3f-910b-7921817eb3ea");
   }
 
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/get-user-by-self.json",
-    "/wiremock/stubs/users/get-perms-by-self.json",
+    "/wiremock/stubs/users/get-all-perms-by-self.json",
     "/wiremock/stubs/inventory/get-service-points-user-not-found.json"
   })
   void getBySelf_positive_no_servicePointsUsers() throws Exception {
@@ -137,14 +138,14 @@ class UserIT extends BaseIntegrationTest {
 
     var user = parseResponse(response, CompositeUser.class);
     assertThat(user.getUser().getId()).isEqualTo(USER_ID_FROM_TOKEN);
-    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all"));
+    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all", "be.all"));
     assertThat(user.getServicePointsUser()).isNull();
   }
 
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/get-user-by-self.json",
-    "/wiremock/stubs/users/get-perms-by-self.json",
+    "/wiremock/stubs/users/get-all-perms-by-self.json",
     "/wiremock/stubs/inventory/get-service-points-user-error.json"
   })
   void getBySelf_positive_error_servicePointsUsers() throws Exception {
@@ -159,14 +160,14 @@ class UserIT extends BaseIntegrationTest {
 
     var user = parseResponse(response, CompositeUser.class);
     assertThat(user.getUser().getId()).isEqualTo(USER_ID_FROM_TOKEN);
-    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all"));
+    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all", "be.all"));
     assertThat(user.getServicePointsUser()).isNull();
   }
 
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/get-user-by-self.json",
-    "/wiremock/stubs/users/get-perms-by-self.json",
+    "/wiremock/stubs/users/get-all-perms-by-self.json",
     "/wiremock/stubs/inventory/get-service-points-user.json",
     "/wiremock/stubs/inventory/get-service-point-notfound.json"
   })
@@ -182,7 +183,7 @@ class UserIT extends BaseIntegrationTest {
 
     var user = parseResponse(response, CompositeUser.class);
     assertThat(user.getUser().getId()).isEqualTo(USER_ID_FROM_TOKEN);
-    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all"));
+    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all", "be.all"));
     assertThat(user.getServicePointsUser().getId()).isEqualTo("e66e30fd-0473-4a3f-910b-7921817eb3ea");
     assertThat(user.getServicePointsUser().getServicePoints()).isEmpty();
   }
@@ -190,7 +191,7 @@ class UserIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/get-user-by-self.json",
-    "/wiremock/stubs/users/get-perms-by-self.json",
+    "/wiremock/stubs/users/get-all-perms-by-self.json",
     "/wiremock/stubs/inventory/get-service-points-user.json",
     "/wiremock/stubs/inventory/get-service-point.json"
   })
@@ -206,13 +207,13 @@ class UserIT extends BaseIntegrationTest {
 
     var user = parseResponse(response, CompositeUser.class);
     assertThat(user.getUser().getId()).isEqualTo(USER_ID_FROM_TOKEN);
-    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all"));
+    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all", "be.all"));
   }
 
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/users/get-user-by-self.json",
-    "/wiremock/stubs/users/get-perms-by-self.json",
+    "/wiremock/stubs/users/get-all-perms-by-self.json",
     "/wiremock/stubs/inventory/get-service-points-user.json",
     "/wiremock/stubs/inventory/get-service-point.json"
   })
@@ -227,7 +228,7 @@ class UserIT extends BaseIntegrationTest {
 
     var user = parseResponse(response, CompositeUser.class);
     assertThat(user.getUser().getId()).isEqualTo(USER_ID_FROM_TOKEN);
-    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all"));
+    assertThat(user.getPermissions().getPermissions()).isEqualTo(List.of("ui.all", "be.all"));
   }
 
   @Test
