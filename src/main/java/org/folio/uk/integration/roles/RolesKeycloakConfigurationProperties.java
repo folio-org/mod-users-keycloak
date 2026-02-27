@@ -9,5 +9,5 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "application.mod-roles-keycloak")
 public class RolesKeycloakConfigurationProperties {
 
-  private boolean includeOnlyVisiblePermissions = true;
+  private boolean includeOnlyVisiblePermissions = false;
 }
