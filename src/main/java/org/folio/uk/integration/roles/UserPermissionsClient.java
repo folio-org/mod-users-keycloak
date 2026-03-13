@@ -13,5 +13,6 @@ public interface UserPermissionsClient {
 
   @GetMapping("/users/{id}")
   UserPermissions getPermissionsForUser(@PathVariable("id") UUID id, @RequestParam("onlyVisible") Boolean onlyVisible,
-    @RequestParam("desiredPermissions") List<String> desiredPermissions);
+    @RequestParam("desiredPermissions") List<String> desiredPermissions,
+    @RequestParam(value = "entitledOnly", required = false) Boolean entitledOnly);
 }

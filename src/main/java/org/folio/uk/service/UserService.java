@@ -181,7 +181,7 @@ public class UserService {
    * @return list of resolved permissions
    */
   public List<String> resolvePermissions(UUID userId, List<String> userPermissions) {
-    var permissions = userPermissionsClient.getPermissionsForUser(userId, false, userPermissions);
+    var permissions = userPermissionsClient.getPermissionsForUser(userId, false, userPermissions, null);
     return permissions.getPermissions();
   }
 
@@ -235,7 +235,8 @@ public class UserService {
 
   private PermissionUser fetchPermissionUser(UUID userId, boolean expandPermissions) {
     var includeOnlyVisiblePermissions = rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions();
-    var userPermissions = userPermissionsClient.getPermissionsForUser(userId, includeOnlyVisiblePermissions, null);
+    var userPermissions = userPermissionsClient.getPermissionsForUser(
+      userId, includeOnlyVisiblePermissions, null, true);
     var permissionsList = emptyIfNull(userPermissions.getPermissions());
 
     return new PermissionUser()

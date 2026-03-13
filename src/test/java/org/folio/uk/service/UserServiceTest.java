@@ -294,29 +294,30 @@ class UserServiceTest {
     var userPermissions = new UserPermissions();
     userPermissions.setPermissions(response);
 
-    when(userPermissionsClient.getPermissionsForUser(userId, false, request)).thenReturn(userPermissions);
+    when(userPermissionsClient.getPermissionsForUser(userId, false, request, null)).thenReturn(userPermissions);
 
     var result = userService.resolvePermissions(userId, request);
 
     assertThat(result).containsExactlyInAnyOrderElementsOf(response);
-    verify(userPermissionsClient).getPermissionsForUser(userId, false, request);
+    verify(userPermissionsClient).getPermissionsForUser(userId, false, request, null);
   }
 
   @Test
   void getUserBySelfReference_positive() {
     var userId = randomUUID();
+    when(rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions()).thenReturn(true);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(folioExecutionContext.getToken()).thenReturn("");
     when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(mock(User.class)));
     when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
     var permissions = new UserPermissions();
     permissions.setPermissions(List.of("some.permission"));
-    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
+    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any(), any())).thenReturn(permissions);
 
     var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, false);
 
     verify(usersClient, times(1)).lookupUserById(userId);
-    verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
+    verify(userPermissionsClient, times(1)).getPermissionsForUser(userId, true, null, true);
     verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
 
     assertThat(resultExpanded.getPermissions()).isNotNull();
@@ -327,7 +328,7 @@ class UserServiceTest {
     var result = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), false, false);
 
     verify(usersClient, times(2)).lookupUserById(userId);
-    verify(userPermissionsClient, times(2)).getPermissionsForUser(eq(userId), any(), any());
+    verify(userPermissionsClient, times(2)).getPermissionsForUser(userId, true, null, true);
     verify(servicePointsUserClient, times(2)).getServicePointsUser(userId);
 
     assertThat(result.getPermissions()).isNotNull();
@@ -344,6 +345,7 @@ class UserServiceTest {
     when(user.getType()).thenReturn("shadow");
     when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
       .thenReturn(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, "testtenant"));
+    when(rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions()).thenReturn(true);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(folioExecutionContext.getToken()).thenReturn("");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
@@ -352,12 +354,12 @@ class UserServiceTest {
     when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
     var permissions = new UserPermissions();
     permissions.setPermissions(List.of("some.permission"));
-    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
+    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any(), any())).thenReturn(permissions);
 
     var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, true);
 
     verify(usersClient, times(2)).lookupUserById(userId);
-    verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
+    verify(userPermissionsClient, times(1)).getPermissionsForUser(userId, true, null, true);
     verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
 
     assertThat(resultExpanded.getPermissions()).isNotNull();
@@ -368,7 +370,7 @@ class UserServiceTest {
     var result = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), false, true);
 
     verify(usersClient, times(4)).lookupUserById(userId);
-    verify(userPermissionsClient, times(2)).getPermissionsForUser(eq(userId), any(), any());
+    verify(userPermissionsClient, times(2)).getPermissionsForUser(userId, true, null, true);
     verify(servicePointsUserClient, times(2)).getServicePointsUser(userId);
 
     assertThat(result.getPermissions()).isNotNull();
@@ -386,6 +388,7 @@ class UserServiceTest {
     // No custom Field "originaltenantid"
     when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
       .thenReturn(Map.of());
+    when(rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions()).thenReturn(true);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(folioExecutionContext.getToken()).thenReturn("");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
@@ -394,12 +397,12 @@ class UserServiceTest {
     when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
     var permissions = new UserPermissions();
     permissions.setPermissions(List.of("some.permission"));
-    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
+    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any(), any())).thenReturn(permissions);
 
     var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, true);
 
     verify(usersClient, times(1)).lookupUserById(userId);
-    verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
+    verify(userPermissionsClient, times(1)).getPermissionsForUser(userId, true, null, true);
     verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
 
     assertThat(resultExpanded.getPermissions()).isNotNull();
@@ -419,6 +422,7 @@ class UserServiceTest {
     when(user.getType()).thenReturn(userType);
     when(user.getCustomFields().get(ORIGINAL_TENANT_ID_CUSTOM_FIELD))
       .thenReturn(Map.of(ORIGINAL_TENANT_ID_CUSTOM_FIELD, "testtenant"));
+    when(rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions()).thenReturn(true);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(folioExecutionContext.getToken()).thenReturn("");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
@@ -427,12 +431,12 @@ class UserServiceTest {
     when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
     var permissions = new UserPermissions();
     permissions.setPermissions(List.of("some.permission"));
-    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any())).thenReturn(permissions);
+    when(userPermissionsClient.getPermissionsForUser(eq(userId), any(), any(), any())).thenReturn(permissions);
 
     var resultExpanded = userService.getUserBySelfReference(List.of(EXPANDED_PERMS), true, true);
 
     verify(usersClient, times(1)).lookupUserById(userId);
-    verify(userPermissionsClient, times(1)).getPermissionsForUser(eq(userId), any(), any());
+    verify(userPermissionsClient, times(1)).getPermissionsForUser(userId, true, null, true);
     verify(servicePointsUserClient, times(1)).getServicePointsUser(userId);
 
     assertThat(resultExpanded.getPermissions()).isNotNull();
