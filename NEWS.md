@@ -13,6 +13,7 @@
 * Improve logging and API for forgotten password and username endpoints (MODUSERSKC-111)
 * Change log level from info to debug in some logging (MODUSERSKC-112)
 * Adjust default behavior of _self endpoint to return ALL assigned permissions (MODUSERSKC-138)
+* Migrate module build from Jenkins to the centralized GitHub Maven workflow (MODUSERSKC-139)
 ---
 
 ## Version `v3.0.0` (14.03.2025)
