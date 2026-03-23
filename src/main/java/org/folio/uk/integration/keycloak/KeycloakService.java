@@ -11,7 +11,6 @@ import static org.folio.common.utils.KeycloakPermissionUtils.toPermissionName;
 import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
 import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_ID_ATTR;
 
-import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +41,7 @@ import org.folio.uk.integration.users.UserTenantsClient;
 import org.folio.uk.integration.users.UsersClient;
 import org.folio.uk.utils.UserUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Log4j2
 @Component
@@ -470,7 +470,7 @@ public class KeycloakService {
     try {
       var res = keycloakClient.createScopePermission(realm, clientId, permission, getToken());
       log.info("Keycloak permission created with id: {}", res.getId());
-    } catch (FeignException.Conflict e) {
+    } catch (HttpClientErrorException.Conflict e) {
       log.info("Permission already exists [message: {}]", e.getMessage());
     } catch (Exception e) {
       throw new KeycloakException(

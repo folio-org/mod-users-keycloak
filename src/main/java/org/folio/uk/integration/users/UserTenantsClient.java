@@ -2,27 +2,46 @@ package org.folio.uk.integration.users;
 
 import java.util.UUID;
 import org.folio.uk.domain.dto.UserTenantCollection;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
-@FeignClient(name = "user-tenants", dismiss404 = true)
+@HttpExchange(url = "user-tenants")
 public interface UserTenantsClient {
 
-  @GetMapping(value = "?userId={id}")
-  UserTenantCollection lookupByUserId(@PathVariable("id") UUID userId);
+  default UserTenantCollection lookupByUserId(UUID userId) {
+    return lookupByUserIdRequest(userId);
+  }
 
-  @GetMapping(value = "?limit=1")
-  UserTenantCollection getOne();
+  default UserTenantCollection getOne() {
+    return getOneRequest(1);
+  }
 
-  @GetMapping(value = "?queryOp=or")
-  UserTenantCollection getUserTenants(@RequestParam Integer limit,
-    @RequestParam(required = false) String userName,
-    @RequestParam(required = false) String email,
-    @RequestParam(required = false) String phoneNumber,
-    @RequestParam(required = false) String mobilePhoneNumber);
+  default UserTenantCollection getUserTenants(Integer limit, String userName, String email, String phoneNumber,
+    String mobilePhoneNumber) {
+    return getUserTenantsRequest("or", limit, userName, email, phoneNumber, mobilePhoneNumber);
+  }
 
-  @GetMapping(value = "?tenantId={id}")
-  UserTenantCollection lookupByTenantId(@PathVariable("id") String tenantId);
+  default UserTenantCollection lookupByTenantId(String tenantId) {
+    return lookupByTenantIdRequest(tenantId);
+  }
+
+  @GetExchange
+  UserTenantCollection lookupByUserIdRequest(@RequestParam("userId") UUID userId);
+
+  @GetExchange
+  UserTenantCollection getOneRequest(@RequestParam("limit") Integer limit);
+
+  @GetExchange
+  UserTenantCollection getUserTenantsRequest(@RequestParam("queryOp") String queryOp,
+    @RequestParam("limit") Integer limit,
+    @RequestParam(value = "userName", required = false) String userName,
+    @RequestParam(value = "email", required = false) String email,
+    @RequestParam(value = "phoneNumber", required = false)
+    String phoneNumber,
+    @RequestParam(value = "mobilePhoneNumber", required = false)
+    String mobilePhoneNumber);
+
+  @GetExchange
+  UserTenantCollection lookupByTenantIdRequest(@RequestParam("tenantId") String tenantId);
 }

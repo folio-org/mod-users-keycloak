@@ -5,16 +5,16 @@ import org.folio.uk.integration.login.model.PasswordResetAction;
 import org.folio.uk.integration.login.model.PasswordResetActionCreated;
 import org.folio.uk.integration.login.model.PasswordResetRequest;
 import org.folio.uk.integration.login.model.PasswordResetResponse;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
 /**
  * Client for password reset actions API in mod-login-keycloak module.
  */
-@FeignClient(name = "authn", dismiss404 = true)
+@HttpExchange(url = "authn")
 public interface LoginClient {
 
   /**
@@ -23,7 +23,7 @@ public interface LoginClient {
    * @param passwordResetAction entry to save
    * @return password create action response
    */
-  @PostMapping("/password-reset-action")
+  @PostExchange("/password-reset-action")
   PasswordResetActionCreated savePasswordResetAction(@RequestBody PasswordResetAction passwordResetAction);
 
   /**
@@ -32,7 +32,7 @@ public interface LoginClient {
    * @param passwordResetActionId password reset action id
    * @return password reset action
    */
-  @GetMapping("/password-reset-action/{passwordResetActionId}")
+  @GetExchange("/password-reset-action/{passwordResetActionId}")
   Optional<PasswordResetAction> getPasswordResetAction(
     @PathVariable("passwordResetActionId") String passwordResetActionId);
 
@@ -42,6 +42,6 @@ public interface LoginClient {
    * @param passwordReset password reset payload
    * @return reset action response
    */
-  @PostMapping("/reset-password")
+  @PostExchange("/reset-password")
   PasswordResetResponse resetPassword(@RequestBody PasswordResetRequest passwordReset);
 }

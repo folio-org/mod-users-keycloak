@@ -40,10 +40,10 @@ import org.folio.uk.integration.users.UsersClient;
 import org.folio.uk.service.PasswordResetService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @UnitTest
@@ -61,15 +61,15 @@ class PasswordResetControllerTest {
   private static final UUID TEST_USER_ID = TEST_USER.getId();
 
   @Autowired private MockMvc mockMvc;
-  @MockBean private UsersClient usersClient;
-  @MockBean private LoginClient loginClient;
-  @MockBean private ConfigurationClient configurationClient;
-  @MockBean private KeycloakClient keycloakClient;
-  @MockBean private NotificationClient notificationClient;
-  @MockBean private PasswordValidatorClient passwordValidatorClient;
-  @MockBean private FolioExecutionContext folioExecutionContext;
-  @MockBean private KeycloakPasswordResetClientProperties resetPasswordClientProperties;
-  @MockBean private RealmConfigurationProvider realmConfigurationProvider;
+  @MockitoBean private UsersClient usersClient;
+  @MockitoBean private LoginClient loginClient;
+  @MockitoBean private ConfigurationClient configurationClient;
+  @MockitoBean private KeycloakClient keycloakClient;
+  @MockitoBean private NotificationClient notificationClient;
+  @MockitoBean private PasswordValidatorClient passwordValidatorClient;
+  @MockitoBean private FolioExecutionContext folioExecutionContext;
+  @MockitoBean private KeycloakPasswordResetClientProperties resetPasswordClientProperties;
+  @MockitoBean private RealmConfigurationProvider realmConfigurationProvider;
 
   @Test
   public void postPasswordResetValidate() throws Exception {

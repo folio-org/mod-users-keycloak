@@ -1,13 +1,13 @@
 package org.folio.uk.integration.roles;
 
 import org.folio.uk.domain.dto.Capabilities;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
-@FeignClient(name = "capabilities")
+@HttpExchange(url = "capabilities")
 public interface CapabilitiesClient {
 
-  @GetMapping
+  @GetExchange
   Capabilities queryCapabilities(@RequestParam String query, @RequestParam Integer limit);
 }

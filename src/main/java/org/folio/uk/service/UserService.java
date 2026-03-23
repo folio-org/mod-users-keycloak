@@ -9,7 +9,6 @@ import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
 import static org.folio.uk.utils.UserUtils.getOriginalTenantIdOptional;
 
-import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Base64;
 import java.util.List;
@@ -44,9 +43,12 @@ import org.folio.uk.integration.users.UsersClient;
 import org.folio.util.StringUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
 
 @Log4j2
 @Service
@@ -83,7 +85,7 @@ public class UserService {
   @Retryable(
     maxAttemptsExpression = "#{@systemUserConfigurationProperties.retryAttempts}",
     backoff = @Backoff(delayExpression = "#{@systemUserConfigurationProperties.retryDelay}"),
-    retryFor = {FeignException.class, KeycloakException.class},
+    retryFor = {RestClientResponseException.class, KeycloakException.class},
     listeners = "methodLoggingRetryListener")
   public User createUserSafe(User user, String password, boolean keycloakOnly) {
     if (!keycloakOnly) {
@@ -209,7 +211,7 @@ public class UserService {
   private ServicePointUser fetchServicePointUser(UUID userId) {
     try {
       return fetchServicePointUserInternal(userId);
-    } catch (FeignException e) {
+    } catch (RestClientResponseException e) {
       log.warn("Failed to fetch service point user: userId = {}, message = {}", userId, e.getMessage());
       return null;
     }
@@ -217,7 +219,7 @@ public class UserService {
 
   private ServicePointUser fetchServicePointUserInternal(UUID userId) {
     var servicePointUsers = servicePointsUserClient.getServicePointsUser(userId);
-    if (servicePointUsers.getTotalRecords() != 1) {
+    if (servicePointUsers == null || servicePointUsers.getTotalRecords() != 1) {
       return null;
     }
 
@@ -291,7 +293,10 @@ public class UserService {
   private User createUserInUserServiceSafe(User user) {
     try {
       return usersClient.createUser(user);
-    } catch (FeignException.UnprocessableEntity e) {
+    } catch (HttpClientErrorException e) {
+      if (e.getStatusCode() != HttpStatus.UNPROCESSABLE_ENTITY) {
+        throw e;
+      }
       var username = user.getUsername();
       log.info("User already exists: username = {}, message = {}", username, e.getMessage());
       return findUserByUsername(username);
@@ -302,7 +307,7 @@ public class UserService {
     try {
       keycloakService.upsertUser(user, password);
     } catch (KeycloakException exception) {
-      if (exception.getCause() instanceof FeignException.Conflict) {
+      if (exception.getCause() instanceof HttpClientErrorException.Conflict) {
         log.warn("System user is already created: username = {}, service = keycloak", user.getUsername());
       } else {
         throw exception;

@@ -1,6 +1,5 @@
 package org.folio.uk.configuration;
 
-import feign.FeignException;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.folio.uk.integration.kafka.configuration.SystemUserRoleRetryConfiguration;
@@ -11,9 +10,9 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.retry.support.RetryTemplateBuilder;
+import org.springframework.web.client.RestClientResponseException;
 
 @Log4j2
 @EnableRetry
@@ -22,7 +21,7 @@ public class RetryConfiguration {
 
   @Bean(name = "methodLoggingRetryListener")
   public RetryListener methodLoggingRetryListener() {
-    return new RetryListenerSupport() {
+    return new RetryListener() {
 
       @Override
       public <T, E extends Throwable> void onError(RetryContext ctx, RetryCallback<T, E> callback, Throwable t) {
@@ -41,7 +40,7 @@ public class RetryConfiguration {
     return new RetryTemplateBuilder().maxAttempts(config.getRetryAttempts())
       .fixedBackoff(config.getRetryDelay().toMillis())
       .withListener(retryListener)
-      .retryOn(List.of(FeignException.class))
+      .retryOn(List.of(RestClientResponseException.class))
       .build();
   }
 }

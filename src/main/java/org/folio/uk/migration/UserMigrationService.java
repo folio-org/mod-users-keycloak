@@ -1,6 +1,5 @@
 package org.folio.uk.migration;
 
-import static feign.Util.isBlank;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
@@ -8,10 +7,10 @@ import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.partition;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 
-import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.List;
@@ -45,6 +44,7 @@ import org.folio.uk.mapper.UserMigrationMapper;
 import org.folio.uk.migration.properties.UserMigrationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientResponseException;
 
 @Log4j2
 @Service
@@ -75,7 +75,7 @@ public class UserMigrationService {
   public UserMigrationJobs getMigrationsByQuery(String query, Integer offset, Integer limit) {
     var offsetReq = OffsetRequest.of(offset, limit);
 
-    var page = StringUtils.isBlank(query)
+    var page = isBlank(query)
       ? repository.findAll(offsetReq)
       : repository.findByCql(query, offsetReq);
 
@@ -131,7 +131,7 @@ public class UserMigrationService {
   }
 
   private BiConsumer<Void, ? super Throwable> migrationCompleteHandler(UserMigrationJobEntity job,
-                                                                       FolioExecutionContext context) {
+    FolioExecutionContext context) {
     return (result, ex) -> {
       try (var ignored = new FolioExecutionContextSetter(context)) {
         EntityUserMigrationJobStatus status;
@@ -191,15 +191,14 @@ public class UserMigrationService {
   }
 
   /**
-   * Creates a user in Keycloak, with the given user object and sets the user's password to their username
-   * if migration.default-passwords-on-migration property is set to true.
-   * If the creation fails, the method will log a warning and return an empty Optional.
-   * If the creation fails due to an invalid email, the method will try to create the user without an email and retry
-   * once if "retryIfEmailNotValid" is set to true.
+   * Creates a user in Keycloak, with the given user object and sets the user's password to their username if
+   * migration.default-passwords-on-migration property is set to true. If the creation fails, the method will log a
+   * warning and return an empty Optional. If the creation fails due to an invalid email, the method will try to create
+   * the user without an email and retry once if "retryIfEmailNotValid" is set to true.
    *
-   * @param user                 the {@link User} object to be created in Keycloak
-   * @param retryIfEmailNotValid a boolean value indicating whether to retry creating the user without an email
-   *                             if the email is invalid
+   * @param user the {@link User} object to be created in Keycloak
+   * @param retryIfEmailNotValid a boolean value indicating whether to retry creating the user without an email if the
+   *   email is invalid
    * @return an Optional of the created user object if the creation is successful, otherwise an empty Optional
    */
   private Optional<User> createUserInKeycloakSafe(User user, boolean retryIfEmailNotValid) {
@@ -231,7 +230,7 @@ public class UserMigrationService {
       return toStream(userTenantsList.getUserTenants())
         .map(UserTenant::getTenantId)
         .collect(toList());
-    } catch (FeignException e) {
+    } catch (RestClientResponseException e) {
       log.warn("Cannot fetch user tenants: userId = {}", userId, e);
       return List.of(folioContext.getTenantId());
     }

@@ -26,10 +26,10 @@ import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 class ApiExceptionHandlerTest {
 
   @Autowired private MockMvc mockMvc;
-  @MockBean private TestService testService;
+  @MockitoBean private TestService testService;
 
   @Test
   void handleUnsupportedOperationException_positive() throws Exception {
@@ -261,4 +261,3 @@ class ApiExceptionHandlerTest {
     @NotNull private UUID id;
   }
 }
-

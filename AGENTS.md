@@ -120,7 +120,7 @@ All integration tests extend `BaseIntegrationTest` (`src/test/java/org/folio/uk/
 ## Important Implementation Notes
 
 - **Spring Retry**: Used for resilience on system user creation (`SYSTEM_USER_RETRY_COUNT`/`SYSTEM_USER_RETRY_DELAY`) and role assignment (`systemUserRoleRetryTemplate`)
-- **Caching**: Caffeine caches for `keycloak-configuration`, `keycloak-client-configuration`, and `token` (configured in `application.yml` via coffee-boots)
+- **Caching**: Caffeine caches for `keycloak-configuration`, `keycloak-client-configuration`, and `token` are configured explicitly in `src/main/java/org/folio/uk/configuration/CacheConfiguration.java`
 - **Secure Store**: Client credentials loaded from AWS SSM, Vault, or FSSP — configured via `application.secret-store.*` properties
 - **Sonar Exclusions**: `domain/`, `configuration/`, `rest/resource/`, `mapper/` packages excluded from coverage
 - **Lombok**: Configured in `lombok.config` with `addLombokGeneratedAnnotation = true`

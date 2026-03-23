@@ -17,9 +17,9 @@ import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @UnitTest
@@ -28,8 +28,8 @@ import org.springframework.test.web.servlet.MockMvc;
 class AuthUserControllerTest {
 
   @Autowired private MockMvc mockMvc;
-  @MockBean private KeycloakService keycloakService;
-  @MockBean private UserService userService;
+  @MockitoBean private KeycloakService keycloakService;
+  @MockitoBean private UserService userService;
 
   @Test
   void checkAuthUserExistence_nonExistentUser() throws Exception {

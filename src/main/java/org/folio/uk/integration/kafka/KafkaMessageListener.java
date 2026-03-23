@@ -4,7 +4,6 @@ import static org.folio.common.utils.OkapiHeaders.URL;
 import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import org.folio.uk.integration.keycloak.SystemUserService;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 @Log4j2
 @Service

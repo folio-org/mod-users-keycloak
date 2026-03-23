@@ -2,9 +2,7 @@ package org.folio.uk.integration.keycloak;
 
 import static org.folio.uk.domain.dto.ErrorCode.LINK_INVALID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
-import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.spring.FolioExecutionContext;
@@ -12,6 +10,8 @@ import org.folio.uk.exception.UnprocessableEntityException;
 import org.folio.uk.integration.keycloak.config.KeycloakPasswordResetClientProperties;
 import org.folio.uk.integration.keycloak.model.TokenResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Log4j2
@@ -29,11 +29,11 @@ public class PasswordResetTokenService {
     var tenant = folioExecutionContext.getTenantId();
     var clientId = passwordResetClientProperties.getClientId();
     var clientConfig = realmConfigurationProvider.getClientConfiguration(tenant, clientId);
-    var loginRequest = new HashMap<String, String>();
-    loginRequest.put("client_id", clientId);
-    loginRequest.put("client_secret", clientConfig.getClientSecret());
-    loginRequest.put("grant_type", "client_credentials");
-    loginRequest.put(PASSWORD_RESET_ACTION_ID_CLAIM, passwordResetActionId);
+    var loginRequest = new LinkedMultiValueMap<String, String>();
+    loginRequest.add("client_id", clientId);
+    loginRequest.add("client_secret", clientConfig.getClientSecret());
+    loginRequest.add("grant_type", "client_credentials");
+    loginRequest.add(PASSWORD_RESET_ACTION_ID_CLAIM, passwordResetActionId);
 
     return keycloakClient.login(loginRequest, tenant);
   }

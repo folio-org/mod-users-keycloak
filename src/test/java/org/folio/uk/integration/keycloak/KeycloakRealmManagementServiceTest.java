@@ -1,12 +1,12 @@
 package org.folio.uk.integration.keycloak;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.common.utils.KeycloakPermissionUtils.toPermissionName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
-import feign.FeignException;
 import java.util.List;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
@@ -14,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.RestClientResponseException;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)
@@ -36,9 +38,9 @@ class KeycloakRealmManagementServiceTest {
 
   @Test
   void setupRealm_negative_exception() {
-    doThrow(FeignException.class).when(keycloakService).createScopePermission(any(), any(), any());
+    doThrow(restClientFailure()).when(keycloakService).createScopePermission(any(), any(), any());
     assertThatThrownBy(() -> service.setupRealm())
-      .isInstanceOf(FeignException.class);
+      .isInstanceOf(RestClientResponseException.class);
   }
 
   @Test
@@ -51,8 +53,13 @@ class KeycloakRealmManagementServiceTest {
 
   @Test
   void cleanupRealm_negative() {
-    doThrow(FeignException.class).when(keycloakService).deleteScopePermission(any());
+    doThrow(restClientFailure()).when(keycloakService).deleteScopePermission(any());
     assertThatThrownBy(() -> service.cleanupRealm())
-      .isInstanceOf(FeignException.class);
+      .isInstanceOf(RestClientResponseException.class);
+  }
+
+  private static RestClientResponseException restClientFailure() {
+    return new RestClientResponseException("Request failed", 500, "Internal Server Error",
+      HttpHeaders.EMPTY, null, UTF_8);
   }
 }
