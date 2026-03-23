@@ -96,7 +96,7 @@ class PasswordResetControllerTest {
     when(loginClient.getPasswordResetAction(eq(PASSWORD_RESET_ACTION_ID))).thenReturn(Optional.of(passwordResetAction));
 
     mockMvc.perform(post("/users-keycloak/password-reset/validate"))
-      .andExpect(status().isUnprocessableEntity());
+      .andExpect(status().isUnprocessableContent());
   }
 
   @Test
@@ -106,7 +106,7 @@ class PasswordResetControllerTest {
     when(loginClient.getPasswordResetAction(any())).thenReturn(Optional.empty());
 
     mockMvc.perform(post("/users-keycloak/password-reset/validate"))
-      .andExpect(status().isUnprocessableEntity());
+      .andExpect(status().isUnprocessableContent());
   }
 
   @Test
@@ -115,7 +115,7 @@ class PasswordResetControllerTest {
     when(usersClient.lookupUserById(any())).thenReturn(Optional.empty());
 
     mockMvc.perform(post("/users-keycloak/password-reset/validate"))
-      .andExpect(status().isUnprocessableEntity());
+      .andExpect(status().isUnprocessableContent());
   }
 
   @Test
@@ -157,7 +157,7 @@ class PasswordResetControllerTest {
     mockMvc.perform(post("/users-keycloak/password-reset/reset")
         .content(asJsonString(new PasswordReset().newPassword("1q2w3E!190ggggg")))
         .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isUnprocessableEntity());
+      .andExpect(status().isUnprocessableContent());
   }
 
   @Test
@@ -175,7 +175,7 @@ class PasswordResetControllerTest {
     mockMvc.perform(post("/users-keycloak/password-reset/reset")
         .content(asJsonString(new PasswordReset().newPassword("1q2w3E!190ggggg")))
         .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isUnprocessableEntity());
+      .andExpect(status().isUnprocessableContent());
   }
 
   @Test
@@ -193,7 +193,7 @@ class PasswordResetControllerTest {
     mockMvc.perform(post("/users-keycloak/password-reset/reset")
         .content(asJsonString(new PasswordReset().newPassword("1q2w3E!190ggggg")))
         .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isUnprocessableEntity());
+      .andExpect(status().isUnprocessableContent());
   }
 
   @Test
@@ -209,7 +209,7 @@ class PasswordResetControllerTest {
     mockMvc.perform(post("/users-keycloak/password-reset/reset")
         .content(asJsonString(new PasswordReset().newPassword("1q2w3E!190")))
         .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isUnprocessableEntity());
+      .andExpect(status().isUnprocessableContent());
   }
 
   @Test
@@ -229,7 +229,7 @@ class PasswordResetControllerTest {
     mockMvc.perform(post("/users-keycloak/password-reset/reset")
         .content(asJsonString(new PasswordReset().newPassword("1q2w3E!190")))
         .contentType(MediaType.APPLICATION_JSON))
-      .andExpect(status().isUnprocessableEntity());
+      .andExpect(status().isUnprocessableContent());
   }
 
   @SneakyThrows

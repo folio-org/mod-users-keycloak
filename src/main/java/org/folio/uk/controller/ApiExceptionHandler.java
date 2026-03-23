@@ -13,7 +13,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_CONTENT;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
@@ -144,7 +144,7 @@ public class ApiExceptionHandler {
         .code(e.getCode())
         .message(e.getMessage())).toList();
 
-    return ResponseEntity.status(UNPROCESSABLE_ENTITY)
+    return ResponseEntity.status(UNPROCESSABLE_CONTENT)
       .body(new ErrorResponse().errors(errors).totalRecords(errors.size()));
   }
 

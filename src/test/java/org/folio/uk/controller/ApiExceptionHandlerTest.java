@@ -1,5 +1,6 @@
 package org.folio.uk.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
@@ -22,12 +23,15 @@ import java.util.UUID;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.folio.test.types.UnitTest;
+import org.folio.uk.domain.dto.ErrorCode;
 import org.folio.uk.exception.RequestValidationException;
+import org.folio.uk.exception.UnprocessableEntityException;
 import org.folio.uk.integration.keycloak.KeycloakException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,6 +51,16 @@ class ApiExceptionHandlerTest {
 
   @Autowired private MockMvc mockMvc;
   @MockitoBean private TestService testService;
+
+  @Test
+  void handleUnprocessableEntityException_positive_usesUnprocessableContentStatus() {
+    var handler = new ApiExceptionHandler();
+
+    var response = handler.handleUnprocessableEntityException(
+      new UnprocessableEntityException("Invalid token.", ErrorCode.LINK_INVALID));
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
+  }
 
   @Test
   void handleUnsupportedOperationException_positive() throws Exception {

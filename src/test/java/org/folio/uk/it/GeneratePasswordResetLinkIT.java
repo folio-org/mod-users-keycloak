@@ -235,7 +235,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   @SneakyThrows
   private void shouldHandleExceptionWhenConvertTime() {
     callGeneratePasswordResetLink()
-      .andExpectAll(status().isUnprocessableEntity(),
+      .andExpectAll(status().isUnprocessableContent(),
         content().string(containsString("Can't convert time period to milliseconds")));
 
     verifyNoInteractions(notificationClient);

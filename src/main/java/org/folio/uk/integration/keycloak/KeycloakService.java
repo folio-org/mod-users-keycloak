@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -126,7 +127,7 @@ public class KeycloakService {
     log.info("Applying identity provider changes on user [userId: {}, kcUserId: {}, tenant: {}, "
       + "memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
 
-    if (!StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
+    if (!Strings.CS.equals(user.getType(), UserType.SHADOW.getValue())) {
       log.warn("Identity provider changes cannot be applied to non-shadow users [userId: {}, kcUserId: {}, "
         + "tenant: {}, memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
       return;

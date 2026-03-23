@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.folio.uk.integration.kafka.model.ResourceEvent;
@@ -78,7 +78,7 @@ public class KafkaConfiguration {
       .map(Throwable::getCause)
       .filter(SQLGrammarException.class::isInstance)
       .map(Throwable::getCause)
-      .filter(throwable -> StringUtils.equals(throwable.getClass().getSimpleName(), "PSQLException"))
+      .filter(throwable -> Strings.CS.equals(throwable.getClass().getSimpleName(), "PSQLException"))
       .map(Throwable::getMessage)
       .filter(errorMessage -> errorMessage.startsWith("ERROR: relation") && errorMessage.contains("does not exist"))
       .map(errorMessage -> errorMessage.replaceAll("\\s+", " "));

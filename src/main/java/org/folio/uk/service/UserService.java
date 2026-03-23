@@ -117,7 +117,7 @@ public class UserService {
 
     // When overrideUser is set to true the shadow user will be used to retrieve the real user
     // with its permissions and service points to support the ECS login into member tenants
-    if (overrideUser && StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
+    if (overrideUser && Objects.equals(user.getType(), UserType.SHADOW.getValue())) {
       var originalTenantIdOptional = getOriginalTenantIdOptional(user);
       if (originalTenantIdOptional.isPresent()) {
         return getRealUserByReference(user, originalTenantIdOptional.get(), expandPermissions);
@@ -294,7 +294,7 @@ public class UserService {
     try {
       return usersClient.createUser(user);
     } catch (HttpClientErrorException e) {
-      if (e.getStatusCode() != HttpStatus.UNPROCESSABLE_ENTITY) {
+      if (e.getStatusCode() != HttpStatus.UNPROCESSABLE_CONTENT) {
         throw e;
       }
       var username = user.getUsername();

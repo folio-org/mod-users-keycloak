@@ -23,7 +23,7 @@ import java.util.function.BiConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -237,7 +237,7 @@ public class UserMigrationService {
   }
 
   private boolean isEmailNotValidError(String message) {
-    return StringUtils.contains(message, INVALID_EMAIL_ERROR_MESSAGE);
+    return Strings.CS.contains(message, INVALID_EMAIL_ERROR_MESSAGE);
   }
 
   private String createSearchingUsersByIdsQuery(List<String> userIds) {

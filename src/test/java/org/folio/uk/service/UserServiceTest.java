@@ -458,6 +458,6 @@ class UserServiceTest {
 
   private static HttpClientErrorException unprocessableContent() {
     return HttpClientErrorException.create(
-      HttpStatus.UNPROCESSABLE_ENTITY, "Unprocessable Content", HttpHeaders.EMPTY, null, UTF_8);
+      HttpStatus.UNPROCESSABLE_CONTENT, "Unprocessable Content", HttpHeaders.EMPTY, null, UTF_8);
   }
 }
