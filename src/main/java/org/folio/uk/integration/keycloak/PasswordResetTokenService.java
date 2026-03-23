@@ -51,7 +51,7 @@ public class PasswordResetTokenService {
 
     try {
       var payload = objectMapper.readTree(new String(Base64.getDecoder().decode(split[1])));
-      return payload.get(PASSWORD_RESET_ACTION_ID_CLAIM).asText();
+      return payload.get(PASSWORD_RESET_ACTION_ID_CLAIM).asString();
     } catch (Exception e) {
       log.warn("Failed to parse token", e);
       throw new UnprocessableEntityException("Invalid token.", LINK_INVALID);
