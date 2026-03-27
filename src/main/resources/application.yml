@@ -17,12 +17,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-  cache:
-    type: caffeine
-  cloud:
-    openfeign:
-      okhttp:
-        enabled: true
   kafka:
     bootstrap-servers: ${KAFKA_HOST:kafka}:${KAFKA_PORT:9092}
     security:
@@ -36,14 +30,9 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
-coffee-boots:
-  cache:
-    spec:
-      keycloak-configuration: maximumSize=500,expireAfterWrite=${KC_CONFIG_TTL:3600s}
-      keycloak-client-configuration: maximumSize=500,expireAfterWrite=${KC_CONFIG_TTL:3600s}
-      token: maximumSize=10,expireAfterWrite=${KC_ADMIN_TOKEN_TTL:60s}
-
 folio:
+  exchange:
+    enabled: true
   jpa:
     repository:
       base-packages: org.folio.uk.domain
@@ -127,5 +116,15 @@ application:
   federated-auth:
     enabled: ${SINGLE_TENANT_UX:false}
     identity_provider_suffix: ${IDENTITY_PROVIDER_SUFFIX:-keycloak-oidc}
+  cache:
+    keycloak-configuration:
+      ttl: ${KC_CONFIG_TTL:3600s}
+      max-size: 500
+    keycloak-client-configuration:
+      ttl: ${KC_CONFIG_TTL:3600s}
+      max-size: 500
+    token:
+      ttl: ${KC_ADMIN_TOKEN_TTL:60s}
+      max-size: 10
 
 okapi.url: ${OKAPI_URL:http://sidecar:8081}

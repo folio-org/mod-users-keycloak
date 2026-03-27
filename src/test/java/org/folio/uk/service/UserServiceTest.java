@@ -2,7 +2,6 @@ package org.folio.uk.service;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.List.of;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,12 +20,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 
-import feign.FeignException.Conflict;
-import feign.FeignException.InternalServerError;
-import feign.FeignException.ServiceUnavailable;
-import feign.FeignException.UnprocessableEntity;
-import feign.Request;
-import feign.Request.HttpMethod;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +51,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 @UnitTest
 @SpringBootTest(classes = {UserService.class, RetryTestConfiguration.class}, webEnvironment = NONE)
@@ -107,7 +104,7 @@ class UserServiceTest {
     var user = user("te*st");
     var users = new Users().addUsersItem(user).totalRecords(1);
 
-    when(usersClient.createUser(user)).thenThrow(UnprocessableEntity.class);
+    when(usersClient.createUser(user)).thenThrow(unprocessableContent());
     when(usersClient.query("username==\"te\\*st\"", 1)).thenReturn(users);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
@@ -124,10 +121,7 @@ class UserServiceTest {
     var user = user();
     var users = new Users().addUsersItem(user).totalRecords(1);
 
-    var uri = "http://keycloak:8200/admin/realms/test/users";
-    var request = Request.create(HttpMethod.POST, uri, emptyMap(), null, UTF_8, null);
-    var cause = new Conflict("User exists", request, null, emptyMap());
-    var keycloakException = new KeycloakException("Failed to create keycloak user", cause);
+    var keycloakException = new KeycloakException("Failed to create keycloak user", conflict());
 
     when(usersClient.createUser(user)).thenReturn(user);
     doThrow(keycloakException).when(keycloakService).upsertUser(user, PASSWORD);
@@ -146,7 +140,7 @@ class UserServiceTest {
     var user = user();
     var foundUsers = new Users().users(emptyList()).totalRecords(0);
 
-    when(usersClient.createUser(user)).thenThrow(UnprocessableEntity.class);
+    when(usersClient.createUser(user)).thenThrow(unprocessableContent());
     when(usersClient.query("username==\"test-username\"", 1)).thenReturn(foundUsers);
 
     assertThatThrownBy(() -> userService.createUserSafe(user, PASSWORD, false))
@@ -161,8 +155,7 @@ class UserServiceTest {
   @Test
   void createUserSafe_positive_retryInvokedForModUsersCall() {
     var user = user();
-    var request = Request.create(HttpMethod.POST, "http://users/users", emptyMap(), null, UTF_8, null);
-    var error = new InternalServerError("Failed to perform request", request, null, emptyMap());
+    var error = internalServerError();
     when(usersClient.createUser(user)).thenThrow(error).thenReturn(user);
 
     var result = userService.createUserSafe(user, PASSWORD, false);
@@ -176,10 +169,7 @@ class UserServiceTest {
   @Test
   void createUserSafe_positive_retryInvokedForKeycloakCall() {
     var user = user();
-    var uri = "http://keycloak:8200/admin/realms/test/users";
-    var request = Request.create(HttpMethod.POST, uri, emptyMap(), null, UTF_8, null);
-    var cause = new ServiceUnavailable("Service unavailable", request, null, emptyMap());
-    var keycloakException = new KeycloakException("Failed to create keycloak user", cause);
+    var keycloakException = new KeycloakException("Failed to create keycloak user", serviceUnavailable());
 
     when(usersClient.createUser(user)).thenReturn(user);
     doThrow(keycloakException).doThrow(keycloakException).doReturn(UUID.randomUUID().toString())
@@ -449,5 +439,25 @@ class UserServiceTest {
     return new User()
       .id(randomUUID())
       .username(username);
+  }
+
+  private static HttpClientErrorException.Conflict conflict() {
+    return (HttpClientErrorException.Conflict) HttpClientErrorException.create(HttpStatus.CONFLICT,
+      "Conflict", HttpHeaders.EMPTY, null, UTF_8);
+  }
+
+  private static HttpServerErrorException.InternalServerError internalServerError() {
+    return (HttpServerErrorException.InternalServerError) HttpServerErrorException.create(
+      HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", HttpHeaders.EMPTY, null, UTF_8);
+  }
+
+  private static HttpServerErrorException.ServiceUnavailable serviceUnavailable() {
+    return (HttpServerErrorException.ServiceUnavailable) HttpServerErrorException.create(
+      HttpStatus.SERVICE_UNAVAILABLE, "Service Unavailable", HttpHeaders.EMPTY, null, UTF_8);
+  }
+
+  private static HttpClientErrorException unprocessableContent() {
+    return HttpClientErrorException.create(
+      HttpStatus.UNPROCESSABLE_CONTENT, "Unprocessable Content", HttpHeaders.EMPTY, null, UTF_8);
   }
 }

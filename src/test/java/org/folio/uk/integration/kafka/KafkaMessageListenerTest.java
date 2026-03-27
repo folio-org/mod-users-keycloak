@@ -4,7 +4,6 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import org.awaitility.Durations;
 import org.folio.test.types.UnitTest;
@@ -23,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import tools.jackson.databind.ObjectMapper;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)

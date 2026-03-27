@@ -3,6 +3,7 @@ package org.folio.uk.migration;
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.apache.commons.collections4.ListUtils.partition;
+import static org.apache.commons.lang3.Strings.CS;
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 import static org.folio.uk.utils.QueryUtils.convertFieldListToCqlQuery;
 
@@ -15,7 +16,6 @@ import java.util.function.BiConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UsersIdp;
@@ -88,7 +88,7 @@ public class IdpMigrationService {
     var centralTenantId = usersIdp.getCentralTenantId();
     var contextTenantId = folioExecutionContext.getTenantId();
 
-    if (!StringUtils.equals(centralTenantId, contextTenantId)) {
+    if (!CS.equals(centralTenantId, contextTenantId)) {
       throw new IllegalStateException(String.format("Cannot apply user IDP migration, supplied centralTenantId '%s' "
         + "does not match context tenantId '%s'", centralTenantId, contextTenantId));
     }

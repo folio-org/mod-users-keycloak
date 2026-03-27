@@ -2,13 +2,13 @@ package org.folio.uk.integration.password;
 
 import org.folio.uk.integration.password.model.PasswordValidationRequest;
 import org.folio.uk.integration.password.model.PasswordValidationResult;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.annotation.PostExchange;
 
-@FeignClient(name = "password")
+@HttpExchange(url = "password")
 public interface PasswordValidatorClient {
 
-  @PostMapping("/validate")
+  @PostExchange("/validate")
   PasswordValidationResult validateNewPassword(@RequestBody PasswordValidationRequest payload);
 }

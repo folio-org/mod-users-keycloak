@@ -1,12 +1,12 @@
 package org.folio.uk.integration.keycloak;
 
-import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.uk.integration.keycloak.config.KeycloakProperties;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 
 @Log4j2
 @Component
@@ -31,11 +31,11 @@ public class TokenService {
 
   private String requestToken() {
     var realmConfigProvider = realmConfigurationProvider.getRealmConfiguration();
-    var loginRequest = new HashMap<String, String>();
+    var loginRequest = new LinkedMultiValueMap<String, String>();
     var clientId = keycloakProperties.getClientId();
-    loginRequest.put("client_id", clientId);
-    loginRequest.put("client_secret", realmConfigProvider.getClientSecret());
-    loginRequest.put("grant_type", keycloakProperties.getGrantType());
+    loginRequest.add("client_id", clientId);
+    loginRequest.add("client_secret", realmConfigProvider.getClientSecret());
+    loginRequest.add("grant_type", keycloakProperties.getGrantType());
 
     log.info("Issuing access token for Keycloak communication [clientId: {}]", clientId);
     var token = keycloakClient.login(loginRequest);

@@ -2,16 +2,21 @@ package org.folio.uk.integration.inventory;
 
 import java.util.UUID;
 import org.folio.uk.integration.inventory.model.ServicePointUserCollection;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /**
  * Client for service points user API in mod-inventory.
  */
-@FeignClient(value = "service-points-users")
+@HttpExchange(url = "service-points-users")
 public interface ServicePointsUserClient {
 
-  @GetMapping("?query=userId=={userId}&limit=1")
-  ServicePointUserCollection getServicePointsUser(@PathVariable UUID userId);
+  default ServicePointUserCollection getServicePointsUser(UUID userId) {
+    return queryServicePointUsers("userId==" + userId, 1);
+  }
+
+  @GetExchange
+  ServicePointUserCollection queryServicePointUsers(@RequestParam("query") String query,
+    @RequestParam("limit") Integer limit);
 }

@@ -17,7 +17,7 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "users": [],
+      "userTenants": [],
       "totalRecords": 0
     }
   }

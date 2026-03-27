@@ -1,7 +1,10 @@
 {
   "request": {
     "method": "GET",
-    "url": "/configurations/entries?query=module==USERSBL",
+    "urlPath": "/configurations/entries",
+    "queryParameters": {
+      "query": { "equalTo": "module==USERSBL" }
+    },
     "headers": {
       "x-okapi-tenant": { "equalTo": "diku" },
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
