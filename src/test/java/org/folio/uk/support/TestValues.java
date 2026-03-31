@@ -2,11 +2,11 @@ package org.folio.uk.support;
 
 import static org.folio.test.TestUtils.readString;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.folio.test.TestUtils;
+import tools.jackson.core.type.TypeReference;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestValues {

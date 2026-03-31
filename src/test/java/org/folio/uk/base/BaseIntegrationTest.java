@@ -21,12 +21,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import feign.FeignException;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.folio.common.utils.tls.HttpClientTlsUtils;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.folio.test.TestUtils;
@@ -44,6 +44,7 @@ import org.folio.uk.domain.dto.User;
 import org.folio.uk.integration.keycloak.KeycloakClient;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.keycloak.TokenService;
+import org.folio.uk.integration.keycloak.config.KeycloakProperties;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.it.CreateUserVerifyDto;
 import org.folio.uk.support.TestValues;
@@ -52,9 +53,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -65,6 +66,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 
 @Log4j2
 @EnableKafka
@@ -123,7 +126,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   }
 
   protected static ResultActions attemptPostWithTenant(String uri, String tenant,
-                                                       Object body, Object... args) throws Exception {
+    Object body, Object... args) throws Exception {
     return mockMvc.perform(post(uri, args)
       .headers(okapiHeadersWithTenant(tenant))
       .content(asJsonString(body))
@@ -144,7 +147,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   }
 
   protected static ResultActions attemptDeleteWithTenant(String uri, String tenant,
-                                                         Object body, Object... args) throws Exception {
+    Object body, Object... args) throws Exception {
     return mockMvc.perform(delete(uri, args)
       .headers(okapiHeadersWithTenant(tenant))
       .content(asJsonString(body))
@@ -165,7 +168,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   }
 
   protected static ResultActions doPostWithTenantAndStatusCode(String uri, String tenant, Object body,
-                                                               int statusCode, Object... args) throws Exception {
+    int statusCode, Object... args) throws Exception {
     return attemptPostWithTenant(uri, tenant, body, args).andExpect(status().is(statusCode));
   }
 
@@ -178,7 +181,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
   }
 
   protected static ResultActions doDeleteWithTenantAndStatusCode(String uri, String tenant, Object body,
-                                                                 int statusCode, Object... args) throws Exception {
+    int statusCode, Object... args) throws Exception {
     return attemptDeleteWithTenant(uri, tenant, body, args).andExpect(status().is(statusCode));
   }
 
@@ -269,7 +272,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     try {
       keycloakTestClient.removeIdentityProvider(CENTRAL_TENANT_NAME, PROVIDER_ALIAS, tokenService.issueToken());
       log.info("Removed identity provider in central tenant");
-    } catch (FeignException.NotFound e) {
+    } catch (HttpClientErrorException.NotFound e) {
       log.info("Cannot remove identity provider in central tenant, provider is not found");
     }
   }
@@ -280,7 +283,7 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     }
     var authToken = tokenService.issueToken();
     getKcUser(tenant, user, authToken)
-      .ifPresent(kcUser ->  keycloakClient.deleteUser(tenant, kcUser.getId(), authToken));
+      .ifPresent(kcUser -> keycloakClient.deleteUser(tenant, kcUser.getId(), authToken));
     log.info("Removed shadow keycloak user in central tenant");
   }
 
@@ -365,6 +368,12 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     @Bean
     public NewTopic systemUserTopic() {
       return new NewTopic(FOLIO_SYSTEM_USER_TOPIC, 1, (short) 1);
+    }
+
+    @Bean
+    public KeycloakTestClient keycloakTestClient(KeycloakProperties properties) {
+      return HttpClientTlsUtils.buildHttpServiceClient(
+        RestClient.builder(), properties.getTls(), properties.getUrl(), KeycloakTestClient.class);
     }
   }
 }

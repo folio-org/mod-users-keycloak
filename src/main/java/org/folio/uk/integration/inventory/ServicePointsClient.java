@@ -3,16 +3,16 @@ package org.folio.uk.integration.inventory;
 import java.util.Optional;
 import java.util.UUID;
 import org.folio.uk.domain.dto.ServicePoint;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /**
  * Client for service points API in mod-inventory.
  */
-@FeignClient(value = "service-points", dismiss404 = true)
+@HttpExchange(url = "service-points")
 public interface ServicePointsClient {
 
-  @GetMapping("/{servicePointId}")
+  @GetExchange("/{servicePointId}")
   Optional<ServicePoint> getServicePoint(@PathVariable UUID servicePointId);
 }

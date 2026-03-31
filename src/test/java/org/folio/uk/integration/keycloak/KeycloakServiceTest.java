@@ -1,6 +1,7 @@
 package org.folio.uk.integration.keycloak;
 
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import feign.FeignException;
 import jakarta.ws.rs.NotFoundException;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +31,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +58,8 @@ class KeycloakServiceTest {
 
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
-    when(keycloakClient.findUsersByUsername(TENANT_NAME, USER_NAME, true, AUTH_TOKEN)).thenReturn(keycloakUsers);
+    when(keycloakClient.findUsersByUsername(TENANT_NAME, USER_NAME, true, AUTH_TOKEN))
+      .thenReturn(keycloakUsers);
 
     var result = keycloakService.findUserByUsername(USER_NAME);
 
@@ -65,7 +70,8 @@ class KeycloakServiceTest {
   void findUserByUsername_positive_emptyResult() {
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
-    when(keycloakClient.findUsersByUsername(TENANT_NAME, USER_NAME, true, AUTH_TOKEN)).thenReturn(emptyList());
+    when(keycloakClient.findUsersByUsername(TENANT_NAME, USER_NAME, true, AUTH_TOKEN))
+      .thenReturn(emptyList());
 
     var result = keycloakService.findUserByUsername(USER_NAME);
 
@@ -76,7 +82,8 @@ class KeycloakServiceTest {
   void findUserByUsername_negative_feignException() {
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
-    when(keycloakClient.findUsersByUsername(TENANT_NAME, USER_NAME, true, AUTH_TOKEN)).thenThrow(FeignException.class);
+    when(keycloakClient.findUsersByUsername(TENANT_NAME, USER_NAME, true, AUTH_TOKEN)).thenThrow(
+      RestClientResponseException.class);
 
     assertThatThrownBy(() -> keycloakService.findUserByUsername(USER_NAME))
       .isInstanceOf(KeycloakException.class)
@@ -116,7 +123,7 @@ class KeycloakServiceTest {
 
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
-    when(keycloakClient.findUserRoles(TENANT_NAME, userId, AUTH_TOKEN)).thenThrow(FeignException.class);
+    when(keycloakClient.findUserRoles(TENANT_NAME, userId, AUTH_TOKEN)).thenThrow(RestClientResponseException.class);
 
     assertThatThrownBy(() -> keycloakService.hasRole(userId, ROLE))
       .isInstanceOf(KeycloakException.class)
@@ -158,7 +165,7 @@ class KeycloakServiceTest {
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
     when(keycloakClient.findByName(TENANT_NAME, ROLE, AUTH_TOKEN)).thenReturn(keycloakRole);
-    doThrow(FeignException.class).when(keycloakClient)
+    doThrow(restClientFailure()).when(keycloakClient)
       .assignRolesToUser(TENANT_NAME, userId, List.of(keycloakRole), AUTH_TOKEN);
 
     assertThatThrownBy(() -> keycloakService.assignRole(userId, ROLE))
@@ -193,7 +200,7 @@ class KeycloakServiceTest {
       List.of(keycloakClient()));
 
     var permission = scopePermission();
-    when(keycloakClient.createScopePermission(any(), any(), any(), any())).thenThrow(FeignException.Conflict.class);
+    when(keycloakClient.createScopePermission(any(), any(), any(), any())).thenThrow(conflict());
 
     keycloakService.createScopePermission("policy", "/foo/bar", List.of("POST"));
 
@@ -222,7 +229,7 @@ class KeycloakServiceTest {
 
     var clients = List.of(keycloakClient());
     when(keycloakClient.findClientsByClientId(TENANT_NAME, LOGIN_CLIENT, AUTH_TOKEN)).thenReturn(clients);
-    doThrow(FeignException.class).when(keycloakClient).createScopePermission(any(), any(), any(), any());
+    doThrow(restClientFailure()).when(keycloakClient).createScopePermission(any(), any(), any(), any());
 
     assertThatThrownBy(() -> keycloakService.createScopePermission("policy", "/foo/bar", List.of("POST")))
       .isInstanceOf(KeycloakException.class)
@@ -282,7 +289,8 @@ class KeycloakServiceTest {
   void findClientWithClientId_negative_feignException() {
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
 
-    when(keycloakClient.findClientsByClientId(TENANT_NAME, LOGIN_CLIENT, AUTH_TOKEN)).thenThrow(FeignException.class);
+    when(keycloakClient.findClientsByClientId(TENANT_NAME, LOGIN_CLIENT, AUTH_TOKEN))
+      .thenThrow(restClientFailure());
 
     assertThatThrownBy(() -> keycloakService.findClientWithClientId(TENANT_NAME, LOGIN_CLIENT))
       .isInstanceOf(KeycloakException.class)
@@ -313,5 +321,15 @@ class KeycloakServiceTest {
     keycloakUser.setId(USER_ID.toString());
     keycloakUser.setUserName(USER_NAME);
     return keycloakUser;
+  }
+
+  private static HttpClientErrorException.Conflict conflict() {
+    return (HttpClientErrorException.Conflict) HttpClientErrorException.create(HttpStatus.CONFLICT,
+      "Conflict", HttpHeaders.EMPTY, null, UTF_8);
+  }
+
+  private static RestClientResponseException restClientFailure() {
+    return new RestClientResponseException("Request failed", 500, "Internal Server Error",
+      HttpHeaders.EMPTY, null, UTF_8);
   }
 }

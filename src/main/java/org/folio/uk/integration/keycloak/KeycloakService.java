@@ -11,7 +11,6 @@ import static org.folio.common.utils.KeycloakPermissionUtils.toPermissionName;
 import static org.folio.spring.utils.FolioExecutionContextUtils.prepareContextForTenant;
 import static org.folio.uk.integration.keycloak.model.KeycloakUser.USER_ID_ATTR;
 
-import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -42,6 +42,7 @@ import org.folio.uk.integration.users.UserTenantsClient;
 import org.folio.uk.integration.users.UsersClient;
 import org.folio.uk.utils.UserUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Log4j2
 @Component
@@ -126,7 +127,7 @@ public class KeycloakService {
     log.info("Applying identity provider changes on user [userId: {}, kcUserId: {}, tenant: {}, "
       + "memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
 
-    if (!StringUtils.equals(user.getType(), UserType.SHADOW.getValue())) {
+    if (!Strings.CS.equals(user.getType(), UserType.SHADOW.getValue())) {
       log.warn("Identity provider changes cannot be applied to non-shadow users [userId: {}, kcUserId: {}, "
         + "tenant: {}, memberTenant: {}]", userId, kcUserId, tenant, memberTenant);
       return;
@@ -470,7 +471,7 @@ public class KeycloakService {
     try {
       var res = keycloakClient.createScopePermission(realm, clientId, permission, getToken());
       log.info("Keycloak permission created with id: {}", res.getId());
-    } catch (FeignException.Conflict e) {
+    } catch (HttpClientErrorException.Conflict e) {
       log.info("Permission already exists [message: {}]", e.getMessage());
     } catch (Exception e) {
       throw new KeycloakException(

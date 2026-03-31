@@ -1,15 +1,14 @@
 package org.folio.uk.integration.configuration;
 
 import org.folio.uk.integration.configuration.model.Configurations;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /**
  * Client for mod-configuration module.
  */
-@FeignClient(name = "configurations")
+@HttpExchange(url = "configurations")
 public interface ConfigurationClient {
 
   /**
@@ -18,8 +17,9 @@ public interface ConfigurationClient {
    * @param moduleName module name
    * @return map containing found configuration
    */
-  @GetMapping("${config.client.path:/entries}?query=module=={moduleName}")
-  Configurations lookupConfigByModuleName(@PathVariable("moduleName") String moduleName);
+  default Configurations lookupConfigByModuleName(String moduleName) {
+    return queryEntries("module==" + moduleName, null);
+  }
 
   /**
    * Searches for configuration by module name and query.
@@ -28,7 +28,11 @@ public interface ConfigurationClient {
    * @param query      configuration query
    * @return map containing found configuration
    */
-  @GetMapping("${config.client.path:/entries}?query=module=={moduleName} AND {query}")
-  Configurations lookupConfigByModuleNameAndQuery(@PathVariable("moduleName") String moduleName,
-    @PathVariable("query") String query, @RequestParam("limit") int limit);
+  default Configurations lookupConfigByModuleNameAndQuery(String moduleName, String query, int limit) {
+    return queryEntries("module==" + moduleName + " AND " + query, limit);
+  }
+
+  @GetExchange("entries")
+  Configurations queryEntries(@RequestParam("query") String query,
+    @RequestParam(value = "limit", required = false) Integer limit);
 }

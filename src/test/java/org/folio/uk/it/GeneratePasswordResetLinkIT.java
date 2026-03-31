@@ -4,7 +4,6 @@ import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -33,10 +32,11 @@ import org.folio.uk.integration.notify.model.Notification;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.LinkedMultiValueMap;
 
 @IntegrationTest
 class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
@@ -64,15 +64,15 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   private static final KeycloakRealmConfiguration CLIENT_CONFIG =
     new KeycloakRealmConfiguration().clientId(CLIENT_ID).clientSecret("secret");
 
-  @MockBean private KeycloakClient keycloakClient;
-  @MockBean private RealmConfigurationProvider realmConfigurationProvider;
-  @SpyBean private NotificationClient notificationClient;
+  @MockitoBean private KeycloakClient keycloakClient;
+  @MockitoBean private RealmConfigurationProvider realmConfigurationProvider;
+  @MockitoSpyBean private NotificationClient notificationClient;
 
   @BeforeEach
   void setup() {
     var tokenResponse = new TokenResponse();
     tokenResponse.setAccessToken(RESET_PASSWORD_TOKEN);
-    when(keycloakClient.login(anyMap(), eq(TEST_TENANT))).thenReturn(tokenResponse);
+    when(keycloakClient.login(any(LinkedMultiValueMap.class), eq(TEST_TENANT))).thenReturn(tokenResponse);
     when(realmConfigurationProvider.getClientConfiguration(TEST_TENANT, CLIENT_ID)).thenReturn(CLIENT_CONFIG);
   }
 
@@ -235,7 +235,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   @SneakyThrows
   private void shouldHandleExceptionWhenConvertTime() {
     callGeneratePasswordResetLink()
-      .andExpectAll(status().isUnprocessableEntity(),
+      .andExpectAll(status().isUnprocessableContent(),
         content().string(containsString("Can't convert time period to milliseconds")));
 
     verifyNoInteractions(notificationClient);

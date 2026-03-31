@@ -4,7 +4,6 @@ import static java.time.OffsetDateTime.parse;
 import static org.folio.uk.domain.dto.User.PreferredEmailCommunicationEnum.SUPPORT;
 import static org.folio.uk.utils.UserUtils.ORIGINAL_TENANT_ID_CUSTOM_FIELD;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,7 @@ import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.model.UserType;
 import org.folio.uk.integration.kafka.model.ResourceEvent;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
+import tools.jackson.core.type.TypeReference;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestConstants {
