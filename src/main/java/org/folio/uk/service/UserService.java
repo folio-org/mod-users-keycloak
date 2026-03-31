@@ -2,7 +2,6 @@ package org.folio.uk.service;
 
 import static java.lang.String.format;
 import static java.util.UUID.fromString;
-import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.toStream;
@@ -183,7 +182,7 @@ public class UserService {
    * @return list of resolved permissions
    */
   public List<String> resolvePermissions(UUID userId, List<String> userPermissions) {
-    var permissions = userPermissionsClient.getPermissionsForUser(userId, false, userPermissions);
+    var permissions = userPermissionsClient.getPermissionsForUser(userId, false, userPermissions, null);
     return permissions.getPermissions();
   }
 
@@ -228,16 +227,17 @@ public class UserService {
       .map(spId -> servicePointsClient.getServicePoint(fromString(spId)))
       .filter(Optional::isPresent)
       .map(Optional::get)
-      .collect(toList());
+      .toList();
 
-    var servicePointUser = servicePointUsers.getServicePointsUsers().get(0);
+    var servicePointUser = servicePointUsers.getServicePointsUsers().getFirst();
     servicePointUser.setServicePoints(servicePoints);
     return servicePointUser;
   }
 
   private PermissionUser fetchPermissionUser(UUID userId, boolean expandPermissions) {
     var includeOnlyVisiblePermissions = rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions();
-    var userPermissions = userPermissionsClient.getPermissionsForUser(userId, includeOnlyVisiblePermissions, null);
+    var userPermissions = userPermissionsClient.getPermissionsForUser(
+      userId, includeOnlyVisiblePermissions, null, true);
     var permissionsList = emptyIfNull(userPermissions.getPermissions());
 
     return new PermissionUser()
@@ -322,6 +322,6 @@ public class UserService {
       throw new EntityNotFoundException(format("Failed to find user: service = mod-users, username = %s", username));
     }
 
-    return userByUsername.get(0);
+    return userByUsername.getFirst();
   }
 }
