@@ -8,13 +8,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 
-@HttpExchange(url = "permissions", accept = "application/json")
+@HttpExchange(url = "permissions")
 public interface UserPermissionsClient {
 
   @GetExchange("/users/{id}")
-  UserPermissions getPermissionsForUser(@PathVariable("id") UUID id,
-                                        @RequestParam(value = "onlyVisible", required = false) Boolean onlyVisible,
-                                        @RequestParam(value = "desiredPermissions", required = false)
-                                        List<String> desiredPermissions,
-                                        @RequestParam(value = "entitledOnly", required = false) Boolean entitledOnly);
+  UserPermissions getPermissionsForUser(@PathVariable("id") UUID id, @RequestParam("onlyVisible") Boolean onlyVisible,
+    @RequestParam(value = "desiredPermissions", required = false) List<String> desiredPermissions);
 }
