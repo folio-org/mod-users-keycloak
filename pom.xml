@@ -43,6 +43,7 @@
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
     <openapi-generator.version>7.21.0</openapi-generator.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
+    <argLine/>
 
     <sonar.exclusions>
       <!--
@@ -417,7 +418,7 @@
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${maven-failsafe-plugin.version}</version>
         <configuration>
-          <argLine>${argLine} -Djdk.internal.httpclient.disableHostnameVerification=true</argLine>
+          <argLine>@{argLine} -Djdk.internal.httpclient.disableHostnameVerification=true</argLine>
           <groups>integration</groups>
         </configuration>
       </plugin>
