@@ -1,7 +1,16 @@
 package org.folio.uk.integration.kafka;
 
+import static org.folio.common.utils.OkapiHeaders.URL;
+import static org.folio.spring.integration.XOkapiHeaders.TENANT;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
+import org.folio.uk.integration.configuration.OkapiConfigurationProperties;
 import org.folio.uk.integration.kafka.model.ResourceEvent;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
@@ -15,7 +24,9 @@ import tools.jackson.databind.ObjectMapper;
 public class KafkaMessageListener {
 
   private final ObjectMapper objectMapper;
+  private final FolioModuleMetadata metadata;
   private final SystemUserService systemUserService;
+  private final OkapiConfigurationProperties okapiProperties;
 
   /**
    * Handles system user event.
@@ -29,15 +40,18 @@ public class KafkaMessageListener {
     topicPattern = "#{folioKafkaProperties.listener['system-user'].topicPattern}")
   public void handleSystemUserEvent(ResourceEvent event) {
     log.info("System user event received: {}", event);
-
-    switch (event.getType()) {
-      case UPDATE ->
-        systemUserService.updateOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class));
-      case CREATE ->
-        systemUserService.createOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class));
-      case DELETE ->
-        systemUserService.deleteOnEvent(objectMapper.convertValue(event.getOldValue(), SystemUserEvent.class));
-      default -> log.warn("Received system user event is not handled: {}", event);
+    Map<String, Collection<String>> headers =
+      Map.of(TENANT, List.of(event.getTenant()), URL, List.of(okapiProperties.getUrl()));
+    try (var ignored = new FolioExecutionContextSetter(metadata, headers)) {
+      switch (event.getType()) {
+        case UPDATE ->
+          systemUserService.updateOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class));
+        case CREATE ->
+          systemUserService.createOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class));
+        case DELETE ->
+          systemUserService.deleteOnEvent(objectMapper.convertValue(event.getOldValue(), SystemUserEvent.class));
+        default -> log.warn("Received system user event is not handled: {}", event);
+      }
     }
   }
 }

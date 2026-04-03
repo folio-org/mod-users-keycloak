@@ -1,13 +1,16 @@
 package org.folio.uk.integration.kafka;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Set;
 import org.folio.test.types.UnitTest;
+import org.folio.uk.integration.configuration.OkapiConfigurationProperties;
 import org.folio.uk.integration.kafka.model.ResourceEvent;
 import org.folio.uk.integration.kafka.model.ResourceEventType;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +25,13 @@ class KafkaMessageListenerTest {
 
   @Spy private ObjectMapper objectMapper = new ObjectMapper();
   @Mock private SystemUserService systemUserService;
+  @Mock private OkapiConfigurationProperties okapiProperties;
   @InjectMocks private KafkaMessageListener kafkaMessageListener;
+
+  @BeforeEach
+  void setUp() {
+    when(okapiProperties.getUrl()).thenReturn("dummy");
+  }
 
   @Test
   void handleSystemUserEvent_positive_deleteEvent() {
