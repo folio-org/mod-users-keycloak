@@ -1,6 +1,7 @@
 package org.folio.uk.integration.kafka;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
@@ -58,6 +59,14 @@ class KafkaMessageListenerTest {
 
     kafkaMessageListener.handleSystemUserEvent(event);
     verify(systemUserService).createOnEvent(newValue);
+  }
+
+  @Test
+  void handleSystemUserEvent_positive_unhandledEventType() {
+    var event = ResourceEvent.builder().type(ResourceEventType.DELETE_ALL).tenant("tenant").build();
+
+    kafkaMessageListener.handleSystemUserEvent(event);
+    verifyNoInteractions(systemUserService);
   }
 
   private static SystemUserEvent getSystemUserEvent() {
