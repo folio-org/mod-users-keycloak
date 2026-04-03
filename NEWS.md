@@ -15,6 +15,7 @@
 * Adjust default behavior of _self endpoint to return ALL assigned permissions (MODUSERSKC-138)
 * Migrate module build from Jenkins to the centralized GitHub Maven workflow (MODUSERSKC-139)
 * Migrate to Spring Boot 4 (MODUSERSKC-108)
+* Entitlement does not reliably create secret store secrets (MODUSERSKC-148)
 ---
 
 ## Version `v3.0.0` (14.03.2025)
