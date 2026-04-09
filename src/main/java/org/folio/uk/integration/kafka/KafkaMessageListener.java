@@ -2,7 +2,6 @@ package org.folio.uk.integration.kafka;
 
 import static org.folio.common.utils.OkapiHeaders.URL;
 import static org.folio.spring.integration.XOkapiHeaders.TENANT;
-import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +14,6 @@ import org.folio.uk.integration.configuration.OkapiConfigurationProperties;
 import org.folio.uk.integration.kafka.model.ResourceEvent;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
@@ -28,7 +26,6 @@ public class KafkaMessageListener {
   private final ObjectMapper objectMapper;
   private final FolioModuleMetadata metadata;
   private final SystemUserService systemUserService;
-  private final TaskExecutor asyncTaskExecutor;
   private final OkapiConfigurationProperties okapiProperties;
 
   /**
@@ -43,23 +40,18 @@ public class KafkaMessageListener {
     topicPattern = "#{folioKafkaProperties.listener['system-user'].topicPattern}")
   public void handleSystemUserEvent(ResourceEvent event) {
     log.info("System user event received: {}", event);
-
-    switch (event.getType()) {
-      case UPDATE -> executeWithContext(event,
-        () -> systemUserService.updateOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class)));
-      case CREATE -> executeWithContext(event,
-        () -> systemUserService.createOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class)));
-      case DELETE -> executeWithContext(event,
-        () -> systemUserService.deleteOnEvent(objectMapper.convertValue(event.getOldValue(), SystemUserEvent.class)));
-      default -> log.warn("Received system user event is not handled: {}", event);
-    }
-  }
-
-  private void executeWithContext(ResourceEvent event, Runnable task) {
     Map<String, Collection<String>> headers =
       Map.of(TENANT, List.of(event.getTenant()), URL, List.of(okapiProperties.getUrl()));
     try (var ignored = new FolioExecutionContextSetter(metadata, headers)) {
-      asyncTaskExecutor.execute(getRunnableWithCurrentFolioContext(task));
+      switch (event.getType()) {
+        case UPDATE ->
+          systemUserService.updateOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class));
+        case CREATE ->
+          systemUserService.createOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class));
+        case DELETE ->
+          systemUserService.deleteOnEvent(objectMapper.convertValue(event.getOldValue(), SystemUserEvent.class));
+        default -> log.warn("Received system user event is not handled: {}", event);
+      }
     }
   }
 }
