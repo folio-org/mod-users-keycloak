@@ -42,7 +42,7 @@ public class PasswordResetService {
   private static final String PUT_TOKEN_IN_QUERY_PARAMS_CONFIG_KEY = "PUT_RESET_TOKEN_IN_QUERY_PARAMS";
   private static final Set<String> GENERATE_LINK_REQUIRED_CONFIGURATION = Collections.emptySet();
   private static final String LINK_EXPIRATION_TIME_DEFAULT = "24";
-  private static final String FOLIO_HOST_DEFAULT = "http://localhost:3000";
+  private static final String BASE_URL_DEFAULT = "http://localhost:3000";
   private static final String LINK_EXPIRATION_UNIT_OF_TIME_DEFAULT = "hours";
 
   private static final String CREATE_PASSWORD_EVENT_CONFIG_NAME = "CREATE_PASSWORD_EVENT";
@@ -109,17 +109,17 @@ public class PasswordResetService {
   }
 
   private String getGeneratedLink(Map<String, String> configMap, String token) {
-    var linkHost = getFolioHost();
+    var baseUrl = getBaseUrl();
     var linkPath = configMap.getOrDefault(UI_PATH_CONFIG_KEY, resetPasswordUiPathDefault);
     var putTokenInQueryParams = parseBoolean(configMap.getOrDefault(PUT_TOKEN_IN_QUERY_PARAMS_CONFIG_KEY, "false"));
     var tenantId = folioExecutionContext.getTenantId();
     var template = putTokenInQueryParams ? "%s%s?resetToken=%s&tenant=%s" : "%s%s/%s?tenant=%s";
-    return String.format(template, linkHost, linkPath, token, tenantId);
+    return String.format(template, baseUrl, linkPath, token, tenantId);
   }
 
-  private String getFolioHost() {
+  private String getBaseUrl() {
     return settingsService.getBaseUrl()
-      .orElse(FOLIO_HOST_DEFAULT);
+      .orElse(BASE_URL_DEFAULT);
   }
 
   private User lookupAndValidateUser(UUID userId) {

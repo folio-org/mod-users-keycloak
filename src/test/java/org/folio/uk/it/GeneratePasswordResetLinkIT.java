@@ -77,7 +77,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset.json")
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-empty-response.json")
   @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
@@ -105,7 +105,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset.json")
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-empty-response.json")
   @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-non-existing-password.json")
@@ -200,7 +200,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset.json")
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-empty-response.json")
   @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-non-existing-password-is-empty.json")
