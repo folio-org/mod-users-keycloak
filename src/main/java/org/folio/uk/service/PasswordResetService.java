@@ -26,6 +26,7 @@ import org.folio.uk.integration.keycloak.PasswordResetTokenService;
 import org.folio.uk.integration.login.LoginService;
 import org.folio.uk.integration.login.model.PasswordResetAction;
 import org.folio.uk.integration.notify.NotificationService;
+import org.folio.uk.integration.settings.SettingsService;
 import org.folio.uk.integration.users.UsersClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,6 @@ import org.springframework.stereotype.Service;
 public class PasswordResetService {
 
   private static final String MODULE_NAME = "USERSBL";
-  private static final String FOLIO_HOST_CONFIG_KEY = "FOLIO_HOST";
   private static final String UI_PATH_CONFIG_KEY = "RESET_PASSWORD_UI_PATH";
   private static final String LINK_EXPIRATION_TIME_CONFIG_KEY = "RESET_PASSWORD_LINK_EXPIRATION_TIME";
   private static final String LINK_EXPIRATION_UNIT_OF_TIME_CONFIG_KEY = "RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME";
@@ -59,6 +59,7 @@ public class PasswordResetService {
   private final UsersClient usersClient;
   private final LoginService loginService;
   private final FolioExecutionContext folioExecutionContext;
+  private final SettingsService settingsService;
 
   @Value("${reset-password.ui-path.default:/reset-password}")
   private String resetPasswordUiPathDefault;
@@ -109,12 +110,17 @@ public class PasswordResetService {
   }
 
   private String getGeneratedLink(Map<String, String> configMap, String token) {
-    var linkHost = configMap.getOrDefault(FOLIO_HOST_CONFIG_KEY, FOLIO_HOST_DEFAULT);
+    var linkHost = getFolioHost();
     var linkPath = configMap.getOrDefault(UI_PATH_CONFIG_KEY, resetPasswordUiPathDefault);
     var putTokenInQueryParams = parseBoolean(configMap.getOrDefault(PUT_TOKEN_IN_QUERY_PARAMS_CONFIG_KEY, "false"));
     var tenantId = folioExecutionContext.getTenantId();
     var template = putTokenInQueryParams ? "%s%s?resetToken=%s&tenant=%s" : "%s%s/%s?tenant=%s";
     return String.format(template, linkHost, linkPath, token, tenantId);
+  }
+
+  private String getFolioHost() {
+    return settingsService.getBaseUrl()
+      .orElse(FOLIO_HOST_DEFAULT);
   }
 
   private User lookupAndValidateUser(UUID userId) {

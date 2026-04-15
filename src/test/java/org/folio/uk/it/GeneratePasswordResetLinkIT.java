@@ -78,6 +78,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
@@ -105,6 +106,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-non-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
@@ -120,6 +122,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset-extended.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
@@ -137,6 +140,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-reset-configs-expiration-minutes.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
@@ -147,6 +151,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-reset-configs-expiration-days.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
@@ -156,6 +161,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-reset-configs-expiration-weeks.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
@@ -166,6 +172,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-reset-configs-expiration-weeks-exceeded-max.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
@@ -176,6 +183,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-invalid-exp.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   public void shouldGenerateAndSendPasswordNotificationWhenExpirationTimeIsIncorrect() {
@@ -184,6 +192,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-invalid-time-unit.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
   public void shouldGenerateAndSendPasswordNotificationWhenExpirationOfUnitTimeIsIncorrect() {
@@ -192,6 +201,7 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-without-reset.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
   @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
   @WireMockStub(scripts = "/wiremock/stubs/login/reset-non-existing-password-is-empty.json")
   @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")

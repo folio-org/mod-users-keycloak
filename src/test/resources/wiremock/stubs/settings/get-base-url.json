@@ -1,10 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/configurations/entries",
-    "queryParameters": {
-      "query": { "equalTo": "module==USERSBL" }
-    },
+    "urlPath": "/settings/base-url",
     "headers": {
       "x-okapi-tenant": { "equalTo": "diku" },
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
@@ -16,8 +13,7 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "configs": [],
-      "totalRecords": 0
+      "baseUrl": "http://localhost:3000"
     }
   }
 }

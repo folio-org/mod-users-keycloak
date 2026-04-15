@@ -14,6 +14,7 @@ import org.folio.uk.integration.roles.UserCapabilitySetClient;
 import org.folio.uk.integration.roles.UserPermissionsClient;
 import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.roles.dafaultrole.DefaultRolesClient;
+import org.folio.uk.integration.settings.SettingsClient;
 import org.folio.uk.integration.users.UserTenantsClient;
 import org.folio.uk.integration.users.UsersClient;
 import org.springframework.context.annotation.Bean;
@@ -86,6 +87,11 @@ public class HttpClientConfiguration {
   @Bean
   public UserRolesClient userRolesClient(HttpServiceProxyFactory factory) {
     return factory.createClient(UserRolesClient.class);
+  }
+
+  @Bean
+  public SettingsClient settingsClient(HttpServiceProxyFactory factory) {
+    return factory.createClient(SettingsClient.class);
   }
 
   @Bean
