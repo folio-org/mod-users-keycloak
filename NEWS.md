@@ -16,6 +16,7 @@
 * Migrate module build from Jenkins to the centralized GitHub Maven workflow (MODUSERSKC-139)
 * Migrate to Spring Boot 4 (MODUSERSKC-108)
 * Entitlement does not reliably create secret store secrets (MODUSERSKC-148)
+* Filter Kafka messages by tenant entitlements (MODUSERSKC-144)
 ---
 
 ## Version `v3.0.0` (14.03.2025)

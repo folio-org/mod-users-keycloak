@@ -1,4 +1,6 @@
 spring:
+  application:
+    version: 0.0.1-TEST
   datasource:
     username: folio_admin
     password: qwerty123
@@ -35,6 +37,11 @@ application:
   federated-auth:
     enabled: ${SINGLE_TENANT_UX:false}
     identity_provider_suffix: ${IDENTITY_PROVIDER_SUFFIX:-keycloak-oidc}
+  kafka:
+    consumer:
+      filtering:
+        tenant-filter:
+          enabled: false
 
 header:
   validation:

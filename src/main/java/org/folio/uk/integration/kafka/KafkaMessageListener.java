@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.integration.kafka.model.ResourceEvent;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.uk.integration.configuration.OkapiConfigurationProperties;
-import org.folio.uk.integration.kafka.model.ResourceEvent;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -36,9 +36,10 @@ public class KafkaMessageListener {
   @KafkaListener(
     id = "system-user-event-listener",
     containerFactory = "kafkaListenerContainerFactory",
-    groupId = "#{folioKafkaProperties.listener['system-user'].groupId}",
-    topicPattern = "#{folioKafkaProperties.listener['system-user'].topicPattern}")
-  public void handleSystemUserEvent(ResourceEvent event) {
+    groupId = "#{kafkaConsumerProperties.listener['system-user'].groupId}",
+    topicPattern = "#{kafkaConsumerProperties.listener['system-user'].topicPattern}",
+    filter = "tenantAwareMessageFilter")
+  public void handleSystemUserEvent(ResourceEvent<?> event) {
     log.info("System user event received: {}", event);
     Map<String, Collection<String>> headers =
       Map.of(TENANT, List.of(event.getTenant()), URL, List.of(okapiProperties.getUrl()));
