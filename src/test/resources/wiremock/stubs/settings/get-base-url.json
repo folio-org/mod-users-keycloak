@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/settings/base-url",
+    "urlPath": "/base-url",
     "headers": {
       "x-okapi-tenant": { "equalTo": "diku" },
       "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
