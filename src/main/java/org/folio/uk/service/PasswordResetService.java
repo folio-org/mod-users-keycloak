@@ -1,7 +1,6 @@
 package org.folio.uk.service;
 
 import static java.lang.Boolean.parseBoolean;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.folio.uk.domain.dto.ErrorCode.LINK_EXPIRED;
 import static org.folio.uk.domain.dto.ErrorCode.LINK_INVALID;
 import static org.folio.uk.domain.dto.ErrorCode.USER_ABSENT_USERNAME;
@@ -73,14 +72,14 @@ public class PasswordResetService {
 
     var passwordResetActionId = UUID.randomUUID().toString();
     var actionResponse = actionService.createPasswordResetAction(userId, etr.expirationTime(), passwordResetActionId);
-    var passwordExists = defaultIfNull(actionResponse.getPasswordExists(), false);
-
     var tokenResponse = resetTokenService.generateResetToken(passwordResetActionId);
     var token = tokenResponse.getAccessToken();
 
     var generatedLink = getGeneratedLink(configMap, token);
 
-    var eventConfigName = passwordExists ? RESET_PASSWORD_EVENT_CONFIG_NAME : CREATE_PASSWORD_EVENT_CONFIG_NAME;
+    var eventConfigName = Boolean.TRUE.equals(actionResponse.getPasswordExists())
+      ? RESET_PASSWORD_EVENT_CONFIG_NAME
+      : CREATE_PASSWORD_EVENT_CONFIG_NAME;
 
     notificationService.sendResetLinkNotification(user, generatedLink,
       eventConfigName, etr.expirationTimeFromConfig(), etr.expirationUnitOfTimeFromConfig());
@@ -169,6 +168,6 @@ public class PasswordResetService {
   }
 
   private record ExpirationTimeRecord(long expirationTime, String expirationTimeFromConfig,
-    String expirationUnitOfTimeFromConfig) {
+                                      String expirationUnitOfTimeFromConfig) {
   }
 }
