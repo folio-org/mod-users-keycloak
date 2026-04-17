@@ -1,4 +1,4 @@
-## Version `v4.0.0` (in progress)
+## Version `v4.0.0` (17.04.2026)
 ### Changes:
 * Set application\_name in spring.datasource.url ([https://folio-org.atlassian.net/browse/MODUSERSKC-84](MODUSERSKC-84))
 * Mask special CQL characters in user queries ([https://folio-org.atlassian.net/browse/MODUSERSKC-86](MODUSERSKC-86))
