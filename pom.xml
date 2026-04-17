@@ -29,7 +29,7 @@
     <folio-spring-support.version>10.0.0</folio-spring-support.version>
     <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
     <folio-util.version>36.0.0</folio-util.version>
-    <application-poc-tools.version>4.1.0-SNAPSHOT</application-poc-tools.version>
+    <application-poc-tools.version>4.0.1</application-poc-tools.version>
     <org.json.version>20251224</org.json.version>
     <streamex.version>0.8.4</streamex.version>
 
