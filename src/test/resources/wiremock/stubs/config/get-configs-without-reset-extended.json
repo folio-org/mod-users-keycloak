@@ -20,15 +20,6 @@
         {
           "module": "USERSBL",
           "configName": "validation_rules",
-          "code": "FOLIO_HOST",
-          "description": "for patrons",
-          "default": true,
-          "enabled": true,
-          "value": "http://localhost:3000"
-        },
-        {
-          "module": "USERSBL",
-          "configName": "validation_rules",
           "code": "PUT_RESET_TOKEN_IN_QUERY_PARAMS",
           "default": true,
           "enabled": true,

@@ -1,7 +1,6 @@
 package org.folio.uk.service;
 
 import static java.lang.Boolean.parseBoolean;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.folio.uk.domain.dto.ErrorCode.LINK_EXPIRED;
 import static org.folio.uk.domain.dto.ErrorCode.LINK_INVALID;
 import static org.folio.uk.domain.dto.ErrorCode.USER_ABSENT_USERNAME;
@@ -26,6 +25,7 @@ import org.folio.uk.integration.keycloak.PasswordResetTokenService;
 import org.folio.uk.integration.login.LoginService;
 import org.folio.uk.integration.login.model.PasswordResetAction;
 import org.folio.uk.integration.notify.NotificationService;
+import org.folio.uk.integration.settings.SettingsService;
 import org.folio.uk.integration.users.UsersClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,14 +36,13 @@ import org.springframework.stereotype.Service;
 public class PasswordResetService {
 
   private static final String MODULE_NAME = "USERSBL";
-  private static final String FOLIO_HOST_CONFIG_KEY = "FOLIO_HOST";
   private static final String UI_PATH_CONFIG_KEY = "RESET_PASSWORD_UI_PATH";
   private static final String LINK_EXPIRATION_TIME_CONFIG_KEY = "RESET_PASSWORD_LINK_EXPIRATION_TIME";
   private static final String LINK_EXPIRATION_UNIT_OF_TIME_CONFIG_KEY = "RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME";
   private static final String PUT_TOKEN_IN_QUERY_PARAMS_CONFIG_KEY = "PUT_RESET_TOKEN_IN_QUERY_PARAMS";
   private static final Set<String> GENERATE_LINK_REQUIRED_CONFIGURATION = Collections.emptySet();
   private static final String LINK_EXPIRATION_TIME_DEFAULT = "24";
-  private static final String FOLIO_HOST_DEFAULT = "http://localhost:3000";
+  private static final String BASE_URL_DEFAULT = "http://localhost:3000";
   private static final String LINK_EXPIRATION_UNIT_OF_TIME_DEFAULT = "hours";
 
   private static final String CREATE_PASSWORD_EVENT_CONFIG_NAME = "CREATE_PASSWORD_EVENT";
@@ -59,6 +58,7 @@ public class PasswordResetService {
   private final UsersClient usersClient;
   private final LoginService loginService;
   private final FolioExecutionContext folioExecutionContext;
+  private final SettingsService settingsService;
 
   @Value("${reset-password.ui-path.default:/reset-password}")
   private String resetPasswordUiPathDefault;
@@ -72,14 +72,14 @@ public class PasswordResetService {
 
     var passwordResetActionId = UUID.randomUUID().toString();
     var actionResponse = actionService.createPasswordResetAction(userId, etr.expirationTime(), passwordResetActionId);
-    var passwordExists = defaultIfNull(actionResponse.getPasswordExists(), false);
-
     var tokenResponse = resetTokenService.generateResetToken(passwordResetActionId);
     var token = tokenResponse.getAccessToken();
 
     var generatedLink = getGeneratedLink(configMap, token);
 
-    var eventConfigName = passwordExists ? RESET_PASSWORD_EVENT_CONFIG_NAME : CREATE_PASSWORD_EVENT_CONFIG_NAME;
+    var eventConfigName = Boolean.TRUE.equals(actionResponse.getPasswordExists())
+      ? RESET_PASSWORD_EVENT_CONFIG_NAME
+      : CREATE_PASSWORD_EVENT_CONFIG_NAME;
 
     notificationService.sendResetLinkNotification(user, generatedLink,
       eventConfigName, etr.expirationTimeFromConfig(), etr.expirationUnitOfTimeFromConfig());
@@ -109,12 +109,17 @@ public class PasswordResetService {
   }
 
   private String getGeneratedLink(Map<String, String> configMap, String token) {
-    var linkHost = configMap.getOrDefault(FOLIO_HOST_CONFIG_KEY, FOLIO_HOST_DEFAULT);
+    var baseUrl = getBaseUrl();
     var linkPath = configMap.getOrDefault(UI_PATH_CONFIG_KEY, resetPasswordUiPathDefault);
     var putTokenInQueryParams = parseBoolean(configMap.getOrDefault(PUT_TOKEN_IN_QUERY_PARAMS_CONFIG_KEY, "false"));
     var tenantId = folioExecutionContext.getTenantId();
     var template = putTokenInQueryParams ? "%s%s?resetToken=%s&tenant=%s" : "%s%s/%s?tenant=%s";
-    return String.format(template, linkHost, linkPath, token, tenantId);
+    return String.format(template, baseUrl, linkPath, token, tenantId);
+  }
+
+  private String getBaseUrl() {
+    return settingsService.getBaseUrl()
+      .orElse(BASE_URL_DEFAULT);
   }
 
   private User lookupAndValidateUser(UUID userId) {
@@ -163,6 +168,6 @@ public class PasswordResetService {
   }
 
   private record ExpirationTimeRecord(long expirationTime, String expirationTimeFromConfig,
-    String expirationUnitOfTimeFromConfig) {
+                                      String expirationUnitOfTimeFromConfig) {
   }
 }
