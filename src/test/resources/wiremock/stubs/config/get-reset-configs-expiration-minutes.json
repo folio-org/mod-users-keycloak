@@ -20,15 +20,6 @@
         {
           "module": "USERSBL",
           "configName": "validation_rules",
-          "code": "FOLIO_HOST",
-          "description": "for patrons",
-          "default": true,
-          "enabled": true,
-          "value": "http://localhost:3000"
-        },
-        {
-          "module": "USERSBL",
-          "configName": "validation_rules",
           "code": "RESET_PASSWORD_LINK_EXPIRATION_TIME",
           "default": true,
           "enabled": true,
@@ -43,7 +34,7 @@
           "value": "minutes"
         }
       ],
-      "totalRecords": 1
+      "totalRecords": 2
     }
   }
 }
