@@ -1,3 +1,8 @@
+## Version `v4.0.1` (21.04.2026)
+### Changes:
+* Use GET /base-url to fetch FOLIO_HOST value (MODUSERSKC-140)
+---
+
 ## Version `v4.0.0` (17.04.2026)
 ### Changes:
 * Set application\_name in spring.datasource.url ([https://folio-org.atlassian.net/browse/MODUSERSKC-84](MODUSERSKC-84))
@@ -17,7 +22,6 @@
 * Migrate to Spring Boot 4 (MODUSERSKC-108)
 * Entitlement does not reliably create secret store secrets (MODUSERSKC-148)
 * Filter Kafka messages by tenant entitlements (MODUSERSKC-144)
-* Use GET /base-url to fetch FOLIO_HOST value (MODUSERSKC-140)
 ---
 
 ## Version `v3.0.0` (14.03.2025)
