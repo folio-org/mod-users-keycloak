@@ -11,7 +11,10 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.folio.uk.integration.kafka.model.ResourceEvent;
+import org.folio.integration.kafka.consumer.EnableKafkaConsumer;
+import org.folio.integration.kafka.consumer.filter.TenantIsDisabledException;
+import org.folio.integration.kafka.consumer.filter.TenantsAreDisabledException;
+import org.folio.integration.kafka.model.ResourceEvent;
 import org.hibernate.exception.SQLGrammarException;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +31,7 @@ import org.springframework.util.backoff.FixedBackOff;
 
 @Log4j2
 @Configuration
+@EnableKafkaConsumer
 @RequiredArgsConstructor
 public class KafkaConfiguration {
 
@@ -35,6 +39,7 @@ public class KafkaConfiguration {
   private final SystemUserEventRetryConfiguration retryConfiguration;
 
   @Bean
+  @SuppressWarnings("rawtypes")
   public ConcurrentKafkaListenerContainerFactory<String, ResourceEvent> kafkaListenerContainerFactory(
     ConsumerFactory<String, ResourceEvent> consumerFactory) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, ResourceEvent>();
@@ -44,6 +49,7 @@ public class KafkaConfiguration {
   }
 
   @Bean
+  @SuppressWarnings("rawtypes")
   public ConsumerFactory<String, ResourceEvent> jsonNodeConsumerFactory() {
     var deserializer = new JsonDeserializer<>(ResourceEvent.class);
     Map<String, Object> config = new HashMap<>(kafkaProperties.buildConsumerProperties(null));
@@ -63,6 +69,11 @@ public class KafkaConfiguration {
   }
 
   private BackOff getBackOff(Exception exception) {
+    if (exception instanceof TenantsAreDisabledException || exception instanceof TenantIsDisabledException) {
+      log.warn("Tenant(s) is disabled, retrying Kafka event", exception);
+      return new FixedBackOff(retryConfiguration.getRetryDelay().toMillis(), retryConfiguration.getRetryAttempts());
+    }
+
     var relationDoesNotExistsMessage = findRelationDoesNotExistsMessage(exception);
     if (relationDoesNotExistsMessage.isPresent()) {
       log.warn("Tenant table is not found, retrying until created [message: {}]", relationDoesNotExistsMessage.get());

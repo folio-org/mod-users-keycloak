@@ -12,10 +12,10 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.folio.integration.kafka.model.ResourceEvent;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.model.UserType;
-import org.folio.uk.integration.kafka.model.ResourceEvent;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
