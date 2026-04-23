@@ -1,4 +1,4 @@
-## Version 'v3.0.13' (unreleased)
+## Version 'v3.0.13' (23.04.2026)
 ### Changes:
 * Filter Kafka messages by tenant entitlements (MODUSERSKC-149)
 ---
