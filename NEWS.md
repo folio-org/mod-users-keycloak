@@ -1,3 +1,8 @@
+## Version 'v3.0.13' (unreleased)
+### Changes:
+* Filter Kafka messages by tenant entitlements (MODUSERSKC-149)
+---
+
 ## Version 'v3.0.12' (06.01.2026)
 ### Changes:
 * Remove @Transactional for UserService (MODUSERSKC-117)
