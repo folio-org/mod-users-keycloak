@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/base-url",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "diku" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "baseUrl": "http://localhost:3000"
+    }
+  }
+}

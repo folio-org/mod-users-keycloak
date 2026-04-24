@@ -179,12 +179,12 @@ x-okapi-token: <auth-token>
 
 {
   "module": "USERSBL",
-  "configName": "validation_rules",
-  "code": "FOLIO_HOST",
-  "description": "Host value for password reset",
+  "configName": "resetPassword",
+  "code": "RESET_PASSWORD_LINK_EXPIRATION_TIME",
+  "description": "A duration value when the reset password token will be expired",
   "default": true,
   "enabled": true,
-  "value": "https://ui-host:3000"
+  "value": "24"
 }
 ```
 
@@ -192,8 +192,7 @@ x-okapi-token: <auth-token>
 
 | Name                                        |     Default value     | Description                                                                                                                                       |
 |:--------------------------------------------|:---------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------|
-| FOLIO_HOST                                  | http://localhost:3000 | Folio host used to generate password reset link                                                                                                   |
-| RESET_PASSWORD_UI_PATH                      |    /reset-password    | UI path, added to the folio host, took value firstly from `mod-configuration`, then from application property `reset-password.ui-path.default`    |
+| RESET_PASSWORD_UI_PATH                      |    /reset-password    | UI path, added to the base URL, took value firstly from `mod-configuration`, then from application property `reset-password.ui-path.default`      |
 | RESET_PASSWORD_LINK_EXPIRATION_TIME         |          24           | A duration value when the reset password token will be expired                                                                                    |
 | RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME |         hours         | A duration unit when the reset password token will be expired                                                                                     |
 | PUT_RESET_TOKEN_IN_QUERY_PARAMS             |         false         | Defines if reset token will be included in the path (if value is not set or set as `false`) or as a query parameter (if value is set to a `true`) |

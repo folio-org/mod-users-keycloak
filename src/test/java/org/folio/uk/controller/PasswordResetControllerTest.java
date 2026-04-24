@@ -36,6 +36,7 @@ import org.folio.uk.integration.notify.NotificationService;
 import org.folio.uk.integration.password.PasswordValidationService;
 import org.folio.uk.integration.password.PasswordValidatorClient;
 import org.folio.uk.integration.password.model.PasswordValidationResult;
+import org.folio.uk.integration.settings.SettingsService;
 import org.folio.uk.integration.users.UsersClient;
 import org.folio.uk.service.PasswordResetService;
 import org.junit.jupiter.api.Test;
@@ -70,6 +71,7 @@ class PasswordResetControllerTest {
   @MockitoBean private FolioExecutionContext folioExecutionContext;
   @MockitoBean private KeycloakPasswordResetClientProperties resetPasswordClientProperties;
   @MockitoBean private RealmConfigurationProvider realmConfigurationProvider;
+  @MockitoBean private SettingsService settingsService;
 
   @Test
   public void postPasswordResetValidate() throws Exception {

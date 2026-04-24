@@ -1,4 +1,4 @@
-## Version `v4.0.0` (in progress)
+## Version `v4.0.0` (17.04.2026)
 ### Changes:
 * Set application\_name in spring.datasource.url ([https://folio-org.atlassian.net/browse/MODUSERSKC-84](MODUSERSKC-84))
 * Mask special CQL characters in user queries ([https://folio-org.atlassian.net/browse/MODUSERSKC-86](MODUSERSKC-86))
@@ -15,6 +15,9 @@
 * Adjust default behavior of _self endpoint to return ALL assigned permissions (MODUSERSKC-138)
 * Migrate module build from Jenkins to the centralized GitHub Maven workflow (MODUSERSKC-139)
 * Migrate to Spring Boot 4 (MODUSERSKC-108)
+* Entitlement does not reliably create secret store secrets (MODUSERSKC-148)
+* Filter Kafka messages by tenant entitlements (MODUSERSKC-144)
+* Use GET /base-url to fetch FOLIO_HOST value (MODUSERSKC-140)
 ---
 
 ## Version `v3.0.0` (14.03.2025)

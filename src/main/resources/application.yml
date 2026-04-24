@@ -1,6 +1,7 @@
 spring:
   application:
     name: mod-users-keycloak
+    version: ${MODULE_VERSION:}
   jackson:
     default-property-inclusion: non_null
     deserialization:
@@ -102,10 +103,17 @@ application:
   idp-migration:
     batch-size: ${IDP_MIGRATION_BATCH_SIZE:20}
   kafka:
-    listener:
-      system-user:
-        topic-pattern: ${KAFKA_SYS_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)mgr-tenant-entitlements.system-user}
-        group-id: ${application.environment}-mod-users-keycloak-system-user-group
+    consumer:
+      listener:
+        system-user:
+          topic-pattern: ${KAFKA_SYS_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)mgr-tenant-entitlements.system-user}
+          group-id: ${application.environment}-mod-users-keycloak-system-user-group
+      filtering:
+        tenant-filter:
+          enabled: ${KAFKA_TENANT_FILTER_ENABLED:false}
+          ignore-empty-batch: true
+          tenant-disabled-strategy: ${KAFKA_TENANT_FILTER_TENANT_DISABLED_STRATEGY:skip}
+          all-tenants-disabled-strategy: ${KAFKA_TENANT_FILTER_ALL_TENANTS_DISABLED_STRATEGY:fail}
   retry:
     system-user-event:
       retry-attempts: ${KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS:9223372036854775807}
@@ -127,4 +135,5 @@ application:
       ttl: ${KC_ADMIN_TOKEN_TTL:60s}
       max-size: 10
 
-okapi.url: ${OKAPI_URL:http://sidecar:8081}
+okapi:
+  url: ${OKAPI_URL:http://sidecar:8081}
