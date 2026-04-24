@@ -1,7 +1,15 @@
 {
   "request": {
     "method": "GET",
-    "url": "/permissions/users/ac6767c3-1325-5205-89d5-c578c991a45a?onlyVisible=true",
+    "urlPath": "/permissions/users/ac6767c3-1325-5205-89d5-c578c991a45a",
+    "queryParameters": {
+      "onlyVisible": {
+        "equalTo": "true"
+      },
+      "entitledOnly": {
+        "equalTo": "true"
+      }
+    },
     "headers": {
       "x-okapi-tenant": {
         "equalTo": "test"
