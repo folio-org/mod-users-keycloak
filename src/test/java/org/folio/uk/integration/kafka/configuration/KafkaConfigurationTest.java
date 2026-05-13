@@ -3,8 +3,8 @@ package org.folio.uk.integration.kafka.configuration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.folio.integration.kafka.model.ResourceEvent;
 import org.folio.test.types.UnitTest;
+import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -18,7 +18,7 @@ class KafkaConfigurationTest {
     var config = new KafkaConfiguration(new KafkaProperties(), retryConfiguration());
 
     @SuppressWarnings("rawtypes")
-    var factory = (DefaultKafkaConsumerFactory<String, ResourceEvent>) config.jsonNodeConsumerFactory();
+    var factory = (DefaultKafkaConsumerFactory<String, SystemUserEvent>) config.jsonNodeConsumerFactory();
 
     assertThat(factory.getKeyDeserializer()).isInstanceOf(StringDeserializer.class);
     assertThat(factory.getValueDeserializer()).isInstanceOf(JacksonJsonDeserializer.class);

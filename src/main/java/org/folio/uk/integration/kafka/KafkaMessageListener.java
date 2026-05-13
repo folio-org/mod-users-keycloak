@@ -16,14 +16,12 @@ import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class KafkaMessageListener {
 
-  private final ObjectMapper objectMapper;
   private final FolioModuleMetadata metadata;
   private final SystemUserService systemUserService;
   private final OkapiConfigurationProperties okapiProperties;
@@ -39,18 +37,15 @@ public class KafkaMessageListener {
     groupId = "#{kafkaConsumerProperties.listener['system-user'].groupId}",
     topicPattern = "#{kafkaConsumerProperties.listener['system-user'].topicPattern}",
     filter = "tenantAwareMessageFilter")
-  public void handleSystemUserEvent(ResourceEvent<?> event) {
+  public void handleSystemUserEvent(SystemUserEvent event) {
     log.info("System user event received: {}", event);
     Map<String, Collection<String>> headers =
       Map.of(TENANT, List.of(event.getTenant()), URL, List.of(okapiProperties.getUrl()));
     try (var ignored = new FolioExecutionContextSetter(metadata, headers)) {
       switch (event.getType()) {
-        case UPDATE ->
-          systemUserService.updateOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class));
-        case CREATE ->
-          systemUserService.createOnEvent(objectMapper.convertValue(event.getNewValue(), SystemUserEvent.class));
-        case DELETE ->
-          systemUserService.deleteOnEvent(objectMapper.convertValue(event.getOldValue(), SystemUserEvent.class));
+        case UPDATE -> systemUserService.updateOnEvent(event.getNewValue());
+        case CREATE -> systemUserService.createOnEvent(event.getNewValue());
+        case DELETE -> systemUserService.deleteOnEvent(event.getOldValue());
         default -> log.warn("Received system user event is not handled: {}", event);
       }
     }

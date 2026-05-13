@@ -5,10 +5,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
-import org.folio.integration.kafka.model.ResourceEvent;
 import org.folio.integration.kafka.model.ResourceEventType;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.integration.configuration.OkapiConfigurationProperties;
+import org.folio.uk.integration.kafka.model.SystemUser;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +37,7 @@ class KafkaMessageListenerTest {
   @Test
   void handleSystemUserEvent_positive_deleteEvent() {
     var oldValue = getSystemUserEvent();
-    var event = ResourceEvent.builder().type(ResourceEventType.DELETE).tenant("tenant").oldValue(oldValue).build();
+    var event = SystemUserEvent.builder().type(ResourceEventType.DELETE).tenant("tenant").oldValue(oldValue).build();
 
     kafkaMessageListener.handleSystemUserEvent(event);
     verify(systemUserService).deleteOnEvent(oldValue);
@@ -46,7 +46,7 @@ class KafkaMessageListenerTest {
   @Test
   void handleSystemUserEvent_positive_updateEvent() {
     var newValue = getSystemUserEvent();
-    var event = ResourceEvent.builder().type(ResourceEventType.UPDATE).tenant("tenant").newValue(newValue).build();
+    var event = SystemUserEvent.builder().type(ResourceEventType.UPDATE).tenant("tenant").newValue(newValue).build();
 
     kafkaMessageListener.handleSystemUserEvent(event);
     verify(systemUserService).updateOnEvent(newValue);
@@ -55,7 +55,7 @@ class KafkaMessageListenerTest {
   @Test
   void handleSystemUserEvent_positive_createEvent() {
     var newValue = getSystemUserEvent();
-    var event = ResourceEvent.builder().type(ResourceEventType.CREATE).tenant("tenant").newValue(newValue).build();
+    var event = SystemUserEvent.builder().type(ResourceEventType.CREATE).tenant("tenant").newValue(newValue).build();
 
     kafkaMessageListener.handleSystemUserEvent(event);
     verify(systemUserService).createOnEvent(newValue);
@@ -63,13 +63,13 @@ class KafkaMessageListenerTest {
 
   @Test
   void handleSystemUserEvent_positive_unhandledEventType() {
-    var event = ResourceEvent.builder().type(ResourceEventType.DELETE_ALL).tenant("tenant").build();
+    var event = SystemUserEvent.builder().type(ResourceEventType.DELETE_ALL).tenant("tenant").build();
 
     kafkaMessageListener.handleSystemUserEvent(event);
     verifyNoInteractions(systemUserService);
   }
 
-  private static SystemUserEvent getSystemUserEvent() {
-    return SystemUserEvent.of("name", "type", Set.of("dummy"));
+  private static SystemUser getSystemUserEvent() {
+    return SystemUser.of("name", "type", Set.of("dummy"));
   }
 }

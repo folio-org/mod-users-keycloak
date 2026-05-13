@@ -14,7 +14,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.folio.integration.kafka.consumer.EnableKafkaConsumer;
 import org.folio.integration.kafka.consumer.filter.TenantIsDisabledException;
 import org.folio.integration.kafka.consumer.filter.TenantsAreDisabledException;
-import org.folio.integration.kafka.model.ResourceEvent;
+import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.hibernate.exception.SQLGrammarException;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -40,18 +40,18 @@ public class KafkaConfiguration {
 
   @Bean
   @SuppressWarnings("rawtypes")
-  public ConcurrentKafkaListenerContainerFactory<String, ResourceEvent> kafkaListenerContainerFactory(
-    ConsumerFactory<String, ResourceEvent> consumerFactory) {
-    var factory = new ConcurrentKafkaListenerContainerFactory<String, ResourceEvent>();
+  public ConcurrentKafkaListenerContainerFactory<String, SystemUserEvent> kafkaListenerContainerFactory(
+    ConsumerFactory<String, SystemUserEvent> consumerFactory) {
+    var factory = new ConcurrentKafkaListenerContainerFactory<String, SystemUserEvent>();
     factory.setConsumerFactory(consumerFactory);
     factory.setCommonErrorHandler(eventErrorHandler());
     return factory;
   }
 
   @Bean
-  @SuppressWarnings("rawtypes")
-  public ConsumerFactory<String, ResourceEvent> jsonNodeConsumerFactory() {
-    var deserializer = new JacksonJsonDeserializer<>(ResourceEvent.class);
+  //@SuppressWarnings("rawtypes")
+  public ConsumerFactory<String, SystemUserEvent> jsonNodeConsumerFactory() {
+    var deserializer = new JacksonJsonDeserializer<>(SystemUserEvent.class);
     Map<String, Object> config = new HashMap<>(kafkaProperties.buildConsumerProperties());
     config.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     config.put(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
