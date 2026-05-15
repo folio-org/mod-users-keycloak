@@ -3,6 +3,7 @@ package org.folio.uk.integration.kafka.model;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.folio.integration.kafka.model.ResourceEvent;
 import org.folio.integration.kafka.model.ResourceEventType;
 import org.folio.uk.domain.dto.User;
@@ -10,6 +11,7 @@ import org.jspecify.annotations.Nullable;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class UserEvent extends ResourceEvent<User> {
 
   private static final String RESOURCE_NAME = "User";

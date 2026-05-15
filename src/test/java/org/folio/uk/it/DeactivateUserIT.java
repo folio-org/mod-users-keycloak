@@ -3,11 +3,12 @@ package org.folio.uk.it;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
 
 import java.util.UUID;
-import org.folio.test.TestUtils;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
+import org.folio.uk.base.model.UserDomainEvent;
 import org.folio.uk.integration.keycloak.KeycloakClient;
 import org.folio.uk.integration.users.UsersClient;
+import org.folio.uk.support.TestValues;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class DeactivateUserIT extends BaseIntegrationTest {
 
   @Test
   void updateOnEvent() {
-    var msg = TestUtils.readString("json/kafka/system-user-event.json");
+    var msg = TestValues.readValue("json/kafka/user-update-event-diactivated.json", UserDomainEvent.class);
     kafkaTemplate.send(FOLIO_USER_TOPIC, msg);
   }
 }

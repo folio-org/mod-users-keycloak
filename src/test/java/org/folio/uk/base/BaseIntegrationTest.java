@@ -372,6 +372,11 @@ public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
     }
 
     @Bean
+    public NewTopic userTopic() {
+      return new NewTopic(FOLIO_USER_TOPIC, 1, (short) 1);
+    }
+
+    @Bean
     public KeycloakTestClient keycloakTestClient(KeycloakProperties properties) {
       return HttpClientTlsUtils.buildHttpServiceClient(
         RestClient.builder(), properties.getTls(), properties.getUrl(), KeycloakTestClient.class);
