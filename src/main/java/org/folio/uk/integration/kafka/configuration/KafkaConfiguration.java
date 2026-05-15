@@ -10,11 +10,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.Strings;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.folio.integration.kafka.consumer.EnableKafkaConsumer;
 import org.folio.integration.kafka.consumer.filter.TenantIsDisabledException;
 import org.folio.integration.kafka.consumer.filter.TenantsAreDisabledException;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
+import org.folio.uk.integration.kafka.model.UserEvent;
+import org.folio.uk.integration.kafka.model.UserEventDeserializer;
 import org.hibernate.exception.SQLGrammarException;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +31,7 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
+import tools.jackson.databind.json.JsonMapper;
 
 @Log4j2
 @Configuration
@@ -36,48 +40,64 @@ import org.springframework.util.backoff.FixedBackOff;
 public class KafkaConfiguration {
 
   private final KafkaProperties kafkaProperties;
-  private final SystemUserEventRetryConfiguration retryConfiguration;
+  private final SystemUserEventRetryConfiguration systemUserEventRetryConfiguration;
+  private final UserEventRetryConfiguration userEventRetryConfiguration;
 
   @Bean
-  @SuppressWarnings("rawtypes")
-  public ConcurrentKafkaListenerContainerFactory<String, SystemUserEvent> kafkaListenerContainerFactory(
+  public ConcurrentKafkaListenerContainerFactory<String, SystemUserEvent> systemUserKafkaListenerContainerFactory(
     ConsumerFactory<String, SystemUserEvent> consumerFactory) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, SystemUserEvent>();
     factory.setConsumerFactory(consumerFactory);
-    factory.setCommonErrorHandler(eventErrorHandler());
+    factory.setCommonErrorHandler(eventErrorHandler(systemUserEventRetryConfiguration));
     return factory;
   }
 
   @Bean
-  //@SuppressWarnings("rawtypes")
-  public ConsumerFactory<String, SystemUserEvent> jsonNodeConsumerFactory() {
-    var deserializer = new JacksonJsonDeserializer<>(SystemUserEvent.class);
-    Map<String, Object> config = new HashMap<>(kafkaProperties.buildConsumerProperties());
-    config.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    config.put(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
-    config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-    return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
+  public ConsumerFactory<String, SystemUserEvent> systemUserConsumerFactory() {
+    return getConsumerFactory(new JacksonJsonDeserializer<>(SystemUserEvent.class));
   }
 
-  private DefaultErrorHandler eventErrorHandler() {
+  @Bean
+  public ConcurrentKafkaListenerContainerFactory<String, UserEvent> userKafkaListenerContainerFactory(
+    ConsumerFactory<String, UserEvent> consumerFactory) {
+    var factory = new ConcurrentKafkaListenerContainerFactory<String, UserEvent>();
+    factory.setConsumerFactory(consumerFactory);
+    factory.setCommonErrorHandler(eventErrorHandler(userEventRetryConfiguration));
+    return factory;
+  }
+
+  @Bean
+  public ConsumerFactory<String, UserEvent> userConsumerFactory(JsonMapper jsonMapper) {
+    return getConsumerFactory(new UserEventDeserializer(jsonMapper));
+  }
+
+  private <T> ConsumerFactory<String, T> getConsumerFactory(Deserializer<T> valueDeserializer) {
+    Map<String, Object> config = new HashMap<>(kafkaProperties.buildConsumerProperties());
+    config.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    config.put(VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
+    config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), valueDeserializer);
+  }
+
+  private DefaultErrorHandler eventErrorHandler(RetryProperties retryProperties) {
     var errorHandler = new DefaultErrorHandler((message, exception) ->
       log.warn("Failed to process event [record: {}]", message, exception.getCause()));
-    errorHandler.setBackOffFunction((message, exception) -> getBackOff(exception));
+    errorHandler.setBackOffFunction((message, exception) -> getBackOff(exception, retryProperties));
     errorHandler.setLogLevel(Level.DEBUG);
 
     return errorHandler;
   }
 
-  private BackOff getBackOff(Exception exception) {
+  private BackOff getBackOff(Exception exception, RetryProperties retryProperties) {
     if (exception instanceof TenantsAreDisabledException || exception instanceof TenantIsDisabledException) {
       log.warn("Tenant(s) is disabled, retrying Kafka event", exception);
-      return new FixedBackOff(retryConfiguration.getRetryDelay().toMillis(), retryConfiguration.getRetryAttempts());
+      return new FixedBackOff(retryProperties.getRetryDelay().toMillis(), retryProperties.getRetryAttempts());
     }
 
     var relationDoesNotExistsMessage = findRelationDoesNotExistsMessage(exception);
     if (relationDoesNotExistsMessage.isPresent()) {
       log.warn("Tenant table is not found, retrying until created [message: {}]", relationDoesNotExistsMessage.get());
-      return new FixedBackOff(retryConfiguration.getRetryDelay().toMillis(), retryConfiguration.getRetryAttempts());
+      return new FixedBackOff(retryProperties.getRetryDelay().toMillis(), retryProperties.getRetryAttempts());
     }
 
     return new FixedBackOff(0L, 0L);

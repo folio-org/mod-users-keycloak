@@ -6,22 +6,18 @@ import java.time.Duration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 @Data
 @Component
-@ConfigurationProperties("application.retry.system-user-role")
-public class SystemUserRoleRetryConfiguration {
+@Validated
+@ConfigurationProperties("application.retry.user-event")
+public class UserEventRetryConfiguration implements RetryProperties {
 
-  /**
-   * Retry delay for module user capabilities assignment.
-   */
   @NotNull
-  private Duration retryDelay = Duration.ofSeconds(5);
+  private Duration retryDelay = Duration.ofMillis(250);
 
-  /**
-   * A number for Retry attempts for module user capabilities assignment.
-   */
   @NotNull
   @Positive
-  private int retryAttempts = 60;
+  private long retryAttempts = Long.MAX_VALUE;
 }

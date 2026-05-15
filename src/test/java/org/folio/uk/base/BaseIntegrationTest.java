@@ -87,6 +87,7 @@ import org.springframework.web.client.RestClient;
 public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
   public static final String FOLIO_SYSTEM_USER_TOPIC = "it-test.master.mgr-tenant-entitlements.system-user";
+  public static final String FOLIO_USER_TOPIC = "it-test.master.users.users";
   public static final String PROVIDER_ALIAS = String.format("%s-keycloak-oidc", TENANT_NAME);
 
   protected static WireMockAdminClient wmAdminClient;

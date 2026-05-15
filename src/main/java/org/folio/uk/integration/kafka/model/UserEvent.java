@@ -26,10 +26,5 @@ public class UserEvent extends ResourceEvent<User> {
     super(id, type, tenant, RESOURCE_NAME, newValue, oldValue);
     this.timestamp = timestamp;
   }
-
-  public UserEvent timestamp(long timestamp) {
-    this.timestamp = timestamp;
-    return this;
-  }
 }
 

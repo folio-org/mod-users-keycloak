@@ -12,7 +12,7 @@ import org.springframework.validation.annotation.Validated;
 @Component
 @Validated
 @ConfigurationProperties("application.retry.system-user-event")
-public class SystemUserEventRetryConfiguration {
+public class SystemUserEventRetryConfiguration implements RetryProperties {
 
   /**
    * Retry delay for system user creation.

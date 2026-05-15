@@ -108,6 +108,9 @@ application:
         system-user:
           topic-pattern: ${KAFKA_SYS_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)mgr-tenant-entitlements.system-user}
           group-id: ${application.environment}-mod-users-keycloak-system-user-group
+        user:
+          topic-pattern: ${KAFKA_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)users.users}
+          group-id: ${application.environment}-mod-users-keycloak-user-group
       filtering:
         tenant-filter:
           enabled: ${KAFKA_TENANT_FILTER_ENABLED:false}
@@ -118,6 +121,9 @@ application:
     system-user-event:
       retry-attempts: ${KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS:9223372036854775807}
       retry-delay: ${KAFKA_SYS_USER_TOPIC_RETRY_DELAY:1s}
+    user-event:
+      retry-attempts: ${KAFKA_USER_TOPIC_RETRY_ATTEMPTS:9223372036854775807}
+      retry-delay: ${KAFKA_USER_TOPIC_RETRY_DELAY:1s}
     system-user-role:
       retry-attempts: ${KAFKA_SYS_USER_ROLE_RETRY_ATTEMPTS:60}
       retry-delay: ${KAFKA_SYS_USER_ROLE_RETRY_DELAY:5s}
