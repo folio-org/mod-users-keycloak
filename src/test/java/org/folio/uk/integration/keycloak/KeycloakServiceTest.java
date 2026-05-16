@@ -237,6 +237,90 @@ class KeycloakServiceTest {
   }
 
   @Test
+  void disableUser_positive_userFound() {
+    var kcUserId = UUID.randomUUID().toString();
+    var kcUser = keycloakUserWithId(kcUserId);
+
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
+    when(keycloakClient.getUsersWithAttrs(TENANT_NAME, "user_id:" + USER_ID, true, AUTH_TOKEN))
+      .thenReturn(singletonList(kcUser));
+
+    keycloakService.disableUser(USER_ID);
+
+    kcUser.setEnabled(false);
+    verify(keycloakClient).updateUser(TENANT_NAME, kcUserId, kcUser, AUTH_TOKEN);
+  }
+
+  @Test
+  void disableUser_positive_userNotFound() {
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
+    when(keycloakClient.getUsersWithAttrs(TENANT_NAME, "user_id:" + USER_ID, true, AUTH_TOKEN))
+      .thenReturn(emptyList());
+
+    keycloakService.disableUser(USER_ID);
+  }
+
+  @Test
+  void disableUser_negative_keycloakException() {
+    var kcUserId = UUID.randomUUID().toString();
+    var kcUser = keycloakUserWithId(kcUserId);
+
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
+    when(keycloakClient.getUsersWithAttrs(TENANT_NAME, "user_id:" + USER_ID, true, AUTH_TOKEN))
+      .thenReturn(singletonList(kcUser));
+    doThrow(restClientFailure()).when(keycloakClient).updateUser(any(), any(), any(), any());
+
+    assertThatThrownBy(() -> keycloakService.disableUser(USER_ID))
+      .isInstanceOf(KeycloakException.class)
+      .hasMessageContaining("Failed to disable keycloak user");
+  }
+
+  @Test
+  void enableUser_positive_userFound() {
+    var kcUserId = UUID.randomUUID().toString();
+    var kcUser = keycloakUserWithId(kcUserId);
+
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
+    when(keycloakClient.getUsersWithAttrs(TENANT_NAME, "user_id:" + USER_ID, true, AUTH_TOKEN))
+      .thenReturn(singletonList(kcUser));
+
+    keycloakService.enableUser(USER_ID);
+
+    kcUser.setEnabled(true);
+    verify(keycloakClient).updateUser(TENANT_NAME, kcUserId, kcUser, AUTH_TOKEN);
+  }
+
+  @Test
+  void enableUser_positive_userNotFound() {
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
+    when(keycloakClient.getUsersWithAttrs(TENANT_NAME, "user_id:" + USER_ID, true, AUTH_TOKEN))
+      .thenReturn(emptyList());
+
+    keycloakService.enableUser(USER_ID);
+  }
+
+  @Test
+  void enableUser_negative_keycloakException() {
+    var kcUserId = UUID.randomUUID().toString();
+    var kcUser = keycloakUserWithId(kcUserId);
+
+    when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_NAME);
+    when(keycloakClient.getUsersWithAttrs(TENANT_NAME, "user_id:" + USER_ID, true, AUTH_TOKEN))
+      .thenReturn(singletonList(kcUser));
+    doThrow(restClientFailure()).when(keycloakClient).updateUser(any(), any(), any(), any());
+
+    assertThatThrownBy(() -> keycloakService.enableUser(USER_ID))
+      .isInstanceOf(KeycloakException.class)
+      .hasMessageContaining("Failed to enable keycloak user");
+  }
+
+  @Test
   void findClientWithClientId_positive() {
     when(tokenService.issueToken()).thenReturn(AUTH_TOKEN);
 
@@ -320,6 +404,12 @@ class KeycloakServiceTest {
     var keycloakUser = new KeycloakUser();
     keycloakUser.setId(USER_ID.toString());
     keycloakUser.setUserName(USER_NAME);
+    return keycloakUser;
+  }
+
+  private static KeycloakUser keycloakUserWithId(String id) {
+    var keycloakUser = new KeycloakUser();
+    keycloakUser.setId(id);
     return keycloakUser;
   }
 
