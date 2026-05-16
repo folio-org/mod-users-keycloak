@@ -111,6 +111,7 @@ application:
         user:
           topic-pattern: ${KAFKA_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)users.users}
           group-id: ${application.environment}-mod-users-keycloak-user-group
+          concurrency: ${KAFKA_USER_TOPIC_CONCURRENCY:3}
       filtering:
         tenant-filter:
           enabled: ${KAFKA_TENANT_FILTER_ENABLED:false}

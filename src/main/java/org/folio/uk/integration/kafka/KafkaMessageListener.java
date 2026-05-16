@@ -61,6 +61,7 @@ public class KafkaMessageListener {
     containerFactory = "userKafkaListenerContainerFactory",
     groupId = "#{kafkaConsumerProperties.listener['user'].groupId}",
     topicPattern = "#{kafkaConsumerProperties.listener['user'].topicPattern}",
+    concurrency = "#{kafkaConsumerProperties.listener['user'].concurrency}",
     filter = "tenantAwareMessageFilter")
   public void handleUserEvent(UserEvent event) {
     log.debug("User event received: {}", () -> briefView(event));

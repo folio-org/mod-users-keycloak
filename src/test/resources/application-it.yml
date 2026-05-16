@@ -48,8 +48,3 @@ header:
     x-okapi-user-id:
       exclude:
         base-paths: /tests, /admin
-
-logging:
-  level:
-    org.folio.uk.integration.kafka: debug
-    org.folio.uk.integration.keycloak: debug
