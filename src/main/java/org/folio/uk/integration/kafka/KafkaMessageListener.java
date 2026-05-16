@@ -68,7 +68,7 @@ public class KafkaMessageListener {
 
     handleEvent(event, e -> {
       switch (e.getType()) {
-        case UPDATE -> userService.updateUserOnEvent(e.getNewValue(),  e.getOldValue());
+        case UPDATE -> userService.updateUserOnEvent(e.getNewValue(), e.getOldValue());
         case CREATE, DELETE ->
           log.debug("Received user event with type {} is ignored: eventId = {}", e.getType(), e.getId());
         default -> throw new IllegalStateException("Received user event with unsupported type: " + e.getType());
