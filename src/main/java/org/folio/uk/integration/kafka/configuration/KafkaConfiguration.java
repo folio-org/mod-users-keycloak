@@ -15,6 +15,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.folio.integration.kafka.consumer.EnableKafkaConsumer;
 import org.folio.integration.kafka.consumer.filter.TenantIsDisabledException;
 import org.folio.integration.kafka.consumer.filter.TenantsAreDisabledException;
+import org.folio.uk.configuration.RetryProperties;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.kafka.model.UserEvent;
 import org.folio.uk.integration.kafka.model.UserEventDeserializer;

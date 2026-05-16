@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.folio.integration.kafka.model.ResourceEvent;
-import org.folio.integration.kafka.model.ResourceEventType;
 import org.folio.integration.kafka.model.TenantAwareEvent;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -18,6 +18,7 @@ import org.folio.uk.integration.configuration.OkapiConfigurationProperties;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.kafka.model.UserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
+import org.folio.uk.service.UserService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class KafkaMessageListener {
 
   private final FolioModuleMetadata metadata;
   private final SystemUserService systemUserService;
+  private final UserService userService;
   private final OkapiConfigurationProperties okapiProperties;
 
   /**
@@ -61,16 +63,16 @@ public class KafkaMessageListener {
     topicPattern = "#{kafkaConsumerProperties.listener['user'].topicPattern}",
     filter = "tenantAwareMessageFilter")
   public void handleUserEvent(UserEvent event) {
-    if (event.getType() == ResourceEventType.UPDATE
-      && event.getNewValue() != null && event.getOldValue() != null
-      && event.getNewValue().getActive() != event.getOldValue().getActive()) {
-      log.info("User active status changed, updating user accordingly: {}", event);
+    log.debug("User event received: {}", () -> briefView(event));
 
-      handleEvent(event, e -> {
-        var newValue = e.getNewValue();
-        log.info("Updating user: {}", newValue.getUsername());
-      });
-    }
+    handleEvent(event, e -> {
+      switch (e.getType()) {
+        case UPDATE -> userService.updateUserOnEvent(e.getNewValue(),  e.getOldValue());
+        case CREATE, DELETE ->
+          log.debug("Received user event with type {} is ignored: eventId = {}", e.getType(), e.getId());
+        default -> throw new IllegalStateException("Received user event with unsupported type: " + e.getType());
+      }
+    });
   }
 
   private <T extends TenantAwareEvent> void handleEvent(T event, Consumer<T> handler) {
@@ -79,5 +81,16 @@ public class KafkaMessageListener {
     try (var ignored = new FolioExecutionContextSetter(metadata, headers)) {
       handler.accept(event);
     }
+  }
+
+  private static String briefView(UserEvent event) {
+    return new ToStringBuilder(event)
+      .append("id", event.getId())
+      .append("type", event.getType())
+      .append("tenant", event.getTenant())
+      .append("userId", event.getNewValue() != null
+        ? event.getNewValue().getId()
+        : event.getOldValue() != null ? event.getOldValue().getId() : null)
+      .toString();
   }
 }

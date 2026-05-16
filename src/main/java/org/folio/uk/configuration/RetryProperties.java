@@ -1,4 +1,4 @@
-package org.folio.uk.integration.kafka.configuration;
+package org.folio.uk.configuration;
 
 import java.time.Duration;
 

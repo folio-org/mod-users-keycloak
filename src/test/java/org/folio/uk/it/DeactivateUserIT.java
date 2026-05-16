@@ -1,13 +1,16 @@
 package org.folio.uk.it;
 
+import static org.awaitility.Awaitility.await;
+import static org.awaitility.Durations.FIVE_SECONDS;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
+import static org.folio.uk.support.TestConstants.USER_ID;
+import static org.mockito.Mockito.verify;
 
-import java.util.UUID;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
 import org.folio.uk.base.model.UserDomainEvent;
 import org.folio.uk.integration.keycloak.KeycloakClient;
-import org.folio.uk.integration.users.UsersClient;
+import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.support.TestValues;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,12 +22,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 @IntegrationTest
 class DeactivateUserIT extends BaseIntegrationTest {
 
-  private static final UUID USER_ID = UUID.fromString("de5bb75d-e696-4d43-9df8-289f39367079");
-
   @Autowired private KeycloakClient keycloakClient;
   @Autowired private KafkaTemplate<String, Object> kafkaTemplate;
 
-  @MockitoSpyBean private UsersClient usersClient;
+  @MockitoSpyBean private KeycloakService keycloakService;
 
   @BeforeAll
   static void beforeAll() {
@@ -40,5 +41,12 @@ class DeactivateUserIT extends BaseIntegrationTest {
   void updateOnEvent() {
     var msg = TestValues.readValue("json/kafka/user-update-event-diactivated.json", UserDomainEvent.class);
     kafkaTemplate.send(FOLIO_USER_TOPIC, msg);
+
+    await().atMost(FIVE_SECONDS).untilAsserted(() -> {
+      verify(keycloakService).disableUser(USER_ID);
+    });
+
+    /*var authToken = tokenService.issueToken();
+    var systemUsersList = keycloakClient.findUsersByUsername(TENANT_NAME, "mod-foo", true, authToken);*/
   }
 }

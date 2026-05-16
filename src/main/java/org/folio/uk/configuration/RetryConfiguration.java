@@ -36,7 +36,7 @@ public class RetryConfiguration {
   @Bean(name = "systemUserRoleRetryTemplate")
   public RetryTemplate capabilityRetryTemplate(
     @Qualifier("methodLoggingRetryListener") RetryListener retryListener, SystemUserRoleRetryConfiguration config) {
-    return new RetryTemplateBuilder().maxAttempts(config.getRetryAttempts())
+    return new RetryTemplateBuilder().maxAttempts((int) config.getRetryAttempts())
       .fixedBackoff(config.getRetryDelay().toMillis())
       .withListener(retryListener)
       .retryOn(List.of(RestClientResponseException.class))

@@ -1,5 +1,6 @@
 package org.folio.uk.service;
 
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.UUID.fromString;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -128,23 +129,6 @@ public class UserService {
       .servicePointsUser(fetchServicePointUser(userId));
   }
 
-  private CompositeUser getRealUserByReference(User shadowUser, String originalTenantId, boolean expandPermissions) {
-    log.debug("Overriding self reference to use a real shadowUser with: tenant = {}", originalTenantId);
-    var userId = shadowUser.getId();
-
-    try (var ignored = new FolioExecutionContextSetter(
-      prepareContextForTenant(originalTenantId, folioModuleMetadata, folioExecutionContext))) {
-      var realUser = usersClient.lookupUserById(userId)
-        .filter(foundUser -> Objects.nonNull(foundUser.getId()))
-        .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: userId = " + userId));
-
-      return new CompositeUser().user(realUser)
-        .originalTenantId(originalTenantId)
-        .permissions(fetchPermissionUser(realUser.getId(), expandPermissions))
-        .servicePointsUser(fetchServicePointUser(realUser.getId()));
-    }
-  }
-
   public void updateUser(UUID id, User user) {
     log.debug("Updating user: id = {}", id);
 
@@ -155,6 +139,21 @@ public class UserService {
     } else {
       log.info("User was not found in keycloak by user_id attribute: id = {}", id);
       keycloakService.upsertUser(user, null);
+    }
+  }
+
+  public void updateUserOnEvent(User newValue, User oldValue) {
+    Objects.requireNonNull(newValue, "New user value must not be null");
+    Objects.requireNonNull(oldValue, "Old user value must not be null");
+
+    if (Objects.equals(newValue.getActive(), oldValue.getActive())) {
+      return;
+    }
+
+    if (TRUE.equals(newValue.getActive())) {
+      keycloakService.enableUser(newValue.getId());
+    } else {
+      keycloakService.disableUser(newValue.getId());
     }
   }
 
@@ -184,6 +183,23 @@ public class UserService {
   public List<String> resolvePermissions(UUID userId, List<String> userPermissions) {
     var permissions = userPermissionsClient.getPermissionsForUser(userId, false, userPermissions, null);
     return permissions.getPermissions();
+  }
+
+  private CompositeUser getRealUserByReference(User shadowUser, String originalTenantId, boolean expandPermissions) {
+    log.debug("Overriding self reference to use a real shadowUser with: tenant = {}", originalTenantId);
+    var userId = shadowUser.getId();
+
+    try (var ignored = new FolioExecutionContextSetter(
+      prepareContextForTenant(originalTenantId, folioModuleMetadata, folioExecutionContext))) {
+      var realUser = usersClient.lookupUserById(userId)
+        .filter(foundUser -> Objects.nonNull(foundUser.getId()))
+        .orElseThrow(() -> new EntityNotFoundException("User was Not Found with: userId = " + userId));
+
+      return new CompositeUser().user(realUser)
+        .originalTenantId(originalTenantId)
+        .permissions(fetchPermissionUser(realUser.getId(), expandPermissions))
+        .servicePointsUser(fetchServicePointUser(realUser.getId()));
+    }
   }
 
   private void removeUserWithLinkedResources(UUID id) {

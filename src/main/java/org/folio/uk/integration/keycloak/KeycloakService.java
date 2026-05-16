@@ -211,6 +211,20 @@ public class KeycloakService {
       () -> buildUsersErrorMessage("Failed to delete keycloak user", id));
   }
 
+  public void disableUser(UUID id) {
+    log.info("Disabling keycloak user with id: {}", id);
+
+    callKeycloak(setEnabled(id, false),
+      () -> buildUsersErrorMessage("Failed to disable keycloak user", id));
+  }
+
+  public void enableUser(UUID id) {
+    log.info("Enable keycloak user with id: {}", id);
+
+    callKeycloak(setEnabled(id, true),
+      () -> buildUsersErrorMessage("Failed to enable keycloak user", id));
+  }
+
   public Optional<KeycloakUser> findKeycloakUserWithUserIdAttr(UUID id) {
     return findKeycloakUserWithUserIdAttr(getRealm(), id);
   }
@@ -417,13 +431,30 @@ public class KeycloakService {
 
   private Runnable delete(UUID id) {
     return () -> {
-      var kcUser = findKeycloakUserWithUserIdAttr(id);
+      var found = findKeycloakUserWithUserIdAttr(id);
 
-      if (kcUser.isPresent()) {
-        keycloakClient.deleteUser(getRealm(), kcUser.get().getId(), getToken());
+      if (found.isPresent()) {
+        keycloakClient.deleteUser(getRealm(), found.get().getId(), getToken());
       } else {
         log.debug("Keycloak user is not found: userId = {}", id);
       }
+    };
+  }
+
+  private Runnable setEnabled(UUID id, boolean enabled) {
+    return () -> {
+      var found = findKeycloakUserWithUserIdAttr(id);
+
+      if (found.isEmpty()) {
+        log.debug("Keycloak user is not found: userId = {}", id);
+        return;
+      }
+
+      var kcUser = found.get();
+      kcUser.setEnabled(enabled);
+      keycloakClient.updateUser(getRealm(), kcUser.getId(), kcUser, getToken());
+
+      log.debug("Keycloak user is {}: userId = {}", enabled ? "enabled" : "disabled", kcUser.getId());
     };
   }
 
