@@ -86,6 +86,10 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | KAFKA_SYS_USER_TOPIC_PATTERN        | `(${application.environment}\.)(.*\.)mgr-tenant-entitlements.system-user` |  false   | Topic pattern for `system-user` topic filled by mgr-tenants-entitlement                                                                                    |
 | KAFKA_SYS_USER_ROLE_RETRY_ATTEMPTS  | 60                                                                        |  false   | Number of retry attempts to upsert loadable roles and assign it to (module) system user                                                                    |
 | KAFKA_SYS_USER_ROLE_RETRY_DELAY     | 5s                                                                        |  false   | Duration between retry attempts (with time unit suffix) to upsert loadable roles and assign it to (module) system user                                     |
+| KAFKA_USER_TOPIC_PATTERN            | `(${application.environment}\.)(.*\.)users.users`                         |  false   | Topic pattern for `users` topic filled by mod-users                                                                                                        |
+| KAFKA_USER_TOPIC_CONCURRENCY        | 3                                                                         |  false   | Number of concurrent consumer threads for the `users` topic listener                                                                                       |
+| KAFKA_USER_TOPIC_RETRY_ATTEMPTS     | 9223372036854775807                                                       |  false   | `users` topic retry attempts on transient failures (default value is Long.MAX_VALUE ~= infinite amount of retries)                                         |
+| KAFKA_USER_TOPIC_RETRY_DELAY        | 1s                                                                        |  false   | `users` topic retry delay on transient failures                                                                                                            |
 
 ### System User Environment Variables
 
