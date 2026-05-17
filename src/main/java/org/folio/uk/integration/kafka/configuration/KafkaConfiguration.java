@@ -58,6 +58,13 @@ public class KafkaConfiguration {
     return getConsumerFactory(new JacksonJsonDeserializer<>(SystemUserEvent.class));
   }
 
+  /**
+   * Creates the {@link ConcurrentKafkaListenerContainerFactory} for the {@code users.users} topic listener,
+   * wired with retry/back-off behaviour defined by {@link UserEventRetryConfiguration}.
+   *
+   * @param consumerFactory the {@link ConsumerFactory} supplying deserialized {@link UserEvent} records
+   * @return configured container factory
+   */
   @Bean
   public ConcurrentKafkaListenerContainerFactory<String, UserEvent> userKafkaListenerContainerFactory(
     ConsumerFactory<String, UserEvent> consumerFactory) {
@@ -67,6 +74,13 @@ public class KafkaConfiguration {
     return factory;
   }
 
+  /**
+   * Creates the {@link ConsumerFactory} for the {@code users.users} topic, using a custom
+   * {@link UserEventDeserializer} to handle the wire-format differences of mod-users events.
+   *
+   * @param jsonMapper the {@link JsonMapper} injected into the deserializer
+   * @return configured consumer factory
+   */
   @Bean
   public ConsumerFactory<String, UserEvent> userConsumerFactory(JsonMapper jsonMapper) {
     return getConsumerFactory(new UserEventDeserializer(jsonMapper));

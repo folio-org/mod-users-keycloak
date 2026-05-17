@@ -58,6 +58,13 @@ public class KafkaMessageListener {
     });
   }
 
+  /**
+   * Handles a user domain event received from the {@code users.users} Kafka topic.
+   * Only {@code UPDATE} events are acted upon; {@code CREATE} and {@code DELETE} events are
+   * silently ignored. Throws {@link NullPointerException} if the event type is {@code null}.
+   *
+   * @param event the {@link UserEvent} received from the Kafka topic
+   */
   @KafkaListener(
     id = "user-event-listener",
     containerFactory = "userKafkaListenerContainerFactory",

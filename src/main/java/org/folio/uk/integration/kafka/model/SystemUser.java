@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
 
+/**
+ * Represents the system user payload carried inside a {@link SystemUserEvent}.
+ */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor(staticName = "of")

@@ -211,6 +211,13 @@ public class KeycloakService {
       () -> buildUsersErrorMessage("Failed to delete keycloak user", id));
   }
 
+  /**
+   * Disables the Keycloak account for the FOLIO user with the given ID.
+   * If no matching Keycloak user is found the operation is silently skipped.
+   *
+   * @param id FOLIO user identifier
+   * @throws KeycloakException if the Keycloak update request fails
+   */
   public void disableUser(UUID id) {
     log.info("Disabling keycloak user with id: {}", id);
 
@@ -218,6 +225,13 @@ public class KeycloakService {
       () -> buildUsersErrorMessage("Failed to disable keycloak user", id));
   }
 
+  /**
+   * Enables the Keycloak account for the FOLIO user with the given ID.
+   * If no matching Keycloak user is found the operation is silently skipped.
+   *
+   * @param id FOLIO user identifier
+   * @throws KeycloakException if the Keycloak update request fails
+   */
   public void enableUser(UUID id) {
     log.info("Enable keycloak user with id: {}", id);
 

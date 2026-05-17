@@ -9,6 +9,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * Retry configuration for the user domain event Kafka listener, bound to
+ * {@code application.retry.user-event.*} properties.
+ *
+ * <p>Controls the delay and maximum number of retry attempts when a transient error occurs
+ * while processing a user event (e.g. tenant not yet initialised).
+ */
 @Data
 @Component
 @Validated

@@ -142,6 +142,15 @@ public class UserService {
     }
   }
 
+  /**
+   * Reacts to a user {@code UPDATE} Kafka event by syncing the active/inactive state to Keycloak.
+   * If the {@code active} flag has not changed between {@code oldValue} and {@code newValue} the
+   * method returns immediately without calling Keycloak.
+   *
+   * @param newValue the updated user state; must not be {@code null}
+   * @param oldValue the previous user state; must not be {@code null}
+   * @throws NullPointerException if either argument is {@code null}
+   */
   public void updateUserOnEvent(User newValue, User oldValue) {
     Objects.requireNonNull(newValue, "New user value must not be null");
     Objects.requireNonNull(oldValue, "Old user value must not be null");
