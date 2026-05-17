@@ -1,3 +1,8 @@
+## Version `v4.1.0` (in progress)
+### Changes:
+* Users expiration field not working for eureka (MODUSERSKC-154)
+---
+
 ## Version `v4.0.0` (17.04.2026)
 ### Changes:
 * Set application\_name in spring.datasource.url ([https://folio-org.atlassian.net/browse/MODUSERSKC-84](MODUSERSKC-84))
