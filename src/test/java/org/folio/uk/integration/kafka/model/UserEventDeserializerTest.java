@@ -112,7 +112,8 @@ class UserEventDeserializerTest {
   void deserialize_negative_malformedJson() {
     assertThatThrownBy(() -> deserializer.deserialize("topic", bytes("not-json{")))
       .isInstanceOf(SerializationException.class)
-      .hasMessageContaining("Failed to deserialize User Event from message");
+      .hasMessageContaining("Failed to deserialize User Event from message")
+      .hasMessageContaining("not-json{");
   }
 
   private static byte[] bytes(String json) {

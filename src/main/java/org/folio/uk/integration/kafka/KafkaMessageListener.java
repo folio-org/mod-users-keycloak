@@ -1,5 +1,6 @@
 package org.folio.uk.integration.kafka;
 
+import static java.util.Objects.requireNonNull;
 import static org.folio.common.utils.OkapiHeaders.URL;
 import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 
@@ -44,6 +45,7 @@ public class KafkaMessageListener {
     topicPattern = "#{kafkaConsumerProperties.listener['system-user'].topicPattern}",
     filter = "tenantAwareMessageFilter")
   public void handleSystemUserEvent(SystemUserEvent event) {
+    requireNonNull(event.getType(), "Event type must not be null");
     log.info("System user event received: {}", event);
 
     handleEvent(event, e -> {
@@ -51,7 +53,7 @@ public class KafkaMessageListener {
         case UPDATE -> systemUserService.updateOnEvent(e.getNewValue());
         case CREATE -> systemUserService.createOnEvent(e.getNewValue());
         case DELETE -> systemUserService.deleteOnEvent(e.getOldValue());
-        default -> log.warn("Received system user event is not handled: {}", e);
+        default -> throw new IllegalStateException("Received system user event with unsupported type: " + e.getType());
       }
     });
   }
@@ -64,6 +66,7 @@ public class KafkaMessageListener {
     concurrency = "#{kafkaConsumerProperties.listener['user'].concurrency}",
     filter = "tenantAwareMessageFilter")
   public void handleUserEvent(UserEvent event) {
+    requireNonNull(event.getType(), "Event type must not be null");
     log.debug("User event received: {}", () -> briefView(event));
 
     handleEvent(event, e -> {

@@ -2,7 +2,7 @@ package org.folio.uk.integration.kafka.model;
 
 import static java.util.function.Function.identity;
 
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class UserEventDeserializer implements Deserializer<UserEvent> {
       return builder.build();
     } catch (Exception e) {
       throw new SerializationException("Failed to deserialize User Event from message: payload = "
-        + Arrays.toString(data), e);
+        + new String(data, StandardCharsets.UTF_8), e);
     }
   }
 

@@ -446,7 +446,7 @@ public class KeycloakService {
       var found = findKeycloakUserWithUserIdAttr(id);
 
       if (found.isEmpty()) {
-        log.debug("Keycloak user is not found: userId = {}", id);
+        log.info("Keycloak user is not found: userId = {}. Ignoring..", id);
         return;
       }
 
@@ -454,7 +454,7 @@ public class KeycloakService {
       kcUser.setEnabled(enabled);
       keycloakClient.updateUser(getRealm(), kcUser.getId(), kcUser, getToken());
 
-      log.debug("Keycloak user is {}: userId = {}", enabled ? "enabled" : "disabled", kcUser.getId());
+      log.info("Keycloak user is {}: userId = {}", enabled ? "enabled" : "disabled", id);
     };
   }
 

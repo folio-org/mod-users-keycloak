@@ -19,7 +19,6 @@ import org.folio.uk.integration.kafka.model.UserEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
 import org.folio.uk.service.UserService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,11 +34,6 @@ class KafkaMessageListenerTest {
   @Mock private OkapiConfigurationProperties okapiProperties;
   @InjectMocks private KafkaMessageListener kafkaMessageListener;
 
-  @BeforeEach
-  void setUp() {
-    when(okapiProperties.getUrl()).thenReturn("dummy");
-  }
-
   @AfterEach
   void tearDown() {
     verifyNoMoreInteractions(systemUserService, userService);
@@ -47,6 +41,7 @@ class KafkaMessageListenerTest {
 
   @Test
   void handleSystemUserEvent_positive_deleteEvent() {
+    givenOkapiUrl();
     var oldValue = systemUser();
     var event = SystemUserEvent.builder().type(ResourceEventType.DELETE).tenant(TENANT_NAME).oldValue(oldValue).build();
 
@@ -57,6 +52,7 @@ class KafkaMessageListenerTest {
 
   @Test
   void handleSystemUserEvent_positive_updateEvent() {
+    givenOkapiUrl();
     var newValue = systemUser();
     var event = SystemUserEvent.builder().type(ResourceEventType.UPDATE).tenant(TENANT_NAME).newValue(newValue).build();
 
@@ -67,6 +63,7 @@ class KafkaMessageListenerTest {
 
   @Test
   void handleSystemUserEvent_positive_createEvent() {
+    givenOkapiUrl();
     var newValue = systemUser();
     var event = SystemUserEvent.builder().type(ResourceEventType.CREATE).tenant(TENANT_NAME).newValue(newValue).build();
 
@@ -76,16 +73,27 @@ class KafkaMessageListenerTest {
   }
 
   @Test
-  void handleSystemUserEvent_positive_unhandledEventType() {
+  void handleSystemUserEvent_negative_unhandledEventType() {
+    givenOkapiUrl();
     var event = SystemUserEvent.builder().type(ResourceEventType.DELETE_ALL).tenant(TENANT_NAME).build();
 
-    kafkaMessageListener.handleSystemUserEvent(event);
+    assertThatThrownBy(() -> kafkaMessageListener.handleSystemUserEvent(event))
+      .isInstanceOf(IllegalStateException.class)
+      .hasMessageContaining("Received system user event with unsupported type: DELETE_ALL");
+  }
 
-    verifyNoInteractions(systemUserService);
+  @Test
+  void handleSystemUserEvent_negative_nullEventType() {
+    var event = SystemUserEvent.builder().tenant(TENANT_NAME).build();
+
+    assertThatThrownBy(() -> kafkaMessageListener.handleSystemUserEvent(event))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessageContaining("Event type must not be null");
   }
 
   @Test
   void handleUserEvent_positive_updateEvent() {
+    givenOkapiUrl();
     var newValue = user(true);
     var oldValue = user(false);
     var event = UserEvent.builder()
@@ -102,6 +110,7 @@ class KafkaMessageListenerTest {
 
   @Test
   void handleUserEvent_positive_createEventIsIgnored() {
+    givenOkapiUrl();
     var event = UserEvent.builder()
       .type(ResourceEventType.CREATE)
       .id("event-id")
@@ -116,6 +125,7 @@ class KafkaMessageListenerTest {
 
   @Test
   void handleUserEvent_positive_deleteEventIsIgnored() {
+    givenOkapiUrl();
     var event = UserEvent.builder()
       .type(ResourceEventType.DELETE)
       .id("event-id")
@@ -130,6 +140,7 @@ class KafkaMessageListenerTest {
 
   @Test
   void handleUserEvent_negative_unsupportedEventType() {
+    givenOkapiUrl();
     var event = UserEvent.builder()
       .type(ResourceEventType.DELETE_ALL)
       .tenant(TENANT_NAME)
@@ -138,6 +149,19 @@ class KafkaMessageListenerTest {
     assertThatThrownBy(() -> kafkaMessageListener.handleUserEvent(event))
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("Received user event with unsupported type: DELETE_ALL");
+  }
+
+  @Test
+  void handleUserEvent_negative_nullEventType() {
+    var event = UserEvent.builder().tenant(TENANT_NAME).build();
+
+    assertThatThrownBy(() -> kafkaMessageListener.handleUserEvent(event))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessageContaining("Event type must not be null");
+  }
+
+  private void givenOkapiUrl() {
+    when(okapiProperties.getUrl()).thenReturn("dummy");
   }
 
   private static SystemUser systemUser() {
