@@ -2,7 +2,6 @@ package org.folio.uk.integration.keycloak;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.folio.uk.support.TestConstants.systemUserEvent;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,6 +25,7 @@ import org.folio.uk.domain.dto.Users;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.roles.dafaultrole.DefaultSystemUserRoleService;
 import org.folio.uk.service.UserService;
+import org.folio.uk.support.TestConstants;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -147,7 +147,7 @@ class SystemUserServiceTest {
     when(secureStore.lookup(MODULE_SYSTEM_USER_STORE_KEY)).thenReturn(Optional.empty());
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
 
-    systemUserService.createOnEvent(systemUserEvent(Set.of(PERMISSION)));
+    systemUserService.createOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
 
     verify(userConfiguration).getPasswordLength();
 
@@ -164,7 +164,7 @@ class SystemUserServiceTest {
     var user = systemUser().id(CAPABILITY_ID);
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users().addUsersItem(user));
 
-    systemUserService.updateOnEvent(systemUserEvent(Set.of(PERMISSION)));
+    systemUserService.updateOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
 
     verify(folioExecutionContext, never()).getTenantId();
   }
@@ -177,7 +177,7 @@ class SystemUserServiceTest {
     when(userService.createUserSafe(userCaptor.capture(), any(), eq(false))).then(firstArg());
     doNothing().when(secureStore).set(any(), any());
 
-    systemUserService.updateOnEvent(systemUserEvent(Set.of(PERMISSION)));
+    systemUserService.updateOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
 
     assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
@@ -185,7 +185,7 @@ class SystemUserServiceTest {
 
   @Test
   void updateOnEvent_positive_emptyPermissions() {
-    systemUserService.updateOnEvent(systemUserEvent(Set.of()));
+    systemUserService.updateOnEvent(TestConstants.systemUser(Set.of()));
 
     verify(folioExecutionContext, never()).getTenantId();
     verify(userService, never()).findUsers(any(), anyInt());
@@ -197,7 +197,7 @@ class SystemUserServiceTest {
     var user = systemUser().id(userId);
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users().addUsersItem(user));
 
-    systemUserService.deleteOnEvent(systemUserEvent(Set.of()));
+    systemUserService.deleteOnEvent(TestConstants.systemUser(Set.of()));
 
     verify(userService).deleteUserById(userId);
   }
@@ -206,7 +206,7 @@ class SystemUserServiceTest {
   void deleteOnEvent_positive_userNotFound() {
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users());
 
-    systemUserService.deleteOnEvent(systemUserEvent(Set.of()));
+    systemUserService.deleteOnEvent(TestConstants.systemUser(Set.of()));
 
     verify(userService, never()).deleteUserById(any());
   }

@@ -9,25 +9,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+/**
+ * Retry configuration for the user domain event Kafka listener, bound to
+ * {@code application.retry.user-event.*} properties.
+ *
+ * <p>Controls the delay and maximum number of retry attempts when a transient error occurs
+ * while processing a user event (e.g. tenant not yet initialised).
+ */
 @Data
 @Component
 @Validated
-@ConfigurationProperties("application.retry.system-user-event")
-public class SystemUserEventRetryConfiguration implements RetryProperties {
+@ConfigurationProperties("application.retry.user-event")
+public class UserEventRetryConfiguration implements RetryProperties {
 
-  /**
-   * Retry delay for system user creation.
-   *
-   * <p>This property is required to resolve installation request for mod-users</p>
-   */
   @NotNull
   private Duration retryDelay = Duration.ofMillis(250);
 
-  /**
-   * A number for Retry attempts for system user creation.
-   *
-   * <p>This property is required to resolve installation request for mod-users</p>
-   */
   @NotNull
   @Positive
   private long retryAttempts = Long.MAX_VALUE;

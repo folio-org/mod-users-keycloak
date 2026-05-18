@@ -11,7 +11,7 @@ import org.folio.test.TestUtils;
 import org.folio.test.extensions.impl.WireMockAdminClient;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
-import org.folio.uk.integration.kafka.model.SystemUserEvent;
+import org.folio.uk.integration.kafka.model.SystemUser;
 import org.folio.uk.integration.keycloak.SystemUserService;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ class KafkaMessageFilteringFailStrategyIT extends BaseIntegrationTest {
       TestUtils.readString("wiremock/stubs/entitlements/get-entitlements-enabled.json"));
 
     await().atMost(FIVE_SECONDS).untilAsserted(() ->
-      verify(systemUserService).createOnEvent(any(SystemUserEvent.class)));
+      verify(systemUserService).createOnEvent(any(SystemUser.class)));
   }
 
   private static WireMockAdminClient.RequestCriteria entitlementsRequestCriteria() {

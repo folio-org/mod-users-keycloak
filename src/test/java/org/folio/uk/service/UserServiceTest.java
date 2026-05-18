@@ -16,6 +16,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
@@ -399,6 +400,57 @@ class UserServiceTest {
     assertThat(resultExpanded.getPermissions().getPermissions()).hasSize(1);
     assertThat(resultExpanded.getPermissions().getPermissions().get(0)).isEqualTo(
       Map.of(PERMISSION_NAME_FIELD, "some.permission"));
+  }
+
+  @Test
+  void updateUserOnEvent_positive_deactivateUser() {
+    var userId = randomUUID();
+    var newValue = new User().id(userId).active(false);
+    var oldValue = new User().id(userId).active(true);
+
+    userService.updateUserOnEvent(newValue, oldValue);
+
+    verify(keycloakService).disableUser(userId);
+  }
+
+  @Test
+  void updateUserOnEvent_positive_activateUser() {
+    var userId = randomUUID();
+    var newValue = new User().id(userId).active(true);
+    var oldValue = new User().id(userId).active(false);
+
+    userService.updateUserOnEvent(newValue, oldValue);
+
+    verify(keycloakService).enableUser(userId);
+  }
+
+  @Test
+  void updateUserOnEvent_positive_noActiveStatusChange() {
+    var userId = randomUUID();
+    var newValue = new User().id(userId).active(true);
+    var oldValue = new User().id(userId).active(true);
+
+    userService.updateUserOnEvent(newValue, oldValue);
+
+    verifyNoInteractions(keycloakService);
+  }
+
+  @Test
+  void updateUserOnEvent_negative_nullNewValue() {
+    var oldValue = new User().id(randomUUID()).active(true);
+
+    assertThatThrownBy(() -> userService.updateUserOnEvent(null, oldValue))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("New user value must not be null");
+  }
+
+  @Test
+  void updateUserOnEvent_negative_nullOldValue() {
+    var newValue = new User().id(randomUUID()).active(false);
+
+    assertThatThrownBy(() -> userService.updateUserOnEvent(newValue, null))
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("Old user value must not be null");
   }
 
   @ParameterizedTest
