@@ -11,10 +11,10 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.folio.integration.kafka.model.ResourceEvent;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.model.UserType;
+import org.folio.uk.integration.kafka.model.SystemUser;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import tools.jackson.core.type.TypeReference;
 
@@ -75,20 +75,20 @@ public class TestConstants {
       .pronouns("he/him");
   }
 
-  public static SystemUserEvent systemUserEvent(Set<String> permissions) {
-    return SystemUserEvent.of("mod-foo", "module", permissions);
+  public static SystemUser systemUser(Set<String> permissions) {
+    return SystemUser.of("mod-foo", "module", permissions);
   }
 
-  public static ResourceEvent systemUserResourceEvent() {
-    return TestValues.readValue("json/kafka/system-user-event.json", ResourceEvent.class);
+  public static SystemUserEvent systemUserResourceEvent() {
+    return TestValues.readValue("json/kafka/system-user-event.json", SystemUserEvent.class);
   }
 
-  public static ResourceEvent systemUserResourceDeleteEvent() {
-    return TestValues.readValue("json/kafka/system-user-delete-event.json", ResourceEvent.class);
+  public static SystemUserEvent systemUserResourceDeleteEvent() {
+    return TestValues.readValue("json/kafka/system-user-delete-event.json", SystemUserEvent.class);
   }
 
-  public static ResourceEvent systemUserResourceUpdateEvent() {
-    return TestValues.readValue("json/kafka/system-user-update-event.json", ResourceEvent.class);
+  public static SystemUserEvent systemUserResourceUpdateEvent() {
+    return TestValues.readValue("json/kafka/system-user-update-event.json", SystemUserEvent.class);
   }
 
   public static List<String> systemUserPermissions() {

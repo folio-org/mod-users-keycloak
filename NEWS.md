@@ -1,3 +1,8 @@
+## Version `v4.0.2` (22.05.2026)
+### Changes:
+* Users expiration field not working for eureka (MODUSERSKC-154)
+---
+
 ## Version `v4.0.1` (21.04.2026)
 ### Changes:
 * Use GET /base-url to fetch FOLIO_HOST value (MODUSERSKC-140)

@@ -1,17 +1,20 @@
 package org.folio.uk.integration.kafka.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.folio.integration.kafka.model.ResourceEvent;
+import org.folio.integration.kafka.model.ResourceEventType;
+import org.jspecify.annotations.Nullable;
 
-@Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@AllArgsConstructor(staticName = "of")
-public class SystemUserEvent {
-  private String name;
-  private String type;
-  @ToString.Exclude
-  private Set<String> permissions;
+/**
+ * Concrete event class for system user events.
+ */
+@NoArgsConstructor
+public class SystemUserEvent extends ResourceEvent<SystemUser> {
+
+  @Builder
+  public SystemUserEvent(String id, ResourceEventType type, String tenant, String resourceName,
+    @Nullable SystemUser newValue, @Nullable SystemUser oldValue) {
+    super(id, type, tenant, resourceName, newValue, oldValue);
+  }
 }
