@@ -7,7 +7,6 @@ import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -18,6 +17,7 @@ import org.folio.integration.kafka.model.ResourceEvent;
 import org.folio.integration.kafka.model.TenantAwareEvent;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
+import org.folio.uk.domain.dto.User;
 import org.folio.uk.integration.configuration.OkapiConfigurationProperties;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.kafka.model.UserEvent;
@@ -102,9 +102,9 @@ public class KafkaMessageListener {
       .append("id", event.getId())
       .append("type", event.getType())
       .append("tenant", event.getTenant())
-      .append("userId", (UUID) getSafeOr(
-        event.getNewValue(), n -> n.getId(),
-        () -> getSafeOr(event.getOldValue(), o -> o.getId(), () -> null))
+      .append("userId", getSafeOr(
+        event.getNewValue(), User::getId,
+        () -> getSafeOr(event.getOldValue(), User::getId, () -> null))
       ).toString();
   }
 
