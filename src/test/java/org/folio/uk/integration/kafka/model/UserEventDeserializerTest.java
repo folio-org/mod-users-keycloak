@@ -102,15 +102,17 @@ class UserEventDeserializerTest {
     var json = """
       {"id": "%s", "tenant": "%s", "timestamp": %d, "type": "UNKNOWN"}
       """.formatted(EVENT_ID, TENANT_NAME, TIMESTAMP);
+    var bytes = bytes(json);
 
-    assertThatThrownBy(() -> deserializer.deserialize("topic", bytes(json)))
+    assertThatThrownBy(() -> deserializer.deserialize("topic", bytes))
       .isInstanceOf(SerializationException.class)
       .hasMessageContaining("Failed to deserialize User Event from message");
   }
 
   @Test
   void deserialize_negative_malformedJson() {
-    assertThatThrownBy(() -> deserializer.deserialize("topic", bytes("not-json{")))
+    var bytes = bytes("not-json{");
+    assertThatThrownBy(() -> deserializer.deserialize("topic", bytes))
       .isInstanceOf(SerializationException.class)
       .hasMessageContaining("Failed to deserialize User Event from message")
       .hasMessageContaining("not-json{");

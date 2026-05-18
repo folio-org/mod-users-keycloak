@@ -7,7 +7,10 @@ import static org.folio.spring.integration.XOkapiHeaders.TENANT;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -99,9 +102,16 @@ public class KafkaMessageListener {
       .append("id", event.getId())
       .append("type", event.getType())
       .append("tenant", event.getTenant())
-      .append("userId", event.getNewValue() != null
-        ? event.getNewValue().getId()
-        : event.getOldValue() != null ? event.getOldValue().getId() : null)
-      .toString();
+      .append("userId", (UUID) getSafeOr(
+        event.getNewValue(), n -> n.getId(),
+        () -> getSafeOr(event.getOldValue(), o -> o.getId(), () -> null))
+      ).toString();
+  }
+
+  private static <E, T> T getSafeOr(E subject, Function<E, T> extractor, Supplier<T> defaultSupplier) {
+    if (subject != null) {
+      return extractor.apply(subject);
+    }
+    return defaultSupplier.get();
   }
 }

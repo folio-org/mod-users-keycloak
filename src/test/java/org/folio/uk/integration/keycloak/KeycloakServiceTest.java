@@ -6,6 +6,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.folio.test.TestUtils.verifyNoMoreInteractions;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.folio.uk.support.TestConstants.USER_ID;
 import static org.folio.uk.support.TestConstants.USER_NAME;
@@ -26,6 +27,7 @@ import org.folio.uk.integration.keycloak.model.Client;
 import org.folio.uk.integration.keycloak.model.KeycloakRole;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.keycloak.model.ScopePermission;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,6 +53,11 @@ class KeycloakServiceTest {
   @Mock private KeycloakClient keycloakClient;
   @Mock private FolioExecutionContext folioExecutionContext;
   @Mock private KeycloakLoginClientProperties loginClientProperties;
+
+  @AfterEach
+  void tearDown() {
+    verifyNoMoreInteractions(this);
+  }
 
   @Test
   void findUserByUsername_positive() {

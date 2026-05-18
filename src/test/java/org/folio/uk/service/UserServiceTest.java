@@ -16,6 +16,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
@@ -430,6 +431,8 @@ class UserServiceTest {
     var oldValue = new User().id(userId).active(true);
 
     userService.updateUserOnEvent(newValue, oldValue);
+
+    verifyNoInteractions(keycloakService);
   }
 
   @Test
