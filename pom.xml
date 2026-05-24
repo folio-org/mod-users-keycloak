@@ -30,7 +30,7 @@
     <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
     <folio-util.version>36.0.0</folio-util.version>
     <application-poc-tools.version>4.1.0-SNAPSHOT</application-poc-tools.version>
-    <org.json.version>20251224</org.json.version>
+    <org.json.version>20260522</org.json.version>
     <streamex.version>0.8.4</streamex.version>
 
     <users-keycloak.yaml-file>${project.basedir}/src/main/resources/swagger.api/users-keycloak.yaml
