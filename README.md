@@ -23,13 +23,11 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 ## Introduction
 
-Business logic "join" module to provide simple access to all user-centric data.
+mod-users-keycloak orchestrates user operations across FOLIO (mod-users) and Keycloak, ensuring that changes made to users who authenticate into FOLIO — librarians, staff, admins, etc. — are applied consistently in both systems.
 
-The module combines interfaces normally provided by `mod-users` and `mod-users-bl` Folio modules. Thus its output are
-either User model from mod-users or Composite User from mod-users-bl.
+FOLIO (mod-users) contains records for all users, including patrons and other individuals who exist in the system but never log in. Keycloak, by contrast, only contains records (AuthUsers) for users who actually authenticate. When creating, updating, or deleting users who log into FOLIO, these operations should go through mod-users-keycloak so that both sides stay in sync. Using the mod-users APIs directly for these users risks inconsistencies — for example, updating a user's externalSystemId in mod-users without updating the corresponding Keycloak record could break authentication (native or SSO).
 
-The module also operates with Keycloak to manage authentication information of users (`authUser`). Auth users created
-and updated in Keycloak on per-realm basis.
+Note: mod-users-keycloak does not implement a general user query endpoint. To search or list users, use mod-users directly (GET /users?query=...), which will return a complete set of results across all user types.
 
 ### ModuleDescriptor
 
