@@ -16,7 +16,7 @@ import org.folio.tools.store.SecureStore;
 import org.folio.uk.configuration.SystemUserConfigurationProperties;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
-import org.folio.uk.integration.kafka.model.SystemUserEvent;
+import org.folio.uk.integration.kafka.model.SystemUser;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.roles.dafaultrole.DefaultSystemUserRoleService;
 import org.folio.uk.service.UserService;
@@ -50,7 +50,7 @@ public class SystemUserService {
    *
    * @param event system user event
    */
-  public void createOnEvent(SystemUserEvent event) {
+  public void createOnEvent(SystemUser event) {
     var username = event.getName();
     var firstName = "System user - " + username;
     var user = createUser(username, firstName, null, event.getType());
@@ -61,7 +61,7 @@ public class SystemUserService {
     recreateAndAssignRole(user, permissions);
   }
 
-  public void updateOnEvent(SystemUserEvent event) {
+  public void updateOnEvent(SystemUser event) {
     if (isEmpty(event.getPermissions())) {
       return;
     }
@@ -71,7 +71,7 @@ public class SystemUserService {
       () -> createOnEvent(event));
   }
 
-  public void deleteOnEvent(SystemUserEvent event) {
+  public void deleteOnEvent(SystemUser event) {
     var username = event.getName();
     findUserByUsername(username).ifPresent(user -> userService.deleteUserById(user.getId()));
   }

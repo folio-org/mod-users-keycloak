@@ -1,0 +1,64 @@
+{
+  "id": "be60cec4-6631-5e77-9598-cd9e088b33b3",
+  "type": "UPDATED",
+  "tenant": "testtenant",
+  "timestamp": 1778587321611,
+  "data": {
+    "old": {
+      "username": "ZakirBailey",
+      "id": "d3958402-2f80-421b-a527-9933245a3556",
+      "active": false,
+      "type": "staff",
+      "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
+      "departments": [],
+      "proxyFor": [],
+      "personal": {
+        "lastName": "Bailey",
+        "firstName": "Zakir",
+        "email": "ZakirBailey@example.com",
+        "dateOfBirth": "2002-05-16T00:00:00.000+00:00",
+        "addresses": [],
+        "preferredContactTypeId": "002"
+      },
+      "enrollmentDate": "2026-05-01T00:00:00.000+00:00",
+      "expirationDate": "2026-05-11T23:59:59.999+00:00",
+      "createdDate": "2026-05-12T12:01:38.613+00:00",
+      "updatedDate": "2026-05-12T12:01:38.613+00:00",
+      "metadata": {
+        "createdDate": "2026-05-12T12:01:38.606+00:00",
+        "createdByUserId": "8c7aea55-6e09-4c9a-8b1a-326abd06bd46",
+        "updatedDate": "2026-05-12T12:01:38.606+00:00",
+        "updatedByUserId": "8c7aea55-6e09-4c9a-8b1a-326abd06bd46"
+      },
+      "preferredEmailCommunication": []
+    },
+    "new": {
+      "username": "ZakirBailey",
+      "id": "d3958402-2f80-421b-a527-9933245a3556",
+      "active": true,
+      "type": "staff",
+      "patronGroup": "3684a786-6671-4268-8ed0-9db82ebca60b",
+      "departments": [],
+      "proxyFor": [],
+      "personal": {
+        "lastName": "Bailey",
+        "firstName": "Zakir",
+        "email": "ZakirBailey@example.com",
+        "dateOfBirth": "2002-05-16T00:00:00.000+00:00",
+        "addresses": [],
+        "preferredContactTypeId": "002"
+      },
+      "enrollmentDate": "2026-05-01T00:00:00.000+00:00",
+      "expirationDate": "2026-05-11T23:59:59.999+00:00",
+      "createdDate": "2026-05-12T12:01:38.613+00:00",
+      "updatedDate": "2026-05-12T12:01:38.613+00:00",
+      "metadata": {
+        "createdDate": "2026-05-12T12:01:38.606+00:00",
+        "createdByUserId": "8c7aea55-6e09-4c9a-8b1a-326abd06bd46",
+        "updatedDate": "2026-05-12T12:01:38.606+00:00",
+        "updatedByUserId": "8c7aea55-6e09-4c9a-8b1a-326abd06bd46"
+      },
+      "preferredEmailCommunication": []
+    }
+  }
+}

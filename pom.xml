@@ -23,21 +23,24 @@
     <lombok.version>1.18.46</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <spring-retry.version>2.0.12</spring-retry.version>
-    <swagger-annotations.version>2.2.49</swagger-annotations.version>
+    <swagger-annotations.version>2.2.50</swagger-annotations.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.10</openapi-tools.jackson-databind-nullable.version>
     <folio-spring-support.version>10.0.0</folio-spring-support.version>
     <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
     <folio-util.version>36.0.0</folio-util.version>
     <application-poc-tools.version>4.1.0-SNAPSHOT</application-poc-tools.version>
-    <org.json.version>20251224</org.json.version>
+    <org.json.version>20260522</org.json.version>
     <streamex.version>0.8.4</streamex.version>
 
     <users-keycloak.yaml-file>${project.basedir}/src/main/resources/swagger.api/users-keycloak.yaml
     </users-keycloak.yaml-file>
 
+    <!-- overrides Spring Boot BOM default; can be removed once Spring Boot ships this version -->
+    <kafka.version>4.2.0</kafka.version>
+
     <!-- Plugins versions -->
-    <maven-checkstyle.version>13.4.2</maven-checkstyle.version>
+    <maven-checkstyle.version>13.5.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
@@ -564,7 +567,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.14</version>
+            <version>0.8.15</version>
             <configuration>
               <excludes>
                 <exclude>**/domain/**</exclude>
