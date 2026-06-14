@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.6</version>
+    <version>4.1.0</version>
     <relativePath />
   </parent>
 
@@ -22,8 +22,8 @@
     <maven.compiler.target>21</maven.compiler.target>
     <lombok.version>1.18.46</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <spring-retry.version>2.0.12</spring-retry.version>
-    <swagger-annotations.version>2.2.50</swagger-annotations.version>
+    <spring-retry.version>2.0.13</spring-retry.version>
+    <swagger-annotations.version>2.2.51</swagger-annotations.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.10</openapi-tools.jackson-databind-nullable.version>
     <folio-spring-support.version>10.0.0</folio-spring-support.version>
@@ -44,7 +44,7 @@
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <openapi-generator.version>7.22.0</openapi-generator.version>
+    <openapi-generator.version>7.23.0</openapi-generator.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
     <argLine />
 
