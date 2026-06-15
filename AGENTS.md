@@ -1,126 +1,48 @@
-# AGENTS.md
+# mod-users-keycloak
 
-This file provides guidance to AI agents when working with code in this repository.
+FOLIO module combining mod-users + mod-users-bl interfaces with Keycloak integration — bridges FOLIO user management and Keycloak IAM. Java 21, Spring Boot 3.5.7, PostgreSQL/Liquibase, Kafka, OpenFeign, MapStruct, Lombok.
 
-## Project Overview
-
-mod-users-keycloak is a FOLIO module that combines interfaces from mod-users and mod-users-bl while integrating with Keycloak for authentication management. It acts as a bridge between FOLIO's user management system and Keycloak's identity and access management.
-
-**Technology Stack:**
-- Java 21, Spring Boot 3.5.7, Maven
-- PostgreSQL with Liquibase migrations
-- Keycloak for IAM, Kafka for event-driven communication
-- OpenFeign for HTTP clients, MapStruct for object mapping, Lombok for boilerplate reduction
-
-## Build and Development Commands
+## Build & Test
 
 ```bash
-# Full build (compile, generate sources, checkstyle, unit tests)
-mvn clean install
-
-# Build without tests
-mvn clean install -DskipTests
-
-# Run unit tests only (tagged with @Tag("unit"))
-mvn test
-
-# Run a single unit test class
-mvn test -Dtest=UserServiceTest
-
-# Run a single unit test method
-mvn test -Dtest=UserServiceTest#shouldCreateUser
-
-# Run integration tests (tagged with @Tag("integration"), requires containers)
-mvn verify
-
-# Run a single integration test class
-mvn verify -Dit.test=UserIT
-
-# Run a single integration test method
-mvn verify -Dit.test=UserIT#shouldReturnUser
-
-# Run with code coverage (JaCoCo, requires 80% instruction coverage)
-mvn clean verify -P coverage
-
-# Run checkstyle validation (also runs automatically at process-classes phase)
-mvn checkstyle:check
-
-# Generate API sources and docs from OpenAPI spec
-mvn clean generate-sources
+mvn clean install              # full build (compile, codegen, checkstyle, unit tests)
+mvn clean install -DskipTests  # skip tests
+mvn test                       # unit tests (@Tag("unit"))
+mvn verify                     # integration tests (@Tag("integration"); needs containers)
+mvn test -Dtest=UserServiceTest#shouldCreateUser   # single unit test
+mvn verify -Dit.test=UserIT#shouldReturnUser        # single IT
+mvn clean verify -P coverage   # JaCoCo 80% instruction min
+mvn checkstyle:check           # also runs at process-classes
+mvn clean generate-sources     # regenerate API sources from OpenAPI
 ```
 
-## Code Style Constraints
+**Style**: max method length 21 lines (suppressed in tests); 2-space indent, 120-char lines, LF, UTF-8 (`.editorconfig`); `folio-java-checkstyle` rules, suppressions in `checkstyle/checkstyle-suppressions.xml`.
 
-- **Max method length: 21 lines** (enforced by checkstyle, `checkstyle/checkstyle-checker.properties`). This limit is suppressed for test files.
-- **Formatting**: 2-space indent, 120-char max line length, LF line endings, UTF-8 (`.editorconfig`)
-- Checkstyle uses `folio-java-checkstyle` rules; violations fail the build
-- Suppressions are in `checkstyle/checkstyle-suppressions.xml`
+## Architecture (`org.folio.uk`)
 
-## Architecture
+**Packages**: `controller/` (implement OpenAPI interfaces) · `service/` (`UserService`, `UsersTenantService`, `PasswordResetService`, `CapabilitiesService`) · `integration/` Feign clients (`keycloak/`, `users/`, `roles/`, `kafka/`, plus notify/password/login/inventory/permission/policy) · `domain/` (`UserMigrationJobEntity` + repos) · `mapper/` · `migration/` · `exception/`.
 
-### Package Structure (`src/main/java/org/folio/uk/`)
+**Key patterns**:
+1. **Dual storage**: users live in both mod-users (Postgres) and Keycloak; `UserService` creates in mod-users first, then upserts in Keycloak.
+2. **Multi-tenant**: each tenant → a Keycloak realm; `UsersTenantService` handles realm setup, system user, Kafka listener restart.
+3. **Event-driven system users**: `KafkaMessageListener` on topic pattern `(${environment}\.)(.*\.)mgr-tenant-entitlements.system-user` → `SystemUserService` (CREATE/UPDATE/DELETE).
+4. **Feign**: external modules + Keycloak Admin API (`KeycloakClient`); admin tokens Caffeine-cached.
+5. **Password reset**: time-limited tokens as Keycloak user attributes; links via mod-notify; config from mod-configuration.
 
-- **controller/** - REST controllers implementing OpenAPI-generated interfaces from `src/main/resources/swagger.api/users-keycloak.yaml`
-- **service/** - Business logic: `UserService`, `UsersTenantService`, `PasswordResetService`, `CapabilitiesService`
-- **integration/** - External system integrations via Feign clients:
-  - **keycloak/** - Keycloak Admin API client, token caching, realm management, system user lifecycle
-  - **users/** - mod-users client
-  - **roles/** - mod-roles-keycloak client (capabilities, permissions, roles)
-  - **kafka/** - Kafka message listener for system user events
-  - **configuration/**, **notify/**, **password/**, **login/**, **inventory/**, **permission/**, **policy/** - Other FOLIO module clients
-- **domain/** - JPA entities (`UserMigrationJobEntity`) and Spring Data repositories
-- **mapper/** - MapStruct mappers
-- **migration/** - Batch migration services (user migration to Keycloak, IDP linking)
-- **exception/** - Custom exceptions (`UnprocessableEntityException`, `RequestValidationException`)
+## Codegen & Descriptor
 
-### Key Architectural Patterns
-
-1. **Dual Storage Model**: Users exist in both mod-users (PostgreSQL) and Keycloak simultaneously. `UserService` coordinates CRUD across both systems — creates in mod-users first, then upserts in Keycloak.
-
-2. **Multi-Tenant Architecture**: Each FOLIO tenant maps to a Keycloak realm. `UsersTenantService` handles tenant lifecycle (realm setup, system user creation, Kafka listener restart).
-
-3. **Event-Driven System User Management**: `KafkaMessageListener` subscribes to topic pattern `(${environment}\.)(.*\.)mgr-tenant-entitlements.system-user` and delegates CREATE/UPDATE/DELETE events to `SystemUserService`.
-
-4. **Feign Client Integration**: All external FOLIO modules accessed via OpenFeign declarative clients. Keycloak Admin API wrapped in `KeycloakClient`. Admin tokens cached via Caffeine with configurable TTL.
-
-5. **Password Reset Flow**: Generates time-limited reset tokens stored as Keycloak user attributes, sends reset links via mod-notify, config pulled from mod-configuration.
-
-### Code Generation
-
-- REST API interfaces and DTOs generated by `openapi-generator-maven-plugin` from `src/main/resources/swagger.api/users-keycloak.yaml`
-- Generated interfaces go to `org.folio.uk.rest.resource`, DTOs to `org.folio.uk.domain.dto`
-- Output in `target/generated-sources/` — added as source directory by `build-helper-maven-plugin`
-- Schema files are in `src/main/resources/swagger.api/schemas/`
-- To add a new endpoint: define it in the YAML spec, add schemas, run `mvn generate-sources`, then implement the generated interface in a controller
-
-### Module Descriptor
-
-- Template: `descriptors/ModuleDescriptor-template.json`
-- Generated to `target/ModuleDescriptor.json` during build (filtered by maven-resources-plugin, then renamed)
-- Contains module metadata, provided/required interfaces, and permissions
+- OpenAPI `src/main/resources/swagger.api/users-keycloak.yaml` (schemas in `schemas/`) → `org.folio.uk.rest.resource` + `.domain.dto` in `target/generated-sources/`. Add endpoint: edit spec/schemas → `mvn generate-sources` → implement generated interface.
+- Module Descriptor: `descriptors/ModuleDescriptor-template.json` → `target/ModuleDescriptor.json` at build.
 
 ## Testing
 
-### Test Organization
+- Unit (`*Test.java`, `@Tag("unit")`): Mockito/MockMvc, surefire.
+- Integration (`*IT.java`, `@Tag("integration")`): failsafe; extend `BaseIntegrationTest` (`src/test/java/org/folio/uk/base/`) providing `@EnablePostgres/@EnableKeycloakTlsMode/@EnableKafka/@EnableWireMock`, `@ActiveProfiles("it")`, request helpers, `@WireMockStub`. Stubs in `src/test/resources/wiremock/stubs/`; fixtures in `json/`; realm `json/keycloak/testtenant-realm.json`.
 
-- **Unit tests** (`*Test.java`): Tagged `@Tag("unit")`, run by surefire plugin. Use Mockito/MockMvc.
-- **Integration tests** (`*IT.java`): Tagged `@Tag("integration")`, run by failsafe plugin. Require Keycloak and PostgreSQL containers.
+## Notes
 
-### Integration Test Infrastructure
-
-All integration tests extend `BaseIntegrationTest` (`src/test/java/org/folio/uk/base/BaseIntegrationTest.java`) which provides:
-- Container management: `@EnablePostgres`, `@EnableKeycloakTlsMode`, `@EnableKafka`, `@EnableWireMock`
-- Test profile: `@ActiveProfiles("it")` — config in `src/test/resources/application-it.yml`
-- Helper methods: `attemptGet/Post/Put/Delete`, `doGet/Post/Put/Delete`, `enableTenant()`, `removeTenant()`
-- Declarative WireMock stubs via `@WireMockStub` annotation
-- WireMock stub files in `src/test/resources/wiremock/stubs/` (organized by service)
-- JSON fixtures in `src/test/resources/json/`
-- Keycloak test realm JSON: `src/test/resources/json/keycloak/testtenant-realm.json`
-
-## Important Implementation Notes
-
-- **Spring Retry**: Used for resilience on system user creation (`SYSTEM_USER_RETRY_COUNT`/`SYSTEM_USER_RETRY_DELAY`) and role assignment (`systemUserRoleRetryTemplate`)
-- **Caching**: Caffeine caches for `keycloak-configuration`, `keycloak-client-configuration`, and `token` are configured explicitly in `src/main/java/org/folio/uk/configuration/CacheConfiguration.java`
-- **Secure Store**: Client credentials loaded from AWS SSM, Vault, or FSSP — configured via `application.secret-store.*` properties
-- **Sonar Exclusions**: `domain/`, `configuration/`, `rest/resource/`, `mapper/` packages excluded from coverage
-- **Lombok**: Configured in `lombok.config` with `addLombokGeneratedAnnotation = true`
+- **Spring Retry**: system user creation (`SYSTEM_USER_RETRY_*`) and role assignment (`systemUserRoleRetryTemplate`).
+- **Caching**: Caffeine `keycloak-configuration`, `keycloak-client-configuration`, `token` in `configuration/CacheConfiguration.java`.
+- **Secure store**: AWS-SSM/Vault/FSSP via `application.secret-store.*`.
+- **Sonar exclusions**: `domain/`, `configuration/`, `rest/resource/`, `mapper/`.
+- **Lombok**: `lombok.config` with `addLombokGeneratedAnnotation = true`.
