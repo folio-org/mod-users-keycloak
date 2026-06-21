@@ -40,7 +40,7 @@
     <kafka.version>4.2.0</kafka.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>13.5.0</maven-checkstyle.version>
+    <maven-checkstyle.version>13.6.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
