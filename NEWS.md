@@ -1,3 +1,8 @@
+## Version 'v3.0.14' (in progress)
+### Changes:
+* Fix system-user password SSM key to match sidecar (MODUSERSKC-167)
+---
+
 ## Version 'v3.0.13' (23.04.2026)
 ### Changes:
 * Filter Kafka messages by tenant entitlements (MODUSERSKC-149)
