@@ -10,14 +10,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.test.types.UnitTest;
-import org.folio.tools.store.SecureStore;
-import org.folio.tools.store.properties.SecureStoreProperties;
 import org.folio.uk.configuration.SystemUserConfigurationProperties;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
@@ -44,12 +41,8 @@ class SystemUserServiceTest {
 
   private static final String TENANT = "test";
   private static final String USERNAME = "test-system-user";
-  private static final String SECURE_STORE_ENV = "secure-test";
-  private static final String SYSTEM_USER_STORE_KEY = "secure-test_test_test-system-user";
-  private static final String LEGACY_SYSTEM_USER_STORE_KEY = "folio_test_test-system-user";
   private static final String MODULE_SYSTEM_USERNAME = "mod-foo";
-  private static final String MODULE_SYSTEM_USER_STORE_KEY = "secure-test_test_mod-foo";
-  private static final String LEGACY_MODULE_SYSTEM_USER_STORE_KEY = "folio_test_mod-foo";
+  private static final String SYSTEM_USER_PASSWORD = "system-user-password";
   private static final String KEYCLOAK_USER_ID = UUID.randomUUID().toString();
   private static final String SYSTEM_ROLE = "System";
   private static final UUID CAPABILITY_ID = UUID.randomUUID();
@@ -57,12 +50,11 @@ class SystemUserServiceTest {
 
   @InjectMocks private SystemUserService systemUserService;
 
-  @Mock private SecureStore secureStore;
   @Mock private UserService userService;
   @Mock private DefaultSystemUserRoleService defaultSystemUserRoleService;
   @Mock private KeycloakService keycloakService;
   @Mock private FolioExecutionContext folioExecutionContext;
-  @Mock private SecureStoreProperties secureStoreProperties;
+  @Mock private SystemUserPasswordService systemUserPasswordService;
 
   @Spy private final SystemUserConfigurationProperties userConfiguration = new SystemUserConfigurationProperties();
   @Captor private ArgumentCaptor<User> userCaptor;
@@ -70,13 +62,13 @@ class SystemUserServiceTest {
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(secureStore, userService, keycloakService);
+    verifyNoMoreInteractions(userService, keycloakService, systemUserPasswordService);
   }
 
   @Test
   void create_positive_freshSetup() {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    givenNoStoredPassword(SYSTEM_USER_STORE_KEY, LEGACY_SYSTEM_USER_STORE_KEY);
+    givenSystemUserPassword(USERNAME);
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
     when(keycloakService.findUserByUsername(USERNAME)).thenReturn(Optional.of(keycloakUser()));
     when(keycloakService.hasRole(KEYCLOAK_USER_ID, SYSTEM_ROLE)).thenReturn(false);
@@ -86,53 +78,48 @@ class SystemUserServiceTest {
     verify(userConfiguration).getSystemUserRole();
     verify(userConfiguration).getEmailTemplate();
     verify(userConfiguration).getUsernameTemplate();
-    verify(userConfiguration).getPasswordLength();
 
-    var capturedPassword = passwordCaptor.getValue();
-    assertThat(passwordCaptor.getValue()).hasSize(userConfiguration.getPasswordLength());
+    assertThat(passwordCaptor.getValue()).isEqualTo(SYSTEM_USER_PASSWORD);
     assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(systemUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
 
-    verify(secureStore).set(SYSTEM_USER_STORE_KEY, capturedPassword);
+    verify(systemUserPasswordService).getOrCreatePassword(TENANT, USERNAME);
     verify(keycloakService).assignRole(KEYCLOAK_USER_ID, SYSTEM_ROLE);
   }
 
   @Test
   void create_positive_userExistsAndRoleNotFound() {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    givenNoStoredPassword(SYSTEM_USER_STORE_KEY, LEGACY_SYSTEM_USER_STORE_KEY);
+    givenSystemUserPassword(USERNAME);
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
     when(keycloakService.findUserByUsername(USERNAME)).thenReturn(Optional.of(keycloakUser()));
     when(keycloakService.hasRole(KEYCLOAK_USER_ID, SYSTEM_ROLE)).thenReturn(false);
 
     systemUserService.create();
 
-    var capturedPassword = passwordCaptor.getValue();
-    assertThat(new HashSet<>(passwordCaptor.getAllValues())).hasSize(1);
-    assertThat(capturedPassword).hasSize(userConfiguration.getPasswordLength());
-    verify(secureStore).set(SYSTEM_USER_STORE_KEY, capturedPassword);
+    assertThat(passwordCaptor.getValue()).isEqualTo(SYSTEM_USER_PASSWORD);
+    verify(systemUserPasswordService).getOrCreatePassword(TENANT, USERNAME);
     verify(keycloakService).assignRole(KEYCLOAK_USER_ID, SYSTEM_ROLE);
   }
 
   @Test
   void create_positive_userExistsAndRoleIsFound() {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    givenNoStoredPassword(SYSTEM_USER_STORE_KEY, LEGACY_SYSTEM_USER_STORE_KEY);
+    givenSystemUserPassword(USERNAME);
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
     when(keycloakService.findUserByUsername(USERNAME)).thenReturn(Optional.of(keycloakUser()));
     when(keycloakService.hasRole(KEYCLOAK_USER_ID, SYSTEM_ROLE)).thenReturn(true);
 
     systemUserService.create();
 
-    var capturedPassword = passwordCaptor.getValue();
-    assertThat(passwordCaptor.getValue()).hasSize(userConfiguration.getPasswordLength());
-    verify(secureStore).set(SYSTEM_USER_STORE_KEY, capturedPassword);
+    assertThat(passwordCaptor.getValue()).isEqualTo(SYSTEM_USER_PASSWORD);
+    verify(systemUserPasswordService).getOrCreatePassword(TENANT, USERNAME);
   }
 
   @Test
   void create_negative_userByUsernameIsNotFound() {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    givenNoStoredPassword(SYSTEM_USER_STORE_KEY, LEGACY_SYSTEM_USER_STORE_KEY);
+    givenSystemUserPassword(USERNAME);
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
     when(keycloakService.findUserByUsername(USERNAME)).thenReturn(Optional.empty());
 
@@ -140,72 +127,53 @@ class SystemUserServiceTest {
       .isInstanceOf(KeycloakException.class)
       .hasMessage("Failed to find a system user by username: " + USERNAME);
 
-    var capturedPassword = passwordCaptor.getValue();
-    assertThat(passwordCaptor.getValue()).hasSize(userConfiguration.getPasswordLength());
-    verify(secureStore).set(SYSTEM_USER_STORE_KEY, capturedPassword);
+    assertThat(passwordCaptor.getValue()).isEqualTo(SYSTEM_USER_PASSWORD);
+    verify(systemUserPasswordService).getOrCreatePassword(TENANT, USERNAME);
   }
 
   @Test
   void createOnEvent_positive_freshSetup() {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    givenNoStoredPassword(MODULE_SYSTEM_USER_STORE_KEY, LEGACY_MODULE_SYSTEM_USER_STORE_KEY);
+    givenSystemUserPassword(MODULE_SYSTEM_USERNAME);
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
 
     systemUserService.createOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
 
-    verify(userConfiguration).getPasswordLength();
-
-    var capturedPassword = passwordCaptor.getValue();
-    assertThat(passwordCaptor.getValue()).hasSize(userConfiguration.getPasswordLength());
+    assertThat(passwordCaptor.getValue()).isEqualTo(SYSTEM_USER_PASSWORD);
     assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
 
-    verify(secureStore).set(MODULE_SYSTEM_USER_STORE_KEY, capturedPassword);
+    verify(systemUserPasswordService).getOrCreatePassword(TENANT, MODULE_SYSTEM_USERNAME);
   }
 
   @Test
-  void createOnEvent_positive_existingSecureStorePassword_passwordIsReused() {
+  void createOnEvent_positive_usesPasswordServicePassword() {
     var storedPassword = "system-user-password";
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    when(secureStoreProperties.getEnvironment()).thenReturn(SECURE_STORE_ENV);
-    when(secureStore.lookup(MODULE_SYSTEM_USER_STORE_KEY)).thenReturn(Optional.of(storedPassword));
+    when(systemUserPasswordService.getOrCreatePassword(TENANT, MODULE_SYSTEM_USERNAME)).thenReturn(storedPassword);
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
 
     systemUserService.createOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
 
     assertThat(passwordCaptor.getValue()).isEqualTo(storedPassword);
-    verify(secureStore, never()).set(any(), any());
-  }
-
-  @Test
-  void createOnEvent_positive_existingLegacyPassword_passwordIsMigrated() {
-    var storedPassword = "legacy-system-user-password";
-    when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    when(secureStoreProperties.getEnvironment()).thenReturn(SECURE_STORE_ENV);
-    when(secureStore.lookup(MODULE_SYSTEM_USER_STORE_KEY)).thenReturn(Optional.empty());
-    when(secureStore.lookup(LEGACY_MODULE_SYSTEM_USER_STORE_KEY)).thenReturn(Optional.of(storedPassword));
-    when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
-
-    systemUserService.createOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
-
-    assertThat(passwordCaptor.getValue()).isEqualTo(storedPassword);
-    verify(secureStore).set(MODULE_SYSTEM_USER_STORE_KEY, storedPassword);
+    verify(systemUserPasswordService).getOrCreatePassword(TENANT, MODULE_SYSTEM_USERNAME);
   }
 
   @Test
   void updateOnEvent_positive_userFound() {
     var user = systemUser().id(CAPABILITY_ID);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users().addUsersItem(user));
 
     systemUserService.updateOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
 
-    verify(folioExecutionContext, never()).getTenantId();
+    verify(systemUserPasswordService).migrateLegacyPasswordIfNeeded(TENANT, MODULE_SYSTEM_USERNAME);
   }
 
   @Test
   void updateOnEvent_positive_userNotFoundThenCreate() {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
-    givenNoStoredPassword(MODULE_SYSTEM_USER_STORE_KEY, LEGACY_MODULE_SYSTEM_USER_STORE_KEY);
+    givenSystemUserPassword(MODULE_SYSTEM_USERNAME);
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users());
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
 
@@ -213,7 +181,8 @@ class SystemUserServiceTest {
 
     assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
-    verify(secureStore).set(MODULE_SYSTEM_USER_STORE_KEY, passwordCaptor.getValue());
+    assertThat(passwordCaptor.getValue()).isEqualTo(SYSTEM_USER_PASSWORD);
+    verify(systemUserPasswordService).getOrCreatePassword(TENANT, MODULE_SYSTEM_USERNAME);
   }
 
   @Test
@@ -285,10 +254,8 @@ class SystemUserServiceTest {
     return i -> i.getArgument(0);
   }
 
-  private void givenNoStoredPassword(String systemUserKey, String legacyKey) {
-    when(secureStoreProperties.getEnvironment()).thenReturn(SECURE_STORE_ENV);
-    when(secureStore.lookup(systemUserKey)).thenReturn(Optional.empty());
-    when(secureStore.lookup(legacyKey)).thenReturn(Optional.empty());
+  private void givenSystemUserPassword(String username) {
+    when(systemUserPasswordService.getOrCreatePassword(TENANT, username)).thenReturn(SYSTEM_USER_PASSWORD);
   }
 
   private static KeycloakUser keycloakUser() {
