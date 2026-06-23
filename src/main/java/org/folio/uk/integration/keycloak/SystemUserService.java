@@ -5,6 +5,7 @@ import static org.folio.common.configuration.properties.FolioEnvironment.getFoli
 import static org.folio.tools.store.utils.SecretGenerator.generateSecret;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.tools.store.SecureStore;
+import org.folio.tools.store.properties.SecureStoreProperties;
 import org.folio.uk.configuration.SystemUserConfigurationProperties;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
@@ -34,6 +36,7 @@ public class SystemUserService {
   private final FolioExecutionContext executionContext;
   private final SystemUserConfigurationProperties systemUserConfiguration;
   private final DefaultSystemUserRoleService defaultSystemUserRoleService;
+  private final SecureStoreProperties secureStoreProperties;
 
   /**
    * Creates a system user for tenant.
@@ -112,8 +115,7 @@ public class SystemUserService {
         .firstName(firstName)
         .lastName("System"));
 
-    var systemUserKey = getSystemUserStoreKey(tenantId, username);
-    var systemUserPassword = secureStore.lookup(systemUserKey).orElseGet(() -> generateAndSavePassword(systemUserKey));
+    var systemUserPassword = getOrCreatePassword(tenantId, username);
 
     return userService.createUserSafe(user, systemUserPassword, false);
   }
@@ -139,12 +141,41 @@ public class SystemUserService {
     return template.replace("{tenantId}", executionContext.getTenantId());
   }
 
-  public static String getSystemUserStoreKey(String tenant, String username) {
-    return String.format("%s_%s_%s", getFolioEnvName(), tenant, username);
+  private static String getSystemUserStoreKey(String env, String tenant, String username) {
+    return String.format("%s_%s_%s", env, tenant, username);
+  }
+
+  private String getOrCreatePassword(String tenant, String username) {
+    var systemUserKey = getSystemUserStoreKey(secureStoreProperties.getEnvironment(), tenant, username);
+    return secureStore.lookup(systemUserKey)
+      .orElseGet(() -> lookupLegacyOrGenerate(systemUserKey, tenant, username));
+  }
+
+  private String lookupLegacyOrGenerate(String systemUserKey, String tenant, String username) {
+    var legacyKey = getLegacySystemUserStoreKey(tenant, username);
+    if (Objects.equals(systemUserKey, legacyKey)) {
+      return generateAndSavePassword(systemUserKey);
+    }
+    return secureStore.lookup(legacyKey)
+      .map(password -> {
+        log.debug("Found legacy system user password, copying to new key [legacyKey: {}, key: {}]",
+          legacyKey, systemUserKey);
+        return savePassword(systemUserKey, password);
+      })
+      .orElseGet(() -> generateAndSavePassword(systemUserKey));
+  }
+
+  private static String getLegacySystemUserStoreKey(String tenant, String username) {
+    return getSystemUserStoreKey(getFolioEnvName(), tenant, username);
   }
 
   private String generateAndSavePassword(String key) {
+    log.debug("Generating system user password [key: {}]", key);
     var secret = generateSecret(systemUserConfiguration.getPasswordLength());
+    return savePassword(key, secret);
+  }
+
+  private String savePassword(String key, String secret) {
     secureStore.set(key, secret);
     return secret;
   }
