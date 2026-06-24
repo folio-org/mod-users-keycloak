@@ -3,6 +3,7 @@
 * Users expiration field not working for eureka (MODUSERSKC-154)
 * Delete the Log4j configuration so the logging settings are automatically inherited from `folio-spring-base`. (EUREKA-889)
 * Upgrade dependencies for Kafka 4.2 compatibility in mod-users-keycloak (MODUSERSKC-161)
+* Fix system-user password SSM key to match sidecar (MODUSERSKC-167)
 ---
 
 ## Version `v4.0.0` (17.04.2026)

@@ -1,8 +1,6 @@
 package org.folio.uk.integration.keycloak;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.folio.common.configuration.properties.FolioEnvironment.getFolioEnvName;
-import static org.folio.tools.store.utils.SecretGenerator.generateSecret;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -12,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.tools.store.SecureStore;
 import org.folio.uk.configuration.SystemUserConfigurationProperties;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
@@ -28,12 +25,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SystemUserService {
 
-  private final SecureStore secureStore;
   private final UserService userService;
   private final KeycloakService keycloakService;
   private final FolioExecutionContext executionContext;
   private final SystemUserConfigurationProperties systemUserConfiguration;
   private final DefaultSystemUserRoleService defaultSystemUserRoleService;
+  private final SystemUserPasswordService systemUserPasswordService;
 
   /**
    * Creates a system user for tenant.
@@ -67,7 +64,10 @@ public class SystemUserService {
     }
     var username = event.getName();
     findUserByUsername(username).ifPresentOrElse(
-      user -> recreateAndAssignRole(user, event.getPermissions()),
+      user -> {
+        systemUserPasswordService.migrateLegacyPasswordIfNeeded(executionContext.getTenantId(), username);
+        recreateAndAssignRole(user, event.getPermissions());
+      },
       () -> createOnEvent(event));
   }
 
@@ -112,8 +112,7 @@ public class SystemUserService {
         .firstName(firstName)
         .lastName("System"));
 
-    var systemUserKey = getSystemUserStoreKey(tenantId, username);
-    var systemUserPassword = secureStore.lookup(systemUserKey).orElseGet(() -> generateAndSavePassword(systemUserKey));
+    var systemUserPassword = systemUserPasswordService.getOrCreatePassword(tenantId, username);
 
     return userService.createUserSafe(user, systemUserPassword, false);
   }
@@ -137,15 +136,5 @@ public class SystemUserService {
 
   private String generateValueByTemplate(String template) {
     return template.replace("{tenantId}", executionContext.getTenantId());
-  }
-
-  public static String getSystemUserStoreKey(String tenant, String username) {
-    return String.format("%s_%s_%s", getFolioEnvName(), tenant, username);
-  }
-
-  private String generateAndSavePassword(String key) {
-    var secret = generateSecret(systemUserConfiguration.getPasswordLength());
-    secureStore.set(key, secret);
-    return secret;
   }
 }
