@@ -59,13 +59,13 @@ public class SystemUserPasswordService {
   }
 
   private String saveLegacyPassword(String systemUserKey, String legacyKey, String password) {
-    log.debug("Found legacy system user password, copying to new key [legacyKey: {}, key: {}]",
+    log.info("Found legacy system user password, copying to new key [legacyKey: {}, key: {}]",
       legacyKey, systemUserKey);
     return savePassword(systemUserKey, password);
   }
 
   private String generateAndSavePassword(String key) {
-    log.debug("Generating system user password [key: {}]", key);
+    log.info("Generating system user password [key: {}]", key);
     var secret = generateSecret(systemUserConfiguration.getPasswordLength());
     return savePassword(key, secret);
   }
