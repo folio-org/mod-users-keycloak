@@ -1,16 +1,20 @@
 package org.folio.uk.integration.roles.dafaultrole;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import org.folio.test.types.UnitTest;
+import org.folio.uk.domain.dto.Error;
+import org.folio.uk.domain.dto.ErrorResponse;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.integration.roles.UserRolesClient;
 import org.folio.uk.integration.roles.model.LoadablePermission;
@@ -22,8 +26,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.HttpClientErrorException;
+import tools.jackson.databind.ObjectMapper;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +42,7 @@ class DefaultSystemUserRoleServiceTest {
   @Mock private DefaultRolesClient defaultRolesClient;
   @Mock private UserRolesClient userRolesClient;
   @Mock private RetryTemplate retryTemplate;
+  @Mock private ObjectMapper objectMapper;
 
   @BeforeEach
   void setUp() {
@@ -82,7 +91,7 @@ class DefaultSystemUserRoleServiceTest {
 
   @Test
   void createAndAssignDefaultRole_negative_roleCreationError() {
-    var userId = randomUUID();
+    final var userId = randomUUID();
     var username = "error-user";
     var user = new User().id(userId).username(username);
     var permissions = List.of("permission.one");
@@ -121,5 +130,68 @@ class DefaultSystemUserRoleServiceTest {
     verify(retryTemplate).execute(any());
     verify(defaultRolesClient).createDefaultLoadableRole(any());
     verify(userRolesClient).assignRoleToUser(any());
+  }
+
+  @Test
+  void createAndAssignDefaultRole_positive_userRoleAlreadyAssigned() throws Exception {
+    final var userId = randomUUID();
+    var username = "assigned-user";
+    var roleId = randomUUID();
+    var createdRole = new LoadableRole();
+    createdRole.setId(roleId);
+    createdRole.setName("default-system-role-" + username);
+
+    when(defaultRolesClient.createDefaultLoadableRole(any())).thenReturn(createdRole);
+    when(userRolesClient.assignRoleToUser(any())).thenThrow(badRequestError());
+    when(objectMapper.readValue(any(String.class), eq(ErrorResponse.class)))
+      .thenReturn(errorResponse("EntityExistsException"));
+
+    var user = new User().id(userId).username(username);
+    var permissions = List.of("permission.one");
+
+    defaultSystemUserRoleService.createAndAssignDefaultRole(user, permissions);
+
+    verify(retryTemplate).execute(any());
+    verify(defaultRolesClient).createDefaultLoadableRole(any());
+    verify(userRolesClient).assignRoleToUser(any());
+    verify(objectMapper).readValue(any(String.class), eq(ErrorResponse.class));
+  }
+
+  @Test
+  void createAndAssignDefaultRole_negative_roleAssigningToUserBadRequestError() throws Exception {
+    var userId = randomUUID();
+    var username = "bad-request-user";
+    var roleId = randomUUID();
+    var createdRole = new LoadableRole();
+    createdRole.setId(roleId);
+    createdRole.setName("default-system-role-" + username);
+    var user = new User().id(userId).username(username);
+    var permissions = List.of("permission.one");
+
+    when(defaultRolesClient.createDefaultLoadableRole(any())).thenReturn(createdRole);
+    when(userRolesClient.assignRoleToUser(any())).thenThrow(badRequestError());
+    when(objectMapper.readValue(any(String.class), eq(ErrorResponse.class)))
+      .thenReturn(errorResponse("ValidationException"));
+
+    assertThatThrownBy(() -> defaultSystemUserRoleService.createAndAssignDefaultRole(user, permissions))
+      .isInstanceOf(HttpClientErrorException.BadRequest.class);
+
+    verify(retryTemplate).execute(any());
+    verify(defaultRolesClient).createDefaultLoadableRole(any());
+    verify(userRolesClient).assignRoleToUser(any());
+    verify(objectMapper).readValue(any(String.class), eq(ErrorResponse.class));
+  }
+
+  private static HttpClientErrorException badRequestError() {
+    var body = """
+      {"errors":[{"code":"found_error","message":"error","parameters":[],"type":"EntityExistsException"}]}
+      """;
+
+    return HttpClientErrorException.create(HttpStatus.BAD_REQUEST, "Bad Request", HttpHeaders.EMPTY,
+      body.getBytes(UTF_8), UTF_8);
+  }
+
+  private static ErrorResponse errorResponse(String type) {
+    return new ErrorResponse().errors(List.of(new Error().type(type)));
   }
 }

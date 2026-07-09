@@ -4,6 +4,7 @@
 * Delete the Log4j configuration so the logging settings are automatically inherited from `folio-spring-base`. (EUREKA-889)
 * Upgrade dependencies for Kafka 4.2 compatibility in mod-users-keycloak (MODUSERSKC-161)
 * Fix system-user password SSM key to match sidecar (MODUSERSKC-167)
+* Avoid retrying system-user role assignment when the user-role relation already exists (MODUSERSKC-168)
 ---
 
 ## Version `v4.0.0` (17.04.2026)
