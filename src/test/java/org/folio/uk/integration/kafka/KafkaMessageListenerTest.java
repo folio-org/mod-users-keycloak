@@ -3,6 +3,8 @@ package org.folio.uk.integration.kafka;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.folio.uk.support.TestConstants.USER_ID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -30,13 +32,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class KafkaMessageListenerTest {
 
   @Mock private SystemUserService systemUserService;
+  @Mock private EntitlementAcknowledgementPublisher entitlementAcknowledgementPublisher;
   @Mock private UserService userService;
   @Mock private OkapiConfigurationProperties okapiProperties;
   @InjectMocks private KafkaMessageListener kafkaMessageListener;
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(systemUserService, userService);
+    verifyNoMoreInteractions(systemUserService, entitlementAcknowledgementPublisher, userService);
   }
 
   @Test
@@ -48,6 +51,7 @@ class KafkaMessageListenerTest {
     kafkaMessageListener.handleSystemUserEvent(event);
 
     verify(systemUserService).deleteOnEvent(oldValue);
+    verify(entitlementAcknowledgementPublisher).publishSuccess(event);
   }
 
   @Test
@@ -59,6 +63,7 @@ class KafkaMessageListenerTest {
     kafkaMessageListener.handleSystemUserEvent(event);
 
     verify(systemUserService).updateOnEvent(newValue);
+    verify(entitlementAcknowledgementPublisher).publishSuccess(event);
   }
 
   @Test
@@ -70,6 +75,7 @@ class KafkaMessageListenerTest {
     kafkaMessageListener.handleSystemUserEvent(event);
 
     verify(systemUserService).createOnEvent(newValue);
+    verify(entitlementAcknowledgementPublisher).publishSuccess(event);
   }
 
   @Test
@@ -80,6 +86,8 @@ class KafkaMessageListenerTest {
     assertThatThrownBy(() -> kafkaMessageListener.handleSystemUserEvent(event))
       .isInstanceOf(IllegalStateException.class)
       .hasMessageContaining("Received system user event with unsupported type: DELETE_ALL");
+
+    verify(entitlementAcknowledgementPublisher).publishError(eq(event), any(IllegalStateException.class));
   }
 
   @Test
@@ -165,7 +173,7 @@ class KafkaMessageListenerTest {
   }
 
   private static SystemUser systemUser() {
-    return SystemUser.of("name", "type", Set.of("dummy"));
+    return SystemUser.of("mod-foo-1.0.0", "name", "type", Set.of("dummy"));
   }
 
   private static User user(boolean active) {

@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 public class KafkaMessageListener {
 
   private final FolioModuleMetadata metadata;
+  private final EntitlementAcknowledgementPublisher entitlementAcknowledgementPublisher;
   private final SystemUserService systemUserService;
   private final UserService userService;
   private final OkapiConfigurationProperties okapiProperties;
@@ -51,14 +52,22 @@ public class KafkaMessageListener {
     requireNonNull(event.getType(), "Event type must not be null");
     log.info("System user event received: {}", event);
 
-    handleEvent(event, e -> {
-      switch (e.getType()) {
-        case UPDATE -> systemUserService.updateOnEvent(e.getNewValue());
-        case CREATE -> systemUserService.createOnEvent(e.getNewValue());
-        case DELETE -> systemUserService.deleteOnEvent(e.getOldValue());
-        default -> throw new IllegalStateException("Received system user event with unsupported type: " + e.getType());
-      }
-    });
+    try {
+      handleEvent(event, e -> {
+        switch (e.getType()) {
+          case UPDATE -> systemUserService.updateOnEvent(e.getNewValue());
+          case CREATE -> systemUserService.createOnEvent(e.getNewValue());
+          case DELETE -> systemUserService.deleteOnEvent(e.getOldValue());
+          default -> throw new IllegalStateException(
+            "Received system user event with unsupported type: " + e.getType());
+        }
+      });
+    } catch (RuntimeException exception) {
+      entitlementAcknowledgementPublisher.publishError(event, exception);
+      throw exception;
+    }
+
+    entitlementAcknowledgementPublisher.publishSuccess(event);
   }
 
   /**

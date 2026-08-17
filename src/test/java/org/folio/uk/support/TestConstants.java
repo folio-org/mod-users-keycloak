@@ -76,7 +76,7 @@ public class TestConstants {
   }
 
   public static SystemUser systemUser(Set<String> permissions) {
-    return SystemUser.of("mod-foo", "module", permissions);
+    return SystemUser.of("mod-foo-1.0.0", "mod-foo", "module", permissions);
   }
 
   public static SystemUserEvent systemUserResourceEvent() {

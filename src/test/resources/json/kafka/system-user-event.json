@@ -3,6 +3,7 @@
   "tenant": "testtenant",
   "resourceName": "System user",
   "new": {
+    "moduleId": "mod-foo-1.0.0",
     "name": "mod-foo",
     "type": "module",
     "permissions": [
