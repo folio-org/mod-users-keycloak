@@ -17,7 +17,7 @@
         "email": "folio.shadow.hosting@folio.org",
         "mobilePhone": "",
         "dateOfBirth": "1975-02-04T00:00:00.000+00:00",
-        "preferredContactTypeId": "001"
+        "preferredContactTypeIds": ["001"]
       },
       "expirationDate": "2024-12-31T23:59:59.000+00:00",
       "createdDate": "2023-12-07T10:53:38.100+00:00",

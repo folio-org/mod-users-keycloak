@@ -19,7 +19,8 @@
           "personal": {
             "lastName": "System",
             "firstName": "System user - mod-foo",
-            "addresses": [ ]
+            "addresses": [ ],
+            "preferredContactTypeIds": [ ]
           },
           "customFields" : { },
           "preferredEmailCommunication" : [ ]

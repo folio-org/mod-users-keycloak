@@ -51,8 +51,16 @@
       }
     },
     "preferredContactTypeId": {
-      "description": "Id of user's preferred contact type like Email, Mail or Text Message, see /addresstypes API",
-      "type": "string"
+      "description": "(Deprecated) ID of user's preferred contact type like Email, Mail, or Text Message  (see ui-users contactTypes.js)",
+      "type": "string",
+      "deprecated": true
+    },
+    "preferredContactTypeIds": {
+      "description": "IDs of user's preferred contact types like Email, Mail, or Text Message (see ui-users contactTypes.js)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "profilePictureLink": {
       "description": "Link to the profile picture",

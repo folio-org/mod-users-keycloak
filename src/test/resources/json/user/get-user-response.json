@@ -16,7 +16,7 @@
     "phone": "",
     "mobilePhone": "",
     "addresses": [],
-    "preferredContactTypeId": "002",
+    "preferredContactTypeIds": ["002"],
     "profilePictureLink": "https://folio.org/profiles/picture.jpg"
   },
   "enrollmentDate": "2020-10-07T04:00:00.000Z",
