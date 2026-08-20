@@ -18,7 +18,7 @@
         "email": "ZakirBailey@example.com",
         "dateOfBirth": "2002-05-16T00:00:00.000+00:00",
         "addresses": [],
-        "preferredContactTypeId": "002"
+        "preferredContactTypeIds": ["002"]
       },
       "enrollmentDate": "2026-05-01T00:00:00.000+00:00",
       "expirationDate": "2026-05-11T23:59:59.999+00:00",
@@ -46,7 +46,7 @@
         "email": "ZakirBailey@example.com",
         "dateOfBirth": "2002-05-16T00:00:00.000+00:00",
         "addresses": [],
-        "preferredContactTypeId": "002"
+        "preferredContactTypeIds": ["002"]
       },
       "enrollmentDate": "2026-05-01T00:00:00.000+00:00",
       "expirationDate": "2026-05-11T23:59:59.999+00:00",
