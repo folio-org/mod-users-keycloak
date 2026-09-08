@@ -16,10 +16,10 @@ mgr-tenant-entitlements orchestrates multi-module entitlement flows asynchronous
 
 ### Kafka topics
 
-| Direction | Topic pattern | Event type | Notes |
-|-----------|--------------|------------|-------|
-| Consumes  | `(${ENV}\.)(.*\.)mgr-tenant-entitlements.system-user` | `SystemUserEvent` | CREATE / UPDATE / DELETE |
-| Produces  | `${ENV}.mgr-tenant-entitlements.resource-result` | `ResourceResultEvent` | Confirmation; only when `EVENT_CONFIRMATION_ENABLED=true` |
+| Direction | Topic pattern                                         | Event type            | Notes                                                     |
+|-----------|-------------------------------------------------------|-----------------------|-----------------------------------------------------------|
+| Consumes  | `(${ENV}\.)(.*\.)mgr-tenant-entitlements.system-user` | `SystemUserEvent`     | CREATE / UPDATE / DELETE                                  |
+| Produces  | `${ENV}.mgr-tenant-entitlements.resource-result`      | `ResourceResultEvent` | Confirmation; only when `EVENT_CONFIRMATION_ENABLED=true` |
 
 ## Business rules and constraints
 
@@ -31,18 +31,18 @@ mgr-tenant-entitlements orchestrates multi-module entitlement flows asynchronous
 
 ## Error behavior
 
-| Condition | Outcome |
-|-----------|---------|
-| Handler throws `RuntimeException` | Recoverer fires immediately; FAILURE confirmation published |
-| Tenant disabled / schema missing | Handler retried per `KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS` / `KAFKA_SYS_USER_TOPIC_RETRY_DELAY`; FAILURE published only after retries exhausted |
-| `moduleId` cannot be extracted from event payload | `moduleId` field in confirmation is `null`; confirmation still published |
+| Condition                                         | Outcome                                                                                                                                        |
+|---------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| Handler throws `RuntimeException`                 | Recoverer fires immediately; FAILURE confirmation published                                                                                    |
+| Tenant disabled / schema missing                  | Handler retried per `KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS` / `KAFKA_SYS_USER_TOPIC_RETRY_DELAY`; FAILURE published only after retries exhausted |
+| `moduleId` cannot be extracted from event payload | `moduleId` field in confirmation is `null`; confirmation still published                                                                       |
 
 ## Configuration
 
-| Environment variable | Default | Description |
-|----------------------|---------|-------------|
-| `EVENT_CONFIRMATION_ENABLED` | `false` | Enable publishing of SUCCESS/FAILURE confirmations |
-| `EVENT_CONFIRMATION_TOPIC` | `${ENV}.mgr-tenant-entitlements.resource-result` | Kafka topic for confirmation messages |
+| Environment variable         | Default                                          | Description                                        |
+|------------------------------|--------------------------------------------------|----------------------------------------------------|
+| `EVENT_CONFIRMATION_ENABLED` | `false`                                          | Enable publishing of SUCCESS/FAILURE confirmations |
+| `EVENT_CONFIRMATION_TOPIC`   | `${ENV}.mgr-tenant-entitlements.resource-result` | Kafka topic for confirmation messages              |
 
 ## Dependencies
 
