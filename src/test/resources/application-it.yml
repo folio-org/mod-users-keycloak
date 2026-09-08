@@ -1,6 +1,9 @@
 spring:
   application:
     version: 0.0.1-TEST
+  kafka:
+    consumer:
+      group-id: it-test-mod-users-keycloak-group
   datasource:
     username: folio_admin
     password: qwerty123

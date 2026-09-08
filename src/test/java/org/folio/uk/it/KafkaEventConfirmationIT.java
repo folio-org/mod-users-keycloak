@@ -8,6 +8,7 @@ import static org.folio.integration.kafka.model.ResourceEventType.DELETE;
 import static org.folio.integration.kafka.model.ResourceResultStatus.FAILURE;
 import static org.folio.integration.kafka.model.ResourceResultStatus.SUCCESS;
 import static org.folio.test.FakeKafkaConsumer.getEvents;
+import static org.folio.uk.support.TestConstants.TENANT_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;

@@ -49,7 +49,7 @@ public class SystemUserService {
   public void createOnEvent(SystemUserEvent event) {
     var systemUser = getSystemUser(event, true);
 
-    create(systemUser);
+    createInternal(systemUser);
 
     eventPublisher.publishSuccessFor(event, systemUser.getModuleId());
   }
@@ -64,7 +64,7 @@ public class SystemUserService {
           systemUserPasswordService.migrateLegacyPasswordIfNeeded(executionContext.getTenantId(), username);
           recreateAndAssignRole(user, systemUser.getPermissions());
         },
-        () -> create(systemUser));
+        () -> createInternal(systemUser));
     }
 
     eventPublisher.publishSuccessFor(event, systemUser.getModuleId());
@@ -89,7 +89,7 @@ public class SystemUserService {
     }
   }
 
-  private void create(SystemUser systemUser) {
+  private void createInternal(SystemUser systemUser) {
     var username = systemUser.getName();
     var firstName = "System user - " + username;
     var user = createUser(username, firstName, null, systemUser.getType());
