@@ -242,6 +242,33 @@ class SystemUserServiceTest {
   }
 
   @Test
+  void createOnEvent_negative_nullNewValue_throwsIllegalArgumentException() {
+    var event = SystemUserEvent.builder().type(CREATE).tenant(TENANT).build();
+
+    assertThatThrownBy(() -> systemUserService.createOnEvent(event))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("System user event does not contain new value");
+  }
+
+  @Test
+  void updateOnEvent_negative_nullNewValue_throwsIllegalArgumentException() {
+    var event = SystemUserEvent.builder().type(UPDATE).tenant(TENANT).build();
+
+    assertThatThrownBy(() -> systemUserService.updateOnEvent(event))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("System user event does not contain new value");
+  }
+
+  @Test
+  void deleteOnEvent_negative_nullOldValue_throwsIllegalArgumentException() {
+    var event = SystemUserEvent.builder().type(DELETE).tenant(TENANT).build();
+
+    assertThatThrownBy(() -> systemUserService.deleteOnEvent(event))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("System user event does not contain old value");
+  }
+
+  @Test
   void delete_positive() {
     var userId = CAPABILITY_ID;
     var user = systemUser().id(userId);
