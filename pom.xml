@@ -20,10 +20,10 @@
     <java.version>21</java.version>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <lombok.version>1.18.46</lombok.version>
+    <lombok.version>1.18.48</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <spring-retry.version>2.0.13</spring-retry.version>
-    <swagger-annotations.version>2.2.54</swagger-annotations.version>
+    <swagger-annotations.version>2.2.55</swagger-annotations.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.11</openapi-tools.jackson-databind-nullable.version>
     <folio-spring-support.version>10.0.0</folio-spring-support.version>
@@ -40,7 +40,7 @@
     <kafka.version>4.2.0</kafka.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>14.0.0</maven-checkstyle.version>
+    <maven-checkstyle.version>14.1.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
