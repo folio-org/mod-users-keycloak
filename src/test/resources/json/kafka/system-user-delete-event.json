@@ -1,8 +1,10 @@
 {
+  "id": "5f26fe20-d7bc-11ef-9cd2-0242ac120002",
   "type": "DELETE",
   "tenant": "testtenant",
   "resourceName": "System user",
   "old": {
+    "moduleId": "mod-foo-1.0.0",
     "name": "mod-foo",
     "type": "module",
     "permissions": [

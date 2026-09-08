@@ -9,10 +9,6 @@ spring:
         preparedStatementCacheQueries: 0
   jpa:
     show-sql: true
-  kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 application:
   environment: it-test

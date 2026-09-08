@@ -2,6 +2,9 @@ package org.folio.uk.integration.keycloak;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.folio.integration.kafka.model.ResourceEventType.CREATE;
+import static org.folio.integration.kafka.model.ResourceEventType.DELETE;
+import static org.folio.integration.kafka.model.ResourceEventType.UPDATE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,12 +16,14 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.folio.integration.kafka.consumer.confirmation.ResourceResultEventPublisher;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.test.types.UnitTest;
 import org.folio.uk.configuration.SystemUserConfigurationProperties;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.Users;
+import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.roles.dafaultrole.DefaultSystemUserRoleService;
 import org.folio.uk.service.UserService;
@@ -42,6 +47,7 @@ class SystemUserServiceTest {
   private static final String TENANT = "test";
   private static final String USERNAME = "test-system-user";
   private static final String MODULE_SYSTEM_USERNAME = "mod-foo";
+  private static final String MODULE_ID = "mod-foo-1.0.0";
   private static final String SYSTEM_USER_PASSWORD = "system-user-password";
   private static final String KEYCLOAK_USER_ID = UUID.randomUUID().toString();
   private static final String SYSTEM_ROLE = "System";
@@ -55,6 +61,7 @@ class SystemUserServiceTest {
   @Mock private KeycloakService keycloakService;
   @Mock private FolioExecutionContext folioExecutionContext;
   @Mock private SystemUserPasswordService systemUserPasswordService;
+  @Mock private ResourceResultEventPublisher eventPublisher;
 
   @Spy private final SystemUserConfigurationProperties userConfiguration = new SystemUserConfigurationProperties();
   @Captor private ArgumentCaptor<User> userCaptor;
@@ -62,7 +69,7 @@ class SystemUserServiceTest {
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(userService, keycloakService, systemUserPasswordService);
+    verifyNoMoreInteractions(userService, keycloakService, systemUserPasswordService, eventPublisher);
   }
 
   @Test
@@ -137,13 +144,16 @@ class SystemUserServiceTest {
     givenSystemUserPassword(MODULE_SYSTEM_USERNAME);
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
 
-    systemUserService.createOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
+    var event = SystemUserEvent.builder().type(CREATE).tenant(TENANT)
+      .newValue(TestConstants.systemUser(Set.of(PERMISSION))).build();
+    systemUserService.createOnEvent(event);
 
     assertThat(passwordCaptor.getValue()).isEqualTo(SYSTEM_USER_PASSWORD);
     assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
 
     verify(systemUserPasswordService).getOrCreatePassword(TENANT, MODULE_SYSTEM_USERNAME);
+    verify(eventPublisher).publishSuccessFor(event, MODULE_ID);
   }
 
   @Test
@@ -153,10 +163,13 @@ class SystemUserServiceTest {
     when(systemUserPasswordService.getOrCreatePassword(TENANT, MODULE_SYSTEM_USERNAME)).thenReturn(storedPassword);
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
 
-    systemUserService.createOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
+    var event = SystemUserEvent.builder().type(CREATE).tenant(TENANT)
+      .newValue(TestConstants.systemUser(Set.of(PERMISSION))).build();
+    systemUserService.createOnEvent(event);
 
     assertThat(passwordCaptor.getValue()).isEqualTo(storedPassword);
     verify(systemUserPasswordService).getOrCreatePassword(TENANT, MODULE_SYSTEM_USERNAME);
+    verify(eventPublisher).publishSuccessFor(event, MODULE_ID);
   }
 
   @Test
@@ -165,9 +178,12 @@ class SystemUserServiceTest {
     when(folioExecutionContext.getTenantId()).thenReturn(TENANT);
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users().addUsersItem(user));
 
-    systemUserService.updateOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
+    var event = SystemUserEvent.builder().type(UPDATE).tenant(TENANT)
+      .newValue(TestConstants.systemUser(Set.of(PERMISSION))).build();
+    systemUserService.updateOnEvent(event);
 
     verify(systemUserPasswordService).migrateLegacyPasswordIfNeeded(TENANT, MODULE_SYSTEM_USERNAME);
+    verify(eventPublisher).publishSuccessFor(event, MODULE_ID);
   }
 
   @Test
@@ -177,20 +193,26 @@ class SystemUserServiceTest {
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users());
     when(userService.createUserSafe(userCaptor.capture(), passwordCaptor.capture(), eq(false))).then(firstArg());
 
-    systemUserService.updateOnEvent(TestConstants.systemUser(Set.of(PERMISSION)));
+    var event = SystemUserEvent.builder().type(UPDATE).tenant(TENANT)
+      .newValue(TestConstants.systemUser(Set.of(PERMISSION))).build();
+    systemUserService.updateOnEvent(event);
 
     assertThat(userCaptor.getValue()).usingRecursiveComparison().ignoringFields("id").isEqualTo(moduleUser());
     assertThat(userCaptor.getValue().getId()).isNotNull();
     assertThat(passwordCaptor.getValue()).isEqualTo(SYSTEM_USER_PASSWORD);
     verify(systemUserPasswordService).getOrCreatePassword(TENANT, MODULE_SYSTEM_USERNAME);
+    verify(eventPublisher).publishSuccessFor(event, MODULE_ID);
   }
 
   @Test
   void updateOnEvent_positive_emptyPermissions() {
-    systemUserService.updateOnEvent(TestConstants.systemUser(Set.of()));
+    var event = SystemUserEvent.builder().type(UPDATE).tenant(TENANT)
+      .newValue(TestConstants.systemUser(Set.of())).build();
+    systemUserService.updateOnEvent(event);
 
     verify(folioExecutionContext, never()).getTenantId();
     verify(userService, never()).findUsers(any(), anyInt());
+    verify(eventPublisher).publishSuccessFor(event, MODULE_ID);
   }
 
   @Test
@@ -199,18 +221,24 @@ class SystemUserServiceTest {
     var user = systemUser().id(userId);
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users().addUsersItem(user));
 
-    systemUserService.deleteOnEvent(TestConstants.systemUser(Set.of()));
+    var event = SystemUserEvent.builder().type(DELETE).tenant(TENANT)
+      .oldValue(TestConstants.systemUser(Set.of())).build();
+    systemUserService.deleteOnEvent(event);
 
     verify(userService).deleteUserById(userId);
+    verify(eventPublisher).publishSuccessFor(event, MODULE_ID);
   }
 
   @Test
   void deleteOnEvent_positive_userNotFound() {
     when(userService.findUsers("username==\"mod-foo\"", 1)).thenReturn(new Users());
 
-    systemUserService.deleteOnEvent(TestConstants.systemUser(Set.of()));
+    var event = SystemUserEvent.builder().type(DELETE).tenant(TENANT)
+      .oldValue(TestConstants.systemUser(Set.of())).build();
+    systemUserService.deleteOnEvent(event);
 
     verify(userService, never()).deleteUserById(any());
+    verify(eventPublisher).publishSuccessFor(event, MODULE_ID);
   }
 
   @Test
