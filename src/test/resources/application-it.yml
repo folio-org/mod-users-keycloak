@@ -1,6 +1,9 @@
 spring:
   application:
     version: 0.0.1-TEST
+  kafka:
+    consumer:
+      group-id: it-test-mod-users-keycloak-group
   datasource:
     username: folio_admin
     password: qwerty123
@@ -9,10 +12,6 @@ spring:
         preparedStatementCacheQueries: 0
   jpa:
     show-sql: true
-  kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 application:
   environment: it-test

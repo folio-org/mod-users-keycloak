@@ -88,6 +88,8 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | KAFKA_USER_TOPIC_CONCURRENCY        | 3                                                                         |  false   | Number of concurrent consumer threads for the `users` topic listener                                                                                       |
 | KAFKA_USER_TOPIC_RETRY_ATTEMPTS     | 9223372036854775807                                                       |  false   | `users` topic retry attempts on transient failures (default value is Long.MAX_VALUE ~= infinite amount of retries)                                         |
 | KAFKA_USER_TOPIC_RETRY_DELAY        | 1s                                                                        |  false   | `users` topic retry delay on transient failures                                                                                                            |
+| EVENT_CONFIRMATION_ENABLED          | false                                                                     |  false   | Enable publishing of system-user event processing outcomes (SUCCESS/FAILURE) to the resource-result topic                                                  |
+| EVENT_CONFIRMATION_TOPIC            | `${ENV}.mgr-tenant-entitlements.resource-result`                          |  false   | Kafka topic for publishing system-user event confirmation results                                                                                          |
 
 ### System User Environment Variables
 
