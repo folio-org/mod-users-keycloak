@@ -1,6 +1,7 @@
-## Version `v4.0.3` (IN PROGRESS)
+## Version `v4.0.3` (09.09.2026)
 ### Changes:
 * Fix system-user password SSM key to match sidecar (MODUSERSKC-167)
+---
 
 ## Version `v4.0.2` (22.05.2026)
 ### Changes:
