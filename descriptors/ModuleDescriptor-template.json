@@ -53,7 +53,7 @@
         {
           "methods" : [ "GET" ],
           "pathPattern" : "/users-keycloak/_self",
-          "permissionsRequired" : []
+          "permissionsRequired" : ["*"]
         },
         {
           "methods": [ "POST" ],
