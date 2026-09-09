@@ -1,3 +1,7 @@
+## Version `v4.0.3` (IN PROGRESS)
+### Changes:
+* Fix system-user password SSM key to match sidecar (MODUSERSKC-167)
+
 ## Version `v4.0.2` (22.05.2026)
 ### Changes:
 * Users expiration field not working for eureka (MODUSERSKC-154)
