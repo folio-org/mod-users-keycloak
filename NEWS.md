@@ -8,6 +8,7 @@
 * **Deprecated** users' `personal`->`preferredContactTypeId` field in favor of an array `personal`->`preferredContactTypeIds` ([MODUSERSKC-171](https://folio-org.atlassian.net/browse/MODUSERSKC-171))
 * **Breaking** Requires `users v16.5`
 * Provides `users-keycloak v1.1`
+* Update mod-users-keycloak _self descriptor to require an access token (MODUSERSKC-165)
 ---
 
 ## Version `v4.0.0` (17.04.2026)
