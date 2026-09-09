@@ -15,11 +15,14 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.folio.integration.kafka.consumer.EnableKafkaConsumer;
 import org.folio.integration.kafka.consumer.filter.TenantIsDisabledException;
 import org.folio.integration.kafka.consumer.filter.TenantsAreDisabledException;
+import org.folio.integration.kafka.consumer.recover.LoggingRecoverer;
+import org.folio.integration.kafka.consumer.recover.ResourceResultEventPublishingRecoverer;
 import org.folio.uk.configuration.RetryProperties;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.kafka.model.UserEvent;
 import org.folio.uk.integration.kafka.model.UserEventDeserializer;
 import org.hibernate.exception.SQLGrammarException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +31,7 @@ import org.springframework.kafka.KafkaException.Level;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ConsumerRecordRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.util.backoff.BackOff;
@@ -45,11 +49,21 @@ public class KafkaConfiguration {
   private final UserEventRetryConfiguration userEventRetryConfiguration;
 
   @Bean
+  public ConsumerRecordRecoverer systemUsersRecoverer(ResourceResultEventPublishingRecoverer mainRecoverer,
+    LoggingRecoverer loggingRecoverer) {
+    return (consumerRecord, exception) -> {
+      loggingRecoverer.accept(consumerRecord, exception);
+      mainRecoverer.accept(consumerRecord, exception);
+    };
+  }
+
+  @Bean
   public ConcurrentKafkaListenerContainerFactory<String, SystemUserEvent> systemUserKafkaListenerContainerFactory(
-    ConsumerFactory<String, SystemUserEvent> consumerFactory) {
+    ConsumerFactory<String, SystemUserEvent> consumerFactory,
+    @Qualifier("systemUsersRecoverer") ConsumerRecordRecoverer recoverer) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, SystemUserEvent>();
     factory.setConsumerFactory(consumerFactory);
-    factory.setCommonErrorHandler(eventErrorHandler(systemUserEventRetryConfiguration));
+    factory.setCommonErrorHandler(eventErrorHandler(systemUserEventRetryConfiguration, recoverer));
     return factory;
   }
 
@@ -67,10 +81,11 @@ public class KafkaConfiguration {
    */
   @Bean
   public ConcurrentKafkaListenerContainerFactory<String, UserEvent> userKafkaListenerContainerFactory(
-    ConsumerFactory<String, UserEvent> consumerFactory) {
+    ConsumerFactory<String, UserEvent> consumerFactory,
+    LoggingRecoverer recoverer) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, UserEvent>();
     factory.setConsumerFactory(consumerFactory);
-    factory.setCommonErrorHandler(eventErrorHandler(userEventRetryConfiguration));
+    factory.setCommonErrorHandler(eventErrorHandler(userEventRetryConfiguration, recoverer));
     return factory;
   }
 
@@ -94,9 +109,8 @@ public class KafkaConfiguration {
     return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), valueDeserializer);
   }
 
-  private DefaultErrorHandler eventErrorHandler(RetryProperties retryProperties) {
-    var errorHandler = new DefaultErrorHandler((message, exception) ->
-      log.warn("Failed to process event [record: {}]", message, exception.getCause()));
+  private DefaultErrorHandler eventErrorHandler(RetryProperties retryProperties, ConsumerRecordRecoverer recoverer) {
+    var errorHandler = new DefaultErrorHandler(recoverer);
     errorHandler.setBackOffFunction((message, exception) -> getBackOff(exception, retryProperties));
     errorHandler.setLogLevel(Level.DEBUG);
 

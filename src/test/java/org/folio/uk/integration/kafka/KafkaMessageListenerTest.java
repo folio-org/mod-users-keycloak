@@ -47,7 +47,7 @@ class KafkaMessageListenerTest {
 
     kafkaMessageListener.handleSystemUserEvent(event);
 
-    verify(systemUserService).deleteOnEvent(oldValue);
+    verify(systemUserService).deleteOnEvent(event);
   }
 
   @Test
@@ -58,7 +58,7 @@ class KafkaMessageListenerTest {
 
     kafkaMessageListener.handleSystemUserEvent(event);
 
-    verify(systemUserService).updateOnEvent(newValue);
+    verify(systemUserService).updateOnEvent(event);
   }
 
   @Test
@@ -69,7 +69,7 @@ class KafkaMessageListenerTest {
 
     kafkaMessageListener.handleSystemUserEvent(event);
 
-    verify(systemUserService).createOnEvent(newValue);
+    verify(systemUserService).createOnEvent(event);
   }
 
   @Test
@@ -165,7 +165,7 @@ class KafkaMessageListenerTest {
   }
 
   private static SystemUser systemUser() {
-    return SystemUser.of("name", "type", Set.of("dummy"));
+    return SystemUser.of("mod-name-1.0.0", "name", "type", Set.of("dummy"));
   }
 
   private static User user(boolean active) {

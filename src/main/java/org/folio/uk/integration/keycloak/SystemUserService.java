@@ -9,15 +9,18 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.integration.kafka.consumer.confirmation.ResourceResultEventPublisher;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.uk.configuration.SystemUserConfigurationProperties;
 import org.folio.uk.domain.dto.Personal;
 import org.folio.uk.domain.dto.User;
 import org.folio.uk.integration.kafka.model.SystemUser;
+import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.keycloak.model.KeycloakUser;
 import org.folio.uk.integration.roles.dafaultrole.DefaultSystemUserRoleService;
 import org.folio.uk.service.UserService;
 import org.folio.util.StringUtil;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -31,6 +34,7 @@ public class SystemUserService {
   private final SystemUserConfigurationProperties systemUserConfiguration;
   private final DefaultSystemUserRoleService defaultSystemUserRoleService;
   private final SystemUserPasswordService systemUserPasswordService;
+  private final ResourceResultEventPublisher eventPublisher;
 
   /**
    * Creates a system user for tenant.
@@ -42,38 +46,37 @@ public class SystemUserService {
     checkAndUpdateSystemUserRole(createdSystemUser.getUsername());
   }
 
-  /**
-   * Creates a system user for tenant.
-   *
-   * @param event system user event
-   */
-  public void createOnEvent(SystemUser event) {
-    var username = event.getName();
-    var firstName = "System user - " + username;
-    var user = createUser(username, firstName, null, event.getType());
-    var permissions = event.getPermissions();
-    if (isEmpty(permissions)) {
-      return;
-    }
-    recreateAndAssignRole(user, permissions);
+  public void createOnEvent(SystemUserEvent event) {
+    var systemUser = getSystemUser(event, true);
+
+    createInternal(systemUser);
+
+    eventPublisher.publishSuccessFor(event, systemUser.getModuleId());
   }
 
-  public void updateOnEvent(SystemUser event) {
-    if (isEmpty(event.getPermissions())) {
-      return;
+  public void updateOnEvent(SystemUserEvent event) {
+    var systemUser = getSystemUser(event, true);
+
+    if (!isEmpty(systemUser.getPermissions())) {
+      var username = systemUser.getName();
+      findUserByUsername(username).ifPresentOrElse(
+        user -> {
+          systemUserPasswordService.migrateLegacyPasswordIfNeeded(executionContext.getTenantId(), username);
+          recreateAndAssignRole(user, systemUser.getPermissions());
+        },
+        () -> createInternal(systemUser));
     }
-    var username = event.getName();
-    findUserByUsername(username).ifPresentOrElse(
-      user -> {
-        systemUserPasswordService.migrateLegacyPasswordIfNeeded(executionContext.getTenantId(), username);
-        recreateAndAssignRole(user, event.getPermissions());
-      },
-      () -> createOnEvent(event));
+
+    eventPublisher.publishSuccessFor(event, systemUser.getModuleId());
   }
 
-  public void deleteOnEvent(SystemUser event) {
-    var username = event.getName();
+  public void deleteOnEvent(SystemUserEvent event) {
+    var systemUser = getSystemUser(event, false);
+
+    var username = systemUser.getName();
     findUserByUsername(username).ifPresent(user -> userService.deleteUserById(user.getId()));
+
+    eventPublisher.publishSuccessFor(event, systemUser.getModuleId());
   }
 
   public void delete() {
@@ -84,6 +87,17 @@ public class SystemUserService {
       var user = users.get(0);
       userService.deleteUser(user.getId());
     }
+  }
+
+  private void createInternal(SystemUser systemUser) {
+    var username = systemUser.getName();
+    var firstName = "System user - " + username;
+    var user = createUser(username, firstName, null, systemUser.getType());
+    var permissions = systemUser.getPermissions();
+    if (isEmpty(permissions)) {
+      return;
+    }
+    recreateAndAssignRole(user, permissions);
   }
 
   private Optional<User> findUserByUsername(String username) {
@@ -136,5 +150,14 @@ public class SystemUserService {
 
   private String generateValueByTemplate(String template) {
     return template.replace("{tenantId}", executionContext.getTenantId());
+  }
+
+  private static @NonNull SystemUser getSystemUser(SystemUserEvent event, boolean fromNewValue) {
+    var systemUser = fromNewValue ? event.getNewValue() : event.getOldValue();
+    if (systemUser == null) {
+      throw new IllegalArgumentException("System user event does not contain "
+        + (fromNewValue ? "new" : "old") + " value");
+    }
+    return systemUser;
   }
 }

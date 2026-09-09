@@ -53,9 +53,9 @@ public class KafkaMessageListener {
 
     handleEvent(event, e -> {
       switch (e.getType()) {
-        case UPDATE -> systemUserService.updateOnEvent(e.getNewValue());
-        case CREATE -> systemUserService.createOnEvent(e.getNewValue());
-        case DELETE -> systemUserService.deleteOnEvent(e.getOldValue());
+        case CREATE -> systemUserService.createOnEvent(e);
+        case UPDATE -> systemUserService.updateOnEvent(e);
+        case DELETE -> systemUserService.deleteOnEvent(e);
         default -> throw new IllegalStateException("Received system user event with unsupported type: " + e.getType());
       }
     });

@@ -13,6 +13,7 @@ import lombok.ToString;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor(staticName = "of")
 public class SystemUser {
+  private String moduleId;
   private String name;
   private String type;
   @ToString.Exclude
