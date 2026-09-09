@@ -10,6 +10,7 @@
 * Provides `users-keycloak v1.1`
 * Update mod-users-keycloak _self descriptor to require an access token (MODUSERSKC-165)
 * Async entitlement processing feedback loop for system-user events (MODUSERSKC-133)
+---
 
 ## Version `v4.0.0` (17.04.2026)
 ### Changes:
