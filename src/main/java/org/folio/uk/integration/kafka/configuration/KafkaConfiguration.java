@@ -15,8 +15,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.folio.integration.kafka.consumer.EnableKafkaConsumer;
 import org.folio.integration.kafka.consumer.filter.TenantIsDisabledException;
 import org.folio.integration.kafka.consumer.filter.TenantsAreDisabledException;
-import org.folio.integration.kafka.consumer.recover.LoggingRecoverer;
-import org.folio.integration.kafka.consumer.recover.ResourceResultEventPublishingRecoverer;
 import org.folio.uk.configuration.RetryProperties;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.kafka.model.UserEvent;
@@ -49,8 +47,9 @@ public class KafkaConfiguration {
   private final UserEventRetryConfiguration userEventRetryConfiguration;
 
   @Bean
-  public ConsumerRecordRecoverer systemUsersRecoverer(ResourceResultEventPublishingRecoverer mainRecoverer,
-    LoggingRecoverer loggingRecoverer) {
+  public ConsumerRecordRecoverer systemUsersRecoverer(
+    @Qualifier("resultEventPublishingRecoverer") ConsumerRecordRecoverer mainRecoverer,
+    @Qualifier("loggingRecoverer") ConsumerRecordRecoverer loggingRecoverer) {
     return (consumerRecord, exception) -> {
       loggingRecoverer.accept(consumerRecord, exception);
       mainRecoverer.accept(consumerRecord, exception);
@@ -82,7 +81,7 @@ public class KafkaConfiguration {
   @Bean
   public ConcurrentKafkaListenerContainerFactory<String, UserEvent> userKafkaListenerContainerFactory(
     ConsumerFactory<String, UserEvent> consumerFactory,
-    LoggingRecoverer recoverer) {
+    @Qualifier("loggingRecoverer") ConsumerRecordRecoverer recoverer) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, UserEvent>();
     factory.setConsumerFactory(consumerFactory);
     factory.setCommonErrorHandler(eventErrorHandler(userEventRetryConfiguration, recoverer));
