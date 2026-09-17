@@ -38,47 +38,6 @@ paths:
         '500':
           $ref: '#/components/responses/internalServerError'
 
-    get:
-      operationId: getUsers
-      description: Retrieve a list of users
-      tags:
-        - users
-      parameters:
-        - $ref: '#/components/parameters/cql-query'
-        - $ref: '#/components/parameters/query-offset'
-        - $ref: '#/components/parameters/query-limit'
-      responses:
-        '200':
-          description: Retrieve a list of users
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/users'
-        '400':
-          $ref: '#/components/responses/badRequest'
-        '500':
-          $ref: '#/components/responses/internalServerError'
-
-    delete:
-      operationId: deleteUsers
-      description: Delete a collection of users selected by a CQL query;
-        | this doesn't delete proxyFor records that reference them
-      tags:
-        - users
-      parameters:
-        - $ref: '#/components/parameters/cql-query'
-      responses:
-        '204':
-          description: All selected users deleted
-          content:
-            text/plain:
-              schema:
-                type: string
-        '400':
-          $ref: '#/components/responses/badRequest'
-        '500':
-          $ref: '#/components/responses/internalServerError'
-
   /users-keycloak/users/{id}:
     put:
       operationId: updateUser
