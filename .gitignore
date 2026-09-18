@@ -37,3 +37,4 @@ build/
 .claude/
 .codemie/
 CLAUDE.md
+/.tasks/
