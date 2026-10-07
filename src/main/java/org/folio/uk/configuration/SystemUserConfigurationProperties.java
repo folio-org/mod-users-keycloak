@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties("application.system.user")
+@ConfigurationProperties("application.system-user")
 public class SystemUserConfigurationProperties {
 
   /**
