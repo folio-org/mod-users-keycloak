@@ -116,17 +116,14 @@ application:
       listener:
         system-user:
           topic-pattern: ${KAFKA_SYS_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)mgr-tenant-entitlements.system-user}
-          group-id: ${application.environment}-mod-users-keycloak-system-user-group
+          group-id: ${application.environment}-mod-users-keycloak-system-user-group-${spring.application.version}
         user:
           topic-pattern: ${KAFKA_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)users.users}
-          group-id: ${application.environment}-mod-users-keycloak-user-group
+          group-id: ${application.environment}-mod-users-keycloak-user-group-${spring.application.version}
           concurrency: ${KAFKA_USER_TOPIC_CONCURRENCY:3}
       filtering:
         tenant-filter:
           enabled: ${KAFKA_TENANT_FILTER_ENABLED:false}
-          ignore-empty-batch: true
-          tenant-disabled-strategy: ${KAFKA_TENANT_FILTER_TENANT_DISABLED_STRATEGY:skip}
-          all-tenants-disabled-strategy: ${KAFKA_TENANT_FILTER_ALL_TENANTS_DISABLED_STRATEGY:fail}
   retry:
     system-user-event:
       retry-attempts: ${KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS:9223372036854775807}

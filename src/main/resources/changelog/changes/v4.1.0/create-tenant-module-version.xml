@@ -1,0 +1,22 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="MODUSERSKC-179@@schema-create-table-tenant-module-version" author="pkjacob">
+    <comment>Track which module version owns the tenant for mixed-version Kafka filtering</comment>
+    <createTable tableName="tenant_module_version">
+      <column name="id" type="integer" defaultValueNumeric="1">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="module_id" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_date" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <sql>ALTER TABLE tenant_module_version ADD CONSTRAINT tenant_module_version_single_row CHECK (id = 1)</sql>
+  </changeSet>
+</databaseChangeLog>
