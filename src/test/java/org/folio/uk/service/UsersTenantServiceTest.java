@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import org.folio.integration.kafka.consumer.filter.TenantModuleVersionService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.tenant.domain.dto.TenantAttributes;
@@ -35,6 +36,7 @@ class UsersTenantServiceTest {
   @Mock private KeycloakRealmManagementService realmService;
 
   @Mock private KafkaAdminService kafkaAdminService;
+  @Mock private TenantModuleVersionService tenantModuleVersionService;
 
   @InjectMocks private UsersTenantService service;
 
@@ -46,6 +48,7 @@ class UsersTenantServiceTest {
     verify(systemUserService).create();
     verify(realmService).setupRealm();
     verify(kafkaAdminService).restartEventListeners();
+    verify(tenantModuleVersionService).markCurrentVersion();
   }
 
   @Test
@@ -63,5 +66,12 @@ class UsersTenantServiceTest {
 
     verify(systemUserService).delete();
     verify(realmService).cleanupRealm();
+  }
+
+  @Test
+  void beforeTenantDeletion_positive() {
+    service.beforeTenantDeletion(TENANT_ATTRIBUTES);
+
+    verify(tenantModuleVersionService).clear();
   }
 }

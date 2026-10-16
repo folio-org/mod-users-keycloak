@@ -339,7 +339,7 @@ class UserServiceTest {
     when(rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions()).thenReturn(true);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(folioExecutionContext.getToken()).thenReturn("");
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
+    when(folioExecutionContext.getAllHeaders()).thenReturn(Map.ofEntries(
       Map.entry("x-okapi-tenant", List.of("centraltenant"))));
     when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
     when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
@@ -382,7 +382,7 @@ class UserServiceTest {
     when(rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions()).thenReturn(true);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(folioExecutionContext.getToken()).thenReturn("");
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
+    when(folioExecutionContext.getAllHeaders()).thenReturn(Map.ofEntries(
       Map.entry("x-okapi-tenant", List.of("centraltenant"))));
     when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
     when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));
@@ -467,7 +467,7 @@ class UserServiceTest {
     when(rolesKeycloakConfiguration.isIncludeOnlyVisiblePermissions()).thenReturn(true);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(folioExecutionContext.getToken()).thenReturn("");
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.ofEntries(
+    when(folioExecutionContext.getAllHeaders()).thenReturn(Map.ofEntries(
       Map.entry("x-okapi-tenant", List.of("centraltenant"))));
     when(usersClient.lookupUserById(userId)).thenReturn(Optional.of(user));
     when(servicePointsUserClient.getServicePointsUser(userId)).thenReturn(mock(ServicePointUserCollection.class));

@@ -12,6 +12,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 * [API documentation](#api-documentation)
 * [Environment Variables](#environment-variables)
   * [Kafka environment variables](#kafka-environment-variables)
+    * [Kafka tenant filtering](#kafka-tenant-filtering)
   * [System User Environment Variables](#system-user-environment-variables)
   * [Secure storage environment variables](#secure-storage-environment-variables)
     * [AWS-SSM](#aws-ssm)
@@ -67,6 +68,7 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | SINGLE_TENANT_UX                 | false                      |  false   | Defines if the module is running in single tenant UX mode                                                                            |
 | IDENTITY_PROVIDER_SUFFIX         | -keycloak-oidc             |  false   | Suffix of a Keycloak OIDC identity provider who will perform federated authentication requests. Used if SINGLE_TENANT_UX is enabled  |
 | OKAPI_URL                        | http://sidecar:8081        |  false   | Okapi url                                                                                                                            |
+| MODULE_VERSION                   | -                          |  false   | Deployed module version. Required for mixed-version deployments and must match `MODULE_VERSION` in the associated sidecar.           |
 
 ### Kafka environment variables
 
@@ -88,8 +90,25 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | KAFKA_USER_TOPIC_CONCURRENCY        | 3                                                                         |  false   | Number of concurrent consumer threads for the `users` topic listener                                                                                       |
 | KAFKA_USER_TOPIC_RETRY_ATTEMPTS     | 9223372036854775807                                                       |  false   | `users` topic retry attempts on transient failures (default value is Long.MAX_VALUE ~= infinite amount of retries)                                         |
 | KAFKA_USER_TOPIC_RETRY_DELAY        | 1s                                                                        |  false   | `users` topic retry delay on transient failures                                                                                                            |
+| KAFKA_TENANT_FILTER_ENABLED         | false                                                                     |  false   | Enables marker-table-based Kafka tenant filtering. Set to `true` in mixed-version deployments.                                                            |
 | EVENT_CONFIRMATION_ENABLED          | false                                                                     |  false   | Enable publishing of system-user event processing outcomes (SUCCESS/FAILURE) to the resource-result topic                                                  |
 | EVENT_CONFIRMATION_TOPIC            | `${ENV}.mgr-tenant-entitlements.resource-result`                          |  false   | Kafka topic for publishing system-user event confirmation results                                                                                          |
+
+#### Kafka tenant filtering
+
+Mixed-version deployments can run multiple versions of `mod-users-keycloak` in separate Kafka consumer groups. When
+`KAFKA_TENANT_FILTER_ENABLED=true`, each version processes Kafka messages only for tenants initialized by that module
+version.
+
+The module version is appended to the `system-user` and `user` Kafka consumer group IDs. Therefore, each deployed
+module version receives its own copy of each event before tenant filtering is applied.
+
+Tenant initialization records `<spring.application.name>-<spring.application.version>` in the tenant schema's
+`tenant_module_version` table. The filter reads the tenant from the `x-okapi-tenant` Kafka header, with
+`folio.tenantId` as a fallback, and skips the message when the recorded module ID belongs to another version.
+
+`MODULE_VERSION` supplies `spring.application.version` and must exactly match the value supplied to the module's
+associated sidecar container.
 
 ### System User Environment Variables
 
