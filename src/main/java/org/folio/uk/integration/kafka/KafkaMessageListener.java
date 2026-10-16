@@ -46,7 +46,7 @@ public class KafkaMessageListener {
     containerFactory = "systemUserKafkaListenerContainerFactory",
     groupId = "#{kafkaConsumerProperties.listener['system-user'].groupId}",
     topicPattern = "#{kafkaConsumerProperties.listener['system-user'].topicPattern}",
-    filter = "tenantAwareMessageFilter")
+    filter = "markerTableBasedTenantAwareMessageFilter")
   public void handleSystemUserEvent(SystemUserEvent event) {
     requireNonNull(event.getType(), "Event type must not be null");
     log.info("System user event received: {}", event);
@@ -74,7 +74,7 @@ public class KafkaMessageListener {
     groupId = "#{kafkaConsumerProperties.listener['user'].groupId}",
     topicPattern = "#{kafkaConsumerProperties.listener['user'].topicPattern}",
     concurrency = "#{kafkaConsumerProperties.listener['user'].concurrency}",
-    filter = "tenantAwareMessageFilter")
+    filter = "markerTableBasedTenantAwareMessageFilter")
   public void handleUserEvent(UserEvent event) {
     requireNonNull(event.getType(), "Event type must not be null");
     log.debug("User event received: {}", () -> briefView(event));

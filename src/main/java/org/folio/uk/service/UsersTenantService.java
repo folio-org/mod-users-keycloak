@@ -1,5 +1,6 @@
 package org.folio.uk.service;
 
+import org.folio.integration.kafka.consumer.filter.TenantModuleVersionService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
@@ -18,6 +19,7 @@ public class UsersTenantService extends TenantService {
   private final TokenService tokenService;
   private final KafkaAdminService kafkaAdminService;
   private final KeycloakRealmManagementService realmService;
+  private final TenantModuleVersionService tenantModuleVersionService;
 
   public UsersTenantService(
     JdbcTemplate jdbcTemplate,
@@ -26,12 +28,14 @@ public class UsersTenantService extends TenantService {
     SystemUserService systemUserService,
     TokenService tokenService,
     KafkaAdminService kafkaAdmin,
-    KeycloakRealmManagementService realmService) {
+    KeycloakRealmManagementService realmService,
+    TenantModuleVersionService tenantModuleVersionService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.systemUserService = systemUserService;
     this.tokenService = tokenService;
     this.kafkaAdminService = kafkaAdmin;
     this.realmService = realmService;
+    this.tenantModuleVersionService = tenantModuleVersionService;
   }
 
   @Override
@@ -40,6 +44,12 @@ public class UsersTenantService extends TenantService {
     systemUserService.create();
     realmService.setupRealm();
     kafkaAdminService.restartEventListeners();
+    tenantModuleVersionService.markCurrentVersion();
+  }
+
+  @Override
+  protected void beforeTenantDeletion(TenantAttributes tenantAttributes) {
+    tenantModuleVersionService.clear();
   }
 
   @Override
