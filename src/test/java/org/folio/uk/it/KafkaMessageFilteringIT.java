@@ -8,8 +8,13 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.folio.integration.kafka.consumer.filter.TenantModuleVersionRepository;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
 import org.folio.uk.integration.keycloak.SystemUserService;
@@ -24,7 +29,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @IntegrationTest
 @TestPropertySource(properties =
-  "application.kafka.consumer.filtering.tenant-filter.enabled=true")
+  "folio.kafka.tenant-filter.enabled=true")
 class KafkaMessageFilteringIT extends BaseIntegrationTest {
 
   private static final String CURRENT_TENANT = "filtercurrent";
@@ -38,6 +43,7 @@ class KafkaMessageFilteringIT extends BaseIntegrationTest {
   @Autowired private KafkaTemplate<String, Object> kafkaTemplate;
   @Autowired private JdbcOperations jdbcOperations;
   @Autowired private TenantModuleVersionRepository repository;
+  @Autowired private FolioModuleMetadata folioModuleMetadata;
 
   @AfterEach
   void removeTenantSchemas() {
@@ -49,7 +55,7 @@ class KafkaMessageFilteringIT extends BaseIntegrationTest {
   @Test
   void shouldProcessMessageForTenantOwnedByCurrentVersion() throws Exception {
     recreateInitializedTenant(CURRENT_TENANT, true);
-    repository.saveModuleVersion(schema(CURRENT_TENANT), CURRENT_MODULE_ID);
+    saveModuleVersion(CURRENT_TENANT, CURRENT_MODULE_ID);
 
     sendSystemUserEvent(CURRENT_TENANT);
 
@@ -59,7 +65,7 @@ class KafkaMessageFilteringIT extends BaseIntegrationTest {
   @Test
   void shouldSkipMessageForTenantOwnedByDifferentVersion() throws Exception {
     recreateInitializedTenant(DIFFERENT_VERSION_TENANT, true);
-    repository.saveModuleVersion(schema(DIFFERENT_VERSION_TENANT), DIFFERENT_MODULE_ID);
+    saveModuleVersion(DIFFERENT_VERSION_TENANT, DIFFERENT_MODULE_ID);
     prepareCurrentTenant();
 
     sendSystemUserEvent(DIFFERENT_VERSION_TENANT);
@@ -83,7 +89,14 @@ class KafkaMessageFilteringIT extends BaseIntegrationTest {
 
   private void prepareCurrentTenant() {
     recreateInitializedTenant(CURRENT_TENANT, true);
-    repository.saveModuleVersion(schema(CURRENT_TENANT), CURRENT_MODULE_ID);
+    saveModuleVersion(CURRENT_TENANT, CURRENT_MODULE_ID);
+  }
+
+  private void saveModuleVersion(String tenant, String moduleId) {
+    var headers = Map.<String, Collection<String>>of(TENANT, List.of(tenant));
+    try (var ignored = new FolioExecutionContextSetter(folioModuleMetadata, headers)) {
+      repository.saveModuleVersion(moduleId);
+    }
   }
 
   private void sendSystemUserEvent(String tenant) throws Exception {

@@ -68,7 +68,7 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 | SINGLE_TENANT_UX                 | false                      |  false   | Defines if the module is running in single tenant UX mode                                                                            |
 | IDENTITY_PROVIDER_SUFFIX         | -keycloak-oidc             |  false   | Suffix of a Keycloak OIDC identity provider who will perform federated authentication requests. Used if SINGLE_TENANT_UX is enabled  |
 | OKAPI_URL                        | http://sidecar:8081        |  false   | Okapi url                                                                                                                            |
-| MODULE_VERSION                   | -                          |  false   | Deployed module version. Required for mixed-version deployments and must match `MODULE_VERSION` in the associated sidecar.           |
+| MODULE_VERSION                   | -                          |  false   | Deployed module version. Required for mixed-version deployments and must exactly match `MODULE_VERSION` in the associated sidecar.   |
 
 ### Kafka environment variables
 
@@ -96,18 +96,22 @@ After that the documentation will be available in `target/docs/mod-users-keycloa
 
 #### Kafka tenant filtering
 
-Mixed-version deployments can run multiple versions of `mod-users-keycloak` in separate Kafka consumer groups. When
-`KAFKA_TENANT_FILTER_ENABLED=true`, each version processes Kafka messages only for tenants initialized by that module
-version.
+In a mixed-version deployment, multiple versions of the module consume the same `system-user` and `user` topics, each
+using a separate consumer group identified by the module version. Each version processes events only for tenants
+initialized by that version.
 
-The module version is appended to the `system-user` and `user` Kafka consumer group IDs. Therefore, each deployed
-module version receives its own copy of each event before tenant filtering is applied.
+##### How it works
 
-Tenant initialization records `<spring.application.name>-<spring.application.version>` in the tenant schema's
-`tenant_module_version` table. The filter reads the tenant from the `x-okapi-tenant` Kafka header, with
-`folio.tenantId` as a fallback, and skips the message when the recorded module ID belongs to another version.
+1. During tenant initialization, the module stores its full module ID,
+   `<spring.application.name>-<spring.application.version>`, in the tenant’s `tenant_module_version` table.
+2. Events are processed when the recorded module ID matches the running version.
+3. Events owned by another module version are skipped.
 
-`MODULE_VERSION` supplies `spring.application.version` and must exactly match the value supplied to the module's
+When `KAFKA_TENANT_FILTER_ENABLED=true`, `MarkerTableBasedTenantAwareMessageFilter` reads the tenant from the
+`x-okapi-tenant` Kafka header, falling back to `folio.tenantId`, and skips the message when the recorded module ID
+belongs to another version.
+
+`MODULE_VERSION` (`spring.application.version`) must exactly match the value supplied to the module's
 associated sidecar container.
 
 ### System User Environment Variables

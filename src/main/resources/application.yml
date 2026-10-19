@@ -43,6 +43,9 @@ spring:
 folio:
   exchange:
     enabled: true
+  kafka:
+    tenant-filter:
+      enabled: ${KAFKA_TENANT_FILTER_ENABLED:false}
   jpa:
     repository:
       base-packages: org.folio.uk.domain
@@ -121,9 +124,6 @@ application:
           topic-pattern: ${KAFKA_USER_TOPIC_PATTERN:(${application.environment}\.)(.*\.)users.users}
           group-id: ${application.environment}-mod-users-keycloak-user-group-${spring.application.version}
           concurrency: ${KAFKA_USER_TOPIC_CONCURRENCY:3}
-      filtering:
-        tenant-filter:
-          enabled: ${KAFKA_TENANT_FILTER_ENABLED:false}
   retry:
     system-user-event:
       retry-attempts: ${KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS:9223372036854775807}
