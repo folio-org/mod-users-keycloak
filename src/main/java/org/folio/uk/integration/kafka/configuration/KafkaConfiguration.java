@@ -14,8 +14,6 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.folio.integration.kafka.consumer.EnableKafkaConsumer;
 import org.folio.integration.kafka.consumer.configuration.TenantModuleVersionConfiguration;
-import org.folio.integration.kafka.consumer.filter.TenantInitializationDetector;
-import org.folio.integration.kafka.consumer.filter.TenantModuleVersionRepository;
 import org.folio.uk.configuration.RetryProperties;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.kafka.model.UserEvent;
@@ -48,11 +46,6 @@ public class KafkaConfiguration {
   private final KafkaProperties kafkaProperties;
   private final SystemUserEventRetryConfiguration systemUserEventRetryConfiguration;
   private final UserEventRetryConfiguration userEventRetryConfiguration;
-
-  @Bean
-  public TenantInitializationDetector tenantInitializationDetector(TenantModuleVersionRepository repository) {
-    return () -> repository.tableExists("user_migration_job");
-  }
 
   @Bean
   public ConsumerRecordRecoverer systemUsersRecoverer(
