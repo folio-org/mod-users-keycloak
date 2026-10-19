@@ -125,11 +125,11 @@ class KafkaEventConfirmationIT extends BaseIntegrationTest {
     });
   }
 
-  private static void assertTenantHeaders(ConsumerRecord<String, ResourceResultEvent> record,
+  private static void assertTenantHeaders(ConsumerRecord<String, ResourceResultEvent> consumerRecord,
     String tenant) {
     var expectedTenant = tenant.getBytes(StandardCharsets.UTF_8);
-    var okapiTenantHeader = record.headers().lastHeader(X_OKAPI_TENANT_HEADER);
-    var folioTenantHeader = record.headers().lastHeader(FOLIO_TENANT_ID_HEADER);
+    var okapiTenantHeader = consumerRecord.headers().lastHeader(X_OKAPI_TENANT_HEADER);
+    var folioTenantHeader = consumerRecord.headers().lastHeader(FOLIO_TENANT_ID_HEADER);
 
     assertThat(okapiTenantHeader).as("'%s' header must be present", X_OKAPI_TENANT_HEADER).isNotNull();
     assertThat(folioTenantHeader).as("'%s' header must be present", FOLIO_TENANT_ID_HEADER).isNotNull();
