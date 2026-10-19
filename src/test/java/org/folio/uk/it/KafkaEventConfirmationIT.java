@@ -13,8 +13,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.folio.integration.kafka.consumer.confirmation.ResourceResultEventPublisher;
 import org.folio.integration.kafka.model.ResourceResultEvent;
 import org.folio.integration.kafka.model.ResourceResultStatus;
@@ -42,6 +44,8 @@ class KafkaEventConfirmationIT extends BaseIntegrationTest {
   private static final String EVENT_ID = "5f26fe20-d7bc-11ef-9cd2-0242ac120002";
   private static final String RESOURCE_NAME = "System user";
   private static final String MODULE_ID = "mod-foo-1.0.0";
+  private static final String X_OKAPI_TENANT_HEADER = "x-okapi-tenant";
+  private static final String FOLIO_TENANT_ID_HEADER = "folio.tenantId";
 
   @MockitoSpyBean private SystemUserService systemUserService;
   @Autowired private ResourceResultEventPublisher eventPublisher;
@@ -117,7 +121,20 @@ class KafkaEventConfirmationIT extends BaseIntegrationTest {
       if (withDetails) {
         assertThat(c.getDetails()).isNotNull();
       }
+      assertTenantHeaders(events.getFirst(), tenant);
     });
+  }
+
+  private static void assertTenantHeaders(ConsumerRecord<String, ResourceResultEvent> consumerRecord,
+    String tenant) {
+    var expectedTenant = tenant.getBytes(StandardCharsets.UTF_8);
+    var okapiTenantHeader = consumerRecord.headers().lastHeader(X_OKAPI_TENANT_HEADER);
+    var folioTenantHeader = consumerRecord.headers().lastHeader(FOLIO_TENANT_ID_HEADER);
+
+    assertThat(okapiTenantHeader).as("'%s' header must be present", X_OKAPI_TENANT_HEADER).isNotNull();
+    assertThat(folioTenantHeader).as("'%s' header must be present", FOLIO_TENANT_ID_HEADER).isNotNull();
+    assertThat(okapiTenantHeader.value()).isEqualTo(expectedTenant);
+    assertThat(folioTenantHeader.value()).isEqualTo(expectedTenant);
   }
 
   private static SystemUserEvent systemUserEvent(org.folio.integration.kafka.model.ResourceEventType type) {
