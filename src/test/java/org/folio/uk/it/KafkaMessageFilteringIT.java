@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.awaitility.Awaitility.await;
 import static org.awaitility.Durations.FIVE_SECONDS;
 import static org.folio.common.utils.OkapiHeaders.TENANT;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,13 +12,17 @@ import static org.mockito.Mockito.verify;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.folio.integration.kafka.consumer.filter.TenantModuleVersionRepository;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.test.types.IntegrationTest;
 import org.folio.uk.base.BaseIntegrationTest;
+import org.folio.uk.base.model.DomainEventType;
+import org.folio.uk.base.model.UserDomainEvent;
 import org.folio.uk.integration.keycloak.SystemUserService;
+import org.folio.uk.service.UserService;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -37,8 +42,11 @@ class KafkaMessageFilteringIT extends BaseIntegrationTest {
   private static final String PRE_MARKER_TENANT = "filterlegacy";
   private static final String CURRENT_MODULE_ID = "mod-users-keycloak-0.0.1-TEST";
   private static final String DIFFERENT_MODULE_ID = "mod-users-keycloak-0.0.0";
+  private static final UUID CURRENT_USER_ID = UUID.fromString("f392d6a8-ba7d-48cb-9b62-8ebdd35d9360");
+  private static final UUID DIFFERENT_VERSION_USER_ID = UUID.fromString("6f63824b-d026-49c5-bf52-1157865ba435");
 
   @MockitoBean private SystemUserService systemUserService;
+  @MockitoBean private UserService userService;
 
   @Autowired private KafkaTemplate<String, Object> kafkaTemplate;
   @Autowired private JdbcOperations jdbcOperations;
@@ -87,6 +95,28 @@ class KafkaMessageFilteringIT extends BaseIntegrationTest {
     verifyNotProcessed(PRE_MARKER_TENANT);
   }
 
+  @Test
+  void shouldProcessUserMessageForTenantOwnedByCurrentVersion() throws Exception {
+    prepareCurrentTenant();
+
+    sendUserEvent(CURRENT_TENANT, CURRENT_USER_ID);
+
+    await().atMost(FIVE_SECONDS).untilAsserted(() -> verifyUserEventProcessed(CURRENT_USER_ID));
+  }
+
+  @Test
+  void shouldSkipUserMessageForTenantOwnedByDifferentVersion() throws Exception {
+    recreateInitializedTenant(DIFFERENT_VERSION_TENANT, true);
+    saveModuleVersion(DIFFERENT_VERSION_TENANT, DIFFERENT_MODULE_ID);
+    prepareCurrentTenant();
+
+    sendUserEvent(DIFFERENT_VERSION_TENANT, DIFFERENT_VERSION_USER_ID);
+    sendUserEvent(CURRENT_TENANT, CURRENT_USER_ID);
+
+    await().atMost(FIVE_SECONDS).untilAsserted(() -> verifyUserEventProcessed(CURRENT_USER_ID));
+    verifyUserEventNotProcessed(DIFFERENT_VERSION_USER_ID);
+  }
+
   private void prepareCurrentTenant() {
     recreateInitializedTenant(CURRENT_TENANT, true);
     saveModuleVersion(CURRENT_TENANT, CURRENT_MODULE_ID);
@@ -107,6 +137,20 @@ class KafkaMessageFilteringIT extends BaseIntegrationTest {
     kafkaTemplate.send(producerRecord).get();
   }
 
+  private void sendUserEvent(String tenant, UUID userId) throws Exception {
+    var oldUser = TestConstants.user(userId.toString(), "old-user", "old@folio.org", "old-external-id");
+    var newUser = TestConstants.user(userId.toString(), "new-user", "new@folio.org", "new-external-id");
+    var event = new UserDomainEvent();
+    event.setId(UUID.randomUUID());
+    event.setType(DomainEventType.UPDATED);
+    event.setTenant(tenant);
+    event.setTimestamp(System.currentTimeMillis());
+    event.setData(UserDomainEvent.UserEventData.of(oldUser, newUser));
+    var producerRecord = new ProducerRecord<String, Object>(FOLIO_USER_TOPIC, event);
+    producerRecord.headers().add(TENANT, tenant.getBytes(UTF_8));
+    kafkaTemplate.send(producerRecord).get();
+  }
+
   private void verifyProcessed(String tenant) {
     verify(systemUserService).createOnEvent(argThat(event -> tenant.equals(event.getTenant())));
   }
@@ -115,12 +159,19 @@ class KafkaMessageFilteringIT extends BaseIntegrationTest {
     verify(systemUserService, never()).createOnEvent(argThat(event -> tenant.equals(event.getTenant())));
   }
 
+  private void verifyUserEventProcessed(UUID userId) {
+    verify(userService).updateUserOnEvent(argThat(user -> userId.equals(user.getId())), any());
+  }
+
+  private void verifyUserEventNotProcessed(UUID userId) {
+    verify(userService, never()).updateUserOnEvent(argThat(user -> userId.equals(user.getId())), any());
+  }
+
   @SuppressWarnings("java:S2077") // Test schemas are derived exclusively from constants in this class.
   private void recreateInitializedTenant(String tenant, boolean createMarkerTable) {
     var schema = schema(tenant);
     dropSchema(tenant);
     jdbcOperations.execute("CREATE SCHEMA \"%s\"".formatted(schema));
-    jdbcOperations.execute("CREATE TABLE \"%s\".user_migration_job (id INTEGER PRIMARY KEY)".formatted(schema));
     if (createMarkerTable) {
       jdbcOperations.execute("""
         CREATE TABLE "%s".tenant_module_version (
