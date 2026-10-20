@@ -1,3 +1,8 @@
+## Version `v4.0.4` (20.10.2026)
+### Changes:
+* Trillium CSP#1 - Upgrade to SpringBoot 4.1 (MODUSERSKC-177)
+---
+
 ## Version `v4.0.3` (09.09.2026)
 ### Changes:
 * Fix system-user password SSM key to match sidecar (MODUSERSKC-167)
