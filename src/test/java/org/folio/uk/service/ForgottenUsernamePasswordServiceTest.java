@@ -344,7 +344,7 @@ class ForgottenUsernamePasswordServiceTest {
 
   private void mockConsortiaMode(UserTenantCollection canaryCollection) {
     when(userTenantsClient.getOne()).thenReturn(canaryCollection);
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(OKAPI_HEADERS);
+    when(folioExecutionContext.getAllHeaders()).thenReturn(OKAPI_HEADERS);
   }
 
   private void mockSingleTenantMode(List<String> aliases) {

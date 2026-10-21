@@ -13,8 +13,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.folio.integration.kafka.consumer.EnableKafkaConsumer;
-import org.folio.integration.kafka.consumer.filter.TenantIsDisabledException;
-import org.folio.integration.kafka.consumer.filter.TenantsAreDisabledException;
+import org.folio.integration.kafka.consumer.configuration.TenantModuleVersionConfiguration;
 import org.folio.uk.configuration.RetryProperties;
 import org.folio.uk.integration.kafka.model.SystemUserEvent;
 import org.folio.uk.integration.kafka.model.UserEvent;
@@ -24,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.kafka.KafkaException.Level;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -39,6 +39,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Log4j2
 @Configuration
 @EnableKafkaConsumer
+@Import(TenantModuleVersionConfiguration.class)
 @RequiredArgsConstructor
 public class KafkaConfiguration {
 
@@ -104,7 +105,7 @@ public class KafkaConfiguration {
     Map<String, Object> config = new HashMap<>(kafkaProperties.buildConsumerProperties());
     config.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     config.put(VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
-    config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
     return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), valueDeserializer);
   }
 
@@ -117,11 +118,6 @@ public class KafkaConfiguration {
   }
 
   private BackOff getBackOff(Exception exception, RetryProperties retryProperties) {
-    if (exception instanceof TenantsAreDisabledException || exception instanceof TenantIsDisabledException) {
-      log.warn("Tenant(s) is disabled, retrying Kafka event", exception);
-      return new FixedBackOff(retryProperties.getRetryDelay().toMillis(), retryProperties.getRetryAttempts());
-    }
-
     var relationDoesNotExistsMessage = findRelationDoesNotExistsMessage(exception);
     if (relationDoesNotExistsMessage.isPresent()) {
       log.warn("Tenant table is not found, retrying until created [message: {}]", relationDoesNotExistsMessage.get());

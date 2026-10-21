@@ -13,6 +13,7 @@
 * Remove unimplemented `GET` and `DELETE /users-keycloak/users` endpoints and the `users-keycloak.collection.get` permission (MODUSERSKC-166)
 * Fix `SYSTEM_USER_*` environment variables being ignored (MODUSERSKC-178)
 * Add tests for `x-okapi-tenant` and `folio.tenantId` Kafka headers to published resource-result events (MODUSERSKC-176)
+* Add marker-table-based Kafka tenant filtering for mixed-version deployments (MODUSERSKC-179)
 ---
 
 ## Version `v4.0.0` (17.04.2026)
