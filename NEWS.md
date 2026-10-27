@@ -14,6 +14,9 @@
 * Fix `SYSTEM_USER_*` environment variables being ignored (MODUSERSKC-178)
 * Add tests for `x-okapi-tenant` and `folio.tenantId` Kafka headers to published resource-result events (MODUSERSKC-176)
 * Add marker-table-based Kafka tenant filtering for mixed-version deployments (MODUSERSKC-179)
+* Add `loanAnonymizationPreference` to the user model ([MODUSERSKC-181](https://folio-org.atlassian.net/browse/MODUSERSKC-181))
+* **Breaking** Requires `users v16.6`
+* Provides `users-keycloak v1.2`
 ---
 
 ## Version `v4.0.0` (17.04.2026)
