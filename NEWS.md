@@ -17,6 +17,7 @@
 * Add `loanAnonymizationPreference` to the user model ([MODUSERSKC-181](https://folio-org.atlassian.net/browse/MODUSERSKC-181))
 * **Breaking** Requires `users v16.6`
 * Provides `users-keycloak v1.2`
+* Add DeployConfig.json following ADR-0013 module configuration management ([MODUSERSKC-172](https://folio-org.atlassian.net/browse/MODUSERSKC-172))
 ---
 
 ## Version `v4.0.0` (17.04.2026)

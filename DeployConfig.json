@@ -1,0 +1,625 @@
+{
+  "_disclaimer": "Default values are calibrated against a reference bugfest environment. See ADR-0013 (Module configuration management) for the governance model behind this file. Resource values and JVM limits must be adjusted to the target host capacity.",
+  "description": "mod-users-keycloak configuration template",
+  "moduleDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for the mod-users-keycloak container"
+      },
+      {
+        "name": "memory",
+        "value": "1024",
+        "description": "Memory hard limit for the mod-users-keycloak container in MiB"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "896",
+        "description": "Memory reservation (soft limit) for the mod-users-keycloak container in MiB"
+      }
+    ],
+    "java": [
+      {
+        "name": "xmx",
+        "value": "512m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "256m",
+        "description": "Maximum Java metaspace size"
+      },
+      {
+        "name": "MetaspaceSize",
+        "value": "88m",
+        "description": "Initial Java metaspace size"
+      }
+    ],
+    "deployment": {
+      "isHaSupported": true,
+      "replicasRecommendedCount": 2,
+      "description": "mod-users-keycloak keeps user migration job state in PostgreSQL and checks for an in-progress migration there before starting a new one, so replicas can run side by side behind a load balancer. Kafka consumers share a consumer group per module version, so system-user and user events are processed once across replicas. The Keycloak realm/client configuration and admin token Caffeine caches are local to each replica and are refreshed only on TTL expiry (KC_CONFIG_TTL, KC_ADMIN_TOKEN_TTL). Password reset tokens are stored as Keycloak user attributes, so they are shared across replicas. Two replicas are recommended for availability."
+    },
+    "kong": {
+      "timeouts": {
+        "connect": "60s",
+        "send": "60s",
+        "read": "60s"
+      },
+      "description": "Default Kong proxy timeouts are sufficient; the user migration endpoints return as soon as the async job is scheduled rather than waiting for it to finish."
+    },
+    "EnvVars": [
+      {
+        "name": "DB_HOST",
+        "value": null,
+        "description": "PostgreSQL database host",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PORT",
+        "value": "5432",
+        "description": "PostgreSQL database port",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": null,
+        "description": "PostgreSQL database username (sourced from secret store)",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": null,
+        "description": "PostgreSQL database password (sourced from secret store)",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_DATABASE",
+        "value": null,
+        "description": "PostgreSQL database name holding the mod-users-keycloak schema (user migration jobs and the tenant module-version marker table)",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_HOST",
+        "value": null,
+        "description": "Kafka broker host. Used to consume system-user and user events and to publish event-confirmation results",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_PORT",
+        "value": "9092",
+        "description": "Kafka broker port",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_SECURITY_PROTOCOL",
+        "value": "PLAINTEXT",
+        "description": "Security protocol used to communicate with Kafka brokers (PLAINTEXT or SSL)",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SSL_KEYSTORE_LOCATION",
+        "value": null,
+        "description": "Filesystem path to the Kafka client key store. Applies when KAFKA_SECURITY_PROTOCOL requires SSL client authentication",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SSL_KEYSTORE_PASSWORD",
+        "value": null,
+        "description": "Password for the Kafka client key store",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SSL_TRUSTSTORE_LOCATION",
+        "value": null,
+        "description": "Filesystem path to the Kafka client trust store. Applies when KAFKA_SECURITY_PROTOCOL is SSL",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SSL_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "Password for the Kafka client trust store",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SYS_USER_TOPIC_PATTERN",
+        "value": "(${application.environment}\\.)(.*\\.)mgr-tenant-entitlements.system-user",
+        "description": "Topic name pattern for the system-user topic filled by mgr-tenant-entitlements",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_USER_TOPIC_PATTERN",
+        "value": "(${application.environment}\\.)(.*\\.)users.users",
+        "description": "Topic name pattern for the users topic filled by mod-users",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_USER_TOPIC_CONCURRENCY",
+        "value": "3",
+        "description": "Number of concurrent consumer threads for the users topic listener",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_ENABLED",
+        "value": "false",
+        "description": "Enables marker-table-based Kafka tenant filtering for mixed-version deployments. Set to true when this deployment shares a Kafka cluster/topic with another module version",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SYS_USER_TOPIC_RETRY_DELAY",
+        "value": "1s",
+        "description": "Delay between system-user event retry attempts when the tenant is not yet initialized",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SYS_USER_TOPIC_RETRY_ATTEMPTS",
+        "value": "9223372036854775807",
+        "description": "Maximum retry attempts for a system-user event when the tenant is not yet initialized (default is effectively infinite)",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_USER_TOPIC_RETRY_DELAY",
+        "value": "1s",
+        "description": "Delay between users event retry attempts on transient failures",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_USER_TOPIC_RETRY_ATTEMPTS",
+        "value": "9223372036854775807",
+        "description": "Maximum retry attempts for a users event on transient failures (default is effectively infinite)",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SYS_USER_ROLE_RETRY_DELAY",
+        "value": "5s",
+        "description": "Delay between attempts to upsert loadable roles and assign them to the module system user",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SYS_USER_ROLE_RETRY_ATTEMPTS",
+        "value": "60",
+        "description": "Number of attempts to upsert loadable roles and assign them to the module system user",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "EVENT_CONFIRMATION_ENABLED",
+        "value": "false",
+        "description": "Enables publishing of SUCCESS/FAILURE confirmations to mgr-tenant-entitlements after processing a system-user event",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "EVENT_CONFIRMATION_TOPIC",
+        "value": "${ENV}.mgr-tenant-entitlements.resource-result",
+        "description": "Kafka topic used to publish system-user event confirmation results. Applies when EVENT_CONFIRMATION_ENABLED is true",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "SYSTEM_USER_USERNAME_TEMPLATE",
+        "value": "{tenantId}-system-user",
+        "description": "Template used to generate the system user username for each tenant",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "SYSTEM_USER_EMAIL_TEMPLATE",
+        "value": "{tenantId}-system-user@folio.org",
+        "description": "Template used to generate the system user email for each tenant",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "SYSTEM_USER_ROLE",
+        "value": "System",
+        "description": "Name of the role assigned to the system user on tenant initialization",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "SYSTEM_USER_PASSWORD_LENGTH",
+        "value": "32",
+        "description": "Length of the generated system user password",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "SYSTEM_USER_RETRY_COUNT",
+        "value": "10",
+        "description": "Number of attempts to create a system user",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "SYSTEM_USER_RETRY_DELAY",
+        "value": "250",
+        "description": "Delay in milliseconds between attempts to create a system user",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "MIGRATION_BATCH_SIZE",
+        "value": "20",
+        "description": "Batch size of users processed at a time by the user migration job. Max value is 50",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "IDP_MIGRATION_BATCH_SIZE",
+        "value": "20",
+        "description": "Batch size of users processed at a time by the identity provider (IDP) linking migration. Max value is 50",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "DEFAULT_PASSWORDS_ON_MIGRATION",
+        "value": "false",
+        "description": "When true, a migrated user's password is set to their username; otherwise migrated users get no credentials",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "INCLUDE_ONLY_VISIBLE_PERMISSIONS",
+        "value": "false",
+        "description": "When true, only visible permissions (UI permissions/permission-set names) are returned by the _self endpoint",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "SINGLE_TENANT_UX",
+        "value": "false",
+        "description": "Enables single tenant UX mode (federated authentication through a Keycloak identity provider)",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "IDENTITY_PROVIDER_SUFFIX",
+        "value": "-keycloak-oidc",
+        "description": "Suffix of the Keycloak OIDC identity provider that performs federated authentication requests. Applies when SINGLE_TENANT_UX is true",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "ENV",
+        "value": "folio",
+        "description": "Logical deployment name, used as the Kafka topic prefix and as the default first segment of the secure store key; must match the value used by the other modules",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "OKAPI_URL",
+        "value": "http://sidecar:8081",
+        "description": "Base URL (the module's sidecar) used to perform HTTP requests to other FOLIO modules",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_VERSION",
+        "value": null,
+        "description": "Deployed module version. Required for mixed-version deployments and must exactly match MODULE_VERSION of the associated sidecar",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SERVER_PORT",
+        "value": "8081",
+        "description": "HTTP port the module listens on",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTIONS",
+        "value": null,
+        "description": "Additional JVM options for the mod-users-keycloak process (heap sizing, GC, agent flags, etc.)",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "KC_URL",
+        "value": "http://keycloak:8080",
+        "description": "Keycloak base URL used to perform Keycloak Admin API requests",
+        "type": "KC",
+        "essential": true
+      },
+      {
+        "name": "KC_ADMIN_CLIENT_ID",
+        "value": "folio-backend-admin-client",
+        "description": "Keycloak admin client ID used for issuing admin tokens. Its secret is read from the secure store, not from an environment variable",
+        "type": "KC",
+        "essential": true
+      },
+      {
+        "name": "KC_ADMIN_GRANT_TYPE",
+        "value": "client_credentials",
+        "description": "OAuth2 grant type used to obtain the Keycloak admin token",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_PASSWORD_RESET_CLIENT_ID",
+        "value": "password-reset-client",
+        "description": "Keycloak client ID used for password reset flows",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_LOGIN_CLIENT_SUFFIX",
+        "value": "-login-application",
+        "description": "Client name suffix appended to the tenant name when resolving the Keycloak login client that owns the authorization resources (used as audience when evaluating permissions); must match the login client naming used elsewhere in the deployment",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_TLS_ENABLED",
+        "value": "false",
+        "description": "Enables TLS for the Keycloak Admin API client",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_TLS_TRUSTSTORE_PATH",
+        "value": null,
+        "description": "Truststore file path for the Keycloak Admin API client. Required when KC_CLIENT_TLS_ENABLED is true",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_TLS_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "Truststore password for the Keycloak Admin API client",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_TLS_TRUSTSTORE_TYPE",
+        "value": null,
+        "description": "Truststore file type for the Keycloak Admin API client (e.g. JKS, PKCS12)",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_ADMIN_TOKEN_TTL",
+        "value": "60s",
+        "description": "Time to live for the cached Keycloak admin token",
+        "type": "CACHE",
+        "essential": false
+      },
+      {
+        "name": "KC_CONFIG_TTL",
+        "value": "3600s",
+        "description": "Time to live for the cached Keycloak realm configuration and client configuration",
+        "type": "CACHE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_TYPE",
+        "value": null,
+        "description": "Secure store backend holding client secrets (e.g. the Keycloak admin client secret) and system user passwords. Supported values: EPHEMERAL, AWS_SSM, VAULT, FSSP",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "SECURE_STORE_ENV",
+        "value": null,
+        "description": "First segment of the secure store key, for example prod or test. Defaults to the value of ENV, with fallback to 'folio'",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_REGION",
+        "value": null,
+        "description": "AWS region of the SSM client. Applies when SECRET_STORE_TYPE=AWS_SSM; when unset the AWS default region provider chain is used",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_USE_IAM",
+        "value": "true",
+        "description": "Use the IAM role of the running task for SSM authorization instead of explicit credentials. Applies when SECRET_STORE_TYPE=AWS_SSM",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT",
+        "value": null,
+        "description": "The HTTP endpoint used to retrieve AWS credentials. Ignored when SECRET_STORE_AWS_SSM_USE_IAM is true",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_PATH",
+        "value": null,
+        "description": "Path component of the credentials endpoint URI, appended to SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_TOKEN",
+        "value": null,
+        "description": "Token for accessing Vault, may be a root token. Required when SECRET_STORE_TYPE=VAULT",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_ADDRESS",
+        "value": null,
+        "description": "Address of the Vault instance. Required when SECRET_STORE_TYPE=VAULT",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_ENABLE_SSL",
+        "value": "false",
+        "description": "Whether to use SSL when connecting to Vault",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_PEM_FILE_PATH",
+        "value": null,
+        "description": "Path to an X.509 certificate in unencrypted PEM format (UTF-8), used for Vault SSL verification",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_KEYSTORE_PASSWORD",
+        "value": null,
+        "description": "Password used to access the Vault client JKS keystore",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_KEYSTORE_FILE_PATH",
+        "value": null,
+        "description": "Path to a JKS keystore file containing a Vault client cert and private key",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_TRUSTSTORE_FILE_PATH",
+        "value": null,
+        "description": "Path to a JKS truststore file containing trusted Vault server certs",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_ADDRESS",
+        "value": null,
+        "description": "Base URL of the Folio Secure Store Proxy (FSSP). Required when SECRET_STORE_TYPE=FSSP",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_SECRET_PATH",
+        "value": "secure-store/entries",
+        "description": "Path within FSSP where module secrets are stored/retrieved",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_ENABLE_SSL",
+        "value": "false",
+        "description": "Whether to use SSL when connecting to FSSP",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_TRUSTSTORE_PATH",
+        "value": null,
+        "description": "Path to the truststore file used for the FSSP SSL connection",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_TRUSTSTORE_FILE_TYPE",
+        "value": null,
+        "description": "Truststore file type for the FSSP client (e.g. JKS, PKCS12)",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "Password for the FSSP truststore file",
+        "type": "CONFIG",
+        "essential": false
+      }
+    ]
+  },
+  "sidecarDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for the sidecar container"
+      },
+      {
+        "name": "memory",
+        "value": "1024",
+        "description": "Memory hard limit for the sidecar container, in MB"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "512",
+        "description": "Memory reservation for the sidecar container, in MB"
+      }
+    ],
+    "java": [
+      {
+        "name": "xms",
+        "value": "128m",
+        "description": "Initial Java heap size"
+      },
+      {
+        "name": "xmx",
+        "value": "256m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "96m",
+        "description": "Maximum Java metaspace size"
+      }
+    ],
+    "EnvVars": [
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Deployment environment identifier",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTS",
+        "value": null,
+        "description": "Additional JVM options for the sidecar process",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_NAME",
+        "value": "mod-users-keycloak",
+        "description": "Name of the backend module the sidecar fronts",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_URL",
+        "value": null,
+        "description": "Internal URL (host:port) at which the mod-users-keycloak backend container is reachable from its sidecar",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_VERSION",
+        "value": null,
+        "description": "Version of the mod-users-keycloak module deployed alongside this sidecar. Must exactly match the backend container's own MODULE_VERSION",
+        "type": "CONFIG",
+        "essential": true
+      }
+    ]
+  }
+}
