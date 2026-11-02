@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.1.1</version>
+    <version>4.1.2</version>
     <relativePath />
   </parent>
 
@@ -23,9 +23,9 @@
     <lombok.version>1.18.48</lombok.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <spring-retry.version>2.0.13</spring-retry.version>
-    <swagger-annotations.version>2.2.55</swagger-annotations.version>
+    <swagger-annotations.version>3.0.0</swagger-annotations.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
-    <openapi-tools.jackson-databind-nullable.version>0.2.12</openapi-tools.jackson-databind-nullable.version>
+    <openapi-tools.jackson-databind-nullable.version>0.2.13</openapi-tools.jackson-databind-nullable.version>
     <jackson2-databind.version>2.22.4</jackson2-databind.version>
     <folio-spring-support.version>10.1.0-SNAPSHOT</folio-spring-support.version>
     <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
@@ -574,7 +574,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.15</version>
+            <version>0.8.16</version>
             <configuration>
               <excludes>
                 <exclude>**/domain/**</exclude>
