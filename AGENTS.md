@@ -1,6 +1,6 @@
 # mod-users-keycloak
 
-FOLIO module combining mod-users + mod-users-bl interfaces with Keycloak integration — bridges FOLIO user management and Keycloak IAM.
+FOLIO module combining mod-users + mod-users-bl interfaces with Keycloak integration — bridges FOLIO user management and Keycloak IAM. Java, Spring Boot, PostgreSQL/Liquibase, Kafka, Keycloak, MapStruct, Lombok.
 
 ## Build & Test
 
