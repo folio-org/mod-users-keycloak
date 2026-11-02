@@ -1,3 +1,8 @@
+## Version `v4.0.5` (02.11.2026)
+### Changes:
+* Add DeployConfig.json following ADR-0013 module configuration management ([MODUSERSKC-172](https://folio-org.atlassian.net/browse/MODUSERSKC-172))
+---
+
 ## Version `v4.0.4` (20.10.2026)
 ### Changes:
 * Trillium CSP#1 - Upgrade to SpringBoot 4.1 (MODUSERSKC-177)
