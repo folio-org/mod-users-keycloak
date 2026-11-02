@@ -20,8 +20,6 @@ mvn clean generate-sources     # regenerate API sources from OpenAPI
 
 ## Architecture (`org.folio.uk`)
 
-**Packages**: `controller/` (implement OpenAPI interfaces) · `service/` (`UserService`, `UsersTenantService`, `PasswordResetService`, `CapabilitiesService`) · `integration/` HTTP clients (`keycloak/`, `users/`, `roles/`, `kafka/`, plus notify/password/login/inventory/permission/policy/settings/configuration) · `domain/` (`UserMigrationJobEntity` + repository) · `mapper/` · `migration/` · `exception/`.
-
 **Key patterns**:
 1. **Dual storage**: users live in both mod-users (Postgres) and Keycloak; `UserService` creates in mod-users first, then upserts in Keycloak.
 2. **Multi-tenant**: each tenant → a Keycloak realm; `UsersTenantService` handles realm setup, system user, Kafka listener restart.
@@ -42,7 +40,5 @@ mvn clean generate-sources     # regenerate API sources from OpenAPI
 ## Notes
 
 - **Spring Retry**: system user creation (`SYSTEM_USER_RETRY_*`) and role assignment (`systemUserRoleRetryTemplate`).
-- **Caching**: Caffeine `keycloak-configuration`, `keycloak-client-configuration`, `token` in `configuration/CacheConfiguration.java`.
 - **Secure store**: AWS-SSM/Vault/FSSP via `application.secret-store.*`.
-- **Sonar exclusions**: `domain/`, `configuration/`, `rest/resource/`, `mapper/`, `integration/**/model/`.
 - **Lombok**: `lombok.config` sets `addLombokGeneratedAnnotation = true` and copies `@Qualifier` to generated constructors, so `@RequiredArgsConstructor` works with qualified beans.
