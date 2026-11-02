@@ -72,11 +72,8 @@ public class KeycloakService {
       return kcUserId;
     }
 
-    var kcUser = toKeycloakUser(user, password);
-    kcUser.setUserTenantAttr(of(getRealm()));
     log.info("Creating keycloak user: userId = {}", user.getId());
-    return callKeycloak(
-      create(kcUser), () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId()));
+    return createKeycloakUser(user, password);
   }
 
   public void linkIdentityProviderToUser(User user, String kcUserId) {
@@ -187,13 +184,9 @@ public class KeycloakService {
     }
   }
 
-  public void createUserForMigration(User user, String password, List<String> userTenants) {
-    var kcUser = toKeycloakUser(user, password);
-    kcUser.setUserTenantAttr(userTenants);
+  public void createUserForMigration(User user, String password) {
     log.info("Creating keycloak user for users migration: userId = {}", user.getId());
-
-    callKeycloak(create(kcUser),
-      () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId()));
+    createKeycloakUser(user, password);
   }
 
   public void updateUser(UUID id, User user) {
@@ -506,6 +499,13 @@ public class KeycloakService {
       keycloakUser.setCredentials(List.of(new Credential("password", password, false)));
     }
     return keycloakUser;
+  }
+
+  private String createKeycloakUser(User user, String password) {
+    var kcUser = toKeycloakUser(user, password);
+    kcUser.setUserTenantAttr(of(getRealm()));
+    return callKeycloak(
+      create(kcUser), () -> buildUsersErrorMessage("Failed to create keycloak user", user.getId()));
   }
 
   private String buildUsersErrorMessage(String message, UUID userId) {

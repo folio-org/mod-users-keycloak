@@ -1,6 +1,5 @@
 package org.folio.uk.integration.users;
 
-import java.util.UUID;
 import org.folio.uk.domain.dto.UserTenantCollection;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
@@ -8,10 +7,6 @@ import org.springframework.web.service.annotation.HttpExchange;
 
 @HttpExchange(url = "user-tenants")
 public interface UserTenantsClient {
-
-  default UserTenantCollection lookupByUserId(UUID userId) {
-    return lookupByUserIdRequest(userId);
-  }
 
   default UserTenantCollection getOne() {
     return getOneRequest(1);
@@ -25,9 +20,6 @@ public interface UserTenantsClient {
   default UserTenantCollection lookupByTenantId(String tenantId) {
     return lookupByTenantIdRequest(tenantId);
   }
-
-  @GetExchange
-  UserTenantCollection lookupByUserIdRequest(@RequestParam("userId") UUID userId);
 
   @GetExchange
   UserTenantCollection getOneRequest(@RequestParam("limit") Integer limit);
