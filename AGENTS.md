@@ -1,36 +1,38 @@
 # mod-users-keycloak
 
-Provides the `users-keycloak` user and composite-user APIs. User records live in mod-users (called over HTTP) and login users in Keycloak; the module's own database holds only user-migration jobs and the tenant module-version marker.
+FOLIO module combining mod-users + mod-users-bl interfaces with Keycloak integration — bridges FOLIO user management and Keycloak IAM.
 
-## Commands
+## Build & Test
 
 ```bash
-mvn clean install -DskipTests  # build
-mvn test                       # unit tests (@UnitTest, *Test.java)
-mvn verify                     # unit and integration tests (@IntegrationTest, *IT.java); needs Docker
-mvn test -Dtest=UserServiceTest#createUserSafe_positive  # one unit test
-mvn verify -Dit.test=UserIT#get_positive -Dtest=SkipSurefire -Dsurefire.failIfNoSpecifiedTests=false  # one IT, unit tests skipped
+mvn clean install              # full build (compile, codegen, checkstyle, unit and integration tests)
+mvn clean install -DskipTests  # skip tests
+mvn test                       # unit tests (@UnitTest)
+mvn verify                     # integration tests (@IntegrationTest; needs containers)
+mvn test -Dtest=UserServiceTest#createUserSafe_positive   # single unit test
+mvn verify -Dit.test=UserIT#get_positive -Dtest=SkipSurefire -Dsurefire.failIfNoSpecifiedTests=false  # single IT
 mvn clean verify -P coverage   # JaCoCo report; the 80% instruction check does not fail the build
-mvn checkstyle:check           # style only
+mvn checkstyle:check           # also runs at process-classes
+mvn clean generate-sources     # regenerate API sources from OpenAPI
 ```
 
-Checkstyle also runs at `process-classes`, so every build above fails on a violation, test sources included. The base rules come from `folio-java-checkstyle`; this repository limits methods to 21 lines (`checkstyle/checkstyle-checker.properties`) and turns that limit off for `src/test/java`.
+**Style**: max method length 21 lines (suppressed in tests); 2-space indent, 120-char lines, LF, UTF-8 (`.editorconfig`); `folio-java-checkstyle` rules, suppressions in `checkstyle/checkstyle-suppressions.xml`.
 
-Surefire runs only the `unit` group and failsafe only the `integration` group, so a test class without `@UnitTest` or `@IntegrationTest` is skipped without a warning. Integration tests extend `BaseIntegrationTest`, which starts Postgres, Kafka, Keycloak (TLS), and WireMock.
+## Architecture (`org.folio.uk`)
 
-## Conventions
+**Key patterns**:
+1. **Dual storage**: users live in both mod-users (Postgres) and Keycloak; `UserService` creates in mod-users first, then upserts in Keycloak.
+2. **Multi-tenant**: each tenant → a Keycloak realm; `UsersTenantService` handles realm setup, system user, Kafka listener restart.
+3. **Event-driven system users**: `KafkaMessageListener` on topic pattern `(${application.environment}\.)(.*\.)mgr-tenant-entitlements.system-user` → `SystemUserService` (CREATE/UPDATE/DELETE).
+4. **HTTP clients**: external modules + Keycloak Admin API (`KeycloakClient`) are `@HttpExchange` interfaces; admin tokens Caffeine-cached.
+5. **Password reset**: a password-reset action with its expiration time is stored in mod-login-keycloak (`LoginClient`, `/authn/password-reset-action`); links via mod-notify; config from mod-configuration.
 
-- The OpenAPI spec `src/main/resources/swagger.api/users-keycloak.yaml` (schemas in `schemas/`) generates `org.folio.uk.rest.resource` and `org.folio.uk.domain.dto`. Change the spec, not the generated sources.
-- `schemas/user.json` is a copy of the mod-users user schema. A field missing from the copy is dropped when a user is saved through `PUT /users-keycloak/users/{id}`, so the stored value is lost in mod-users. When mod-users adds a field, add it here and raise the `users` version in `requires` and the `users-keycloak` version in `provides` of `descriptors/ModuleDescriptor-template.json`.
-- A user is created in mod-users first and in Keycloak second, because the Keycloak user stores the mod-users id in its `user_id` attribute (`upsertUser` rejects a user without an id). Keycloak update, delete, enable, and disable find the Keycloak user by this attribute, not by username.
-- Create a `KeycloakException` with a cause when it can reach a controller, because `ApiExceptionHandler` reads `getCause().getMessage()` and fails with a `NullPointerException` otherwise. `UserService.updateUser` already has such a path ("Too many keycloak users").
+## Codegen & Descriptor
 
-## Gotchas
+- OpenAPI `src/main/resources/swagger.api/users-keycloak.yaml` (schemas in `schemas/`) → `org.folio.uk.rest.resource` + `.domain.dto` in `target/generated-sources/`. Add endpoint: edit spec/schemas → `mvn generate-sources` → implement generated interface.
+- Module Descriptor: `descriptors/ModuleDescriptor-template.json` → `target/ModuleDescriptor.json` at build.
 
-- User create, update, and delete call mod-users first and Keycloak second, with no compensation. If the Keycloak call fails, the mod-users change stays, and the client usually gets a 400.
-- On create, any 422 from mod-users counts as "user already exists": the module loads the user by username and continues with Keycloak. If no user has that username, the request ends with 404. This, plus the tolerated Keycloak 409 in `createUserSafe`, makes the `@Retryable` system-user creation safe to repeat (`SYSTEM_USER_RETRY_COUNT`, `SYSTEM_USER_RETRY_DELAY`).
-- `KeycloakService.upsertUser` matches by username. If a Keycloak user with that username exists and has a `user_id` attribute, it is updated and the attribute is overwritten with the new id; without the attribute, nothing changes. The password is not set in either case. `PUT` creates a missing Keycloak user without a password.
-- `DELETE /users-keycloak/users/{id}` deletes the mod-users record and the user's roles, capabilities, capability sets, and policies only if the user exists in mod-users; the Keycloak delete always runs. A retry after a partial failure therefore deletes only the Keycloak user and leaves the role cleanup undone.
-- `ApiExceptionHandler` maps every `KeycloakException` that has a cause to 400 `service_error`, Keycloak outages included. Downstream 400 and 404 responses pass through as 400 and 404; other downstream errors become 500.
-- `KafkaMessageListener` has two listeners: system-user events from mgr-tenant-entitlements, and `users.users` events, where only `UPDATE` is handled and only the `active` flag is synced to Keycloak. The `KAFKA_SYS_USER_TOPIC_RETRY_*` and `KAFKA_USER_TOPIC_RETRY_*` settings apply only while the tenant schema does not exist yet ("relation ... does not exist"). On any other failure Kafka does not redeliver: the event is logged and skipped, so a failed `active` sync leaves Keycloak out of date. For system-user events, a failure result is also published when `EVENT_CONFIRMATION_ENABLED=true`.
-- `POST /users-keycloak/migrations` returns 201 at once and creates Keycloak users asynchronously. A user that fails (for example, already in Keycloak) is logged and skipped, and the job still ends as `FINISHED`; `FAILED` means a whole batch threw. `/users-keycloak/idp-migrations` is also asynchronous, keeps no job record, and returns 204 without doing anything when `SINGLE_TENANT_UX` is false.
+## Testing
+
+- Unit (`*Test.java`, `@UnitTest`): Mockito/MockMvc, surefire.
+- Integration (`*IT.java`, `@IntegrationTest`): failsafe; extend `BaseIntegrationTest` (`src/test/java/org/folio/uk/base/`) providing `@EnablePostgres/@EnableKeycloakTlsMode/@EnableKafka/@EnableWireMock`, `@ActiveProfiles("it")`, request helpers, `@WireMockStub`. Stubs in `src/test/resources/wiremock/stubs/`; fixtures in `json/`; realm `json/keycloak/testtenant-realm.json`.
