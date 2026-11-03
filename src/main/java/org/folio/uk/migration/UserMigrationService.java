@@ -4,11 +4,9 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.ListUtils.partition;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -32,19 +30,16 @@ import org.folio.uk.domain.dto.User;
 import org.folio.uk.domain.dto.UserMigrationJob;
 import org.folio.uk.domain.dto.UserMigrationJobStatus;
 import org.folio.uk.domain.dto.UserMigrationJobs;
-import org.folio.uk.domain.dto.UserTenant;
 import org.folio.uk.domain.entity.EntityUserMigrationJobStatus;
 import org.folio.uk.domain.entity.UserMigrationJobEntity;
 import org.folio.uk.exception.RequestValidationException;
 import org.folio.uk.integration.keycloak.KeycloakService;
 import org.folio.uk.integration.permission.PermissionService;
-import org.folio.uk.integration.users.UserTenantsClient;
 import org.folio.uk.integration.users.UsersClient;
 import org.folio.uk.mapper.UserMigrationMapper;
 import org.folio.uk.migration.properties.UserMigrationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClientResponseException;
 
 @Log4j2
 @Service
@@ -62,7 +57,6 @@ public class UserMigrationService {
   private final UsersClient usersClient;
   private final UserMigrationMapper mapper;
   private final FolioExecutionContext folioContext;
-  private final UserTenantsClient userTenantsClient;
 
   @Transactional(readOnly = true)
   public UserMigrationJob getMigrationById(UUID id) {
@@ -204,7 +198,7 @@ public class UserMigrationService {
   private Optional<User> createUserInKeycloakSafe(User user, boolean retryIfEmailNotValid) {
     var password = migrationProperties.isDefaultPasswordsOnMigration() ? user.getUsername() : null;
     try {
-      keycloakService.createUserForMigration(user, password, fetchUserTenants(user.getId()));
+      keycloakService.createUserForMigration(user, password);
       return of(user);
     } catch (Exception e) {
       var message = e.getCause().getMessage();
@@ -220,19 +214,6 @@ public class UserMigrationService {
           user.getId(), message);
       }
       return empty();
-    }
-  }
-
-  private List<String> fetchUserTenants(UUID userId) {
-    try {
-      var userTenantsList = userTenantsClient.lookupByUserId(userId);
-
-      return toStream(userTenantsList.getUserTenants())
-        .map(UserTenant::getTenantId)
-        .collect(toList());
-    } catch (RestClientResponseException e) {
-      log.warn("Cannot fetch user tenants: userId = {}", userId, e);
-      return List.of(folioContext.getTenantId());
     }
   }
 
