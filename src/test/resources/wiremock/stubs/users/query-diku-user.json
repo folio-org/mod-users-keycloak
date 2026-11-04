@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/users",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "diku" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    },
+    "queryParameters": {
+      "query": { "contains": "diku_admin" },
+      "limit": { "equalTo": "2" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "users": [
+        {
+          "username": "diku_admin",
+          "id": "d3958402-2f80-421b-a527-9933245a3556",
+          "active": true
+        }
+      ],
+      "totalRecords": 1
+    }
+  }
+}

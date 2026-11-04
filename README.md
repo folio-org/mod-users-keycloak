@@ -217,12 +217,13 @@ x-okapi-token: <auth-token>
 
 > **_NOTE:_** Fields `code` and `value` are mandatory, if any of them are not specified - default value will be used.
 
-| Name                                        |     Default value     | Description                                                                                                                                       |
-|:--------------------------------------------|:---------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------|
-| RESET_PASSWORD_UI_PATH                      |    /reset-password    | UI path, added to the base URL, took value firstly from `mod-configuration`, then from application property `reset-password.ui-path.default`      |
-| RESET_PASSWORD_LINK_EXPIRATION_TIME         |          24           | A duration value when the reset password token will be expired                                                                                    |
-| RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME |         hours         | A duration unit when the reset password token will be expired                                                                                     |
-| PUT_RESET_TOKEN_IN_QUERY_PARAMS             |         false         | Defines if reset token will be included in the path (if value is not set or set as `false`) or as a query parameter (if value is set to a `true`) |
+| Name                                        |   Default value    | Description                                                                                                                                       |
+|:--------------------------------------------|:------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------|
+| RESET_PASSWORD_UI_PATH                      |  /reset-password   | UI path, added to the base URL, took value firstly from `mod-configuration`, then from application property `reset-password.ui-path.default`      |
+| RESET_PASSWORD_LINK_EXPIRATION_TIME         |         24         | A duration value when the reset password token will be expired                                                                                    |
+| RESET_PASSWORD_LINK_EXPIRATION_UNIT_OF_TIME |       hours        | A duration unit when the reset password token will be expired                                                                                     |
+| PUT_RESET_TOKEN_IN_QUERY_PARAMS             |       false        | Defines if reset token will be included in the path (if value is not set or set as `false`) or as a query parameter (if value is set to a `true`) |
+| FORGOT_PASSWORD_UI_PATH                     |  /forgot-password  | UI path, added to the base URL, took value firstly from `mod-configuration`, then from application property `forgot-password.ui-path.default`     |
 
 ## Loading of client IDs/secrets
 

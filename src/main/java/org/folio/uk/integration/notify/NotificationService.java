@@ -41,12 +41,13 @@ public class NotificationService {
   }
 
   public void sendResetLinkNotification(User user, String generatedLink, String eventConfigName, String expirationTime,
-    String expirationUnitOfTime) {
+    String expirationUnitOfTime, String forgotPasswordLink) {
     var context = new Context()
       .withAdditionalProperty("user", user)
       .withAdditionalProperty("link", generatedLink)
       .withAdditionalProperty("expirationTime", expirationTime)
-      .withAdditionalProperty("expirationUnitOfTime", expirationUnitOfTime);
+      .withAdditionalProperty("expirationUnitOfTime", expirationUnitOfTime)
+      .withAdditionalProperty("forgotPasswordLink", forgotPasswordLink);
 
     var notification = buildUserNotification(user, eventConfigName, context);
 
