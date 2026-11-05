@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/user-tenants",
+    "headers": {
+      "x-okapi-tenant": { "equalTo": "diku" },
+      "x-okapi-token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "userTenants": [],
+      "totalRecords": 0
+    }
+  }
+}

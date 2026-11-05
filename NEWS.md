@@ -19,6 +19,7 @@
 * Provides `users-keycloak v1.2`
 * Add DeployConfig.json following ADR-0013 module configuration management ([MODUSERSKC-172](https://folio-org.atlassian.net/browse/MODUSERSKC-172))
 * Set the Keycloak `tenant_name` attribute to the current tenant during users migration instead of reading it from `/user-tenants` ([MODUSERSKC-80](https://folio-org.atlassian.net/browse/MODUSERSKC-80))
+* Include forgotPasswordLink in create/reset password emails so "request a new link" works ([MODUSERSKC-180](https://folio-org.atlassian.net/browse/MODUSERSKC-180))
 ---
 
 ## Version `v4.0.0` (17.04.2026)

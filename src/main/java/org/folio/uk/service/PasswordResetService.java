@@ -44,6 +44,8 @@ public class PasswordResetService {
   private static final String LINK_EXPIRATION_TIME_DEFAULT = "24";
   private static final String BASE_URL_DEFAULT = "http://localhost:3000";
   private static final String LINK_EXPIRATION_UNIT_OF_TIME_DEFAULT = "hours";
+  private static final String FOLIO_HOST_CONFIG_KEY = "FOLIO_HOST";
+  private static final String FORGOT_PASSWORD_UI_PATH_CONFIG_KEY = "FORGOT_PASSWORD_UI_PATH";
 
   private static final String CREATE_PASSWORD_EVENT_CONFIG_NAME = "CREATE_PASSWORD_EVENT";
   private static final String RESET_PASSWORD_EVENT_CONFIG_NAME = "RESET_PASSWORD_EVENT";
@@ -63,6 +65,9 @@ public class PasswordResetService {
   @Value("${reset-password.ui-path.default:/reset-password}")
   private String resetPasswordUiPathDefault;
 
+  @Value("${forgot-password.ui-path.default:/forgot-password}")
+  private String forgotPasswordUiPathDefault;
+
   public String sendPasswordRestLink(UUID userId) {
     var configMap =
       configurationService.getAllModuleConfigsValidated(MODULE_NAME, GENERATE_LINK_REQUIRED_CONFIGURATION);
@@ -81,8 +86,11 @@ public class PasswordResetService {
       ? RESET_PASSWORD_EVENT_CONFIG_NAME
       : CREATE_PASSWORD_EVENT_CONFIG_NAME;
 
+    var forgotPasswordLink = getForgotPasswordLink(configMap);
+
     notificationService.sendResetLinkNotification(user, generatedLink,
-      eventConfigName, etr.expirationTimeFromConfig(), etr.expirationUnitOfTimeFromConfig());
+      eventConfigName, etr.expirationTimeFromConfig(), etr.expirationUnitOfTimeFromConfig(),
+      forgotPasswordLink);
 
     return generatedLink;
   }
@@ -148,6 +156,13 @@ public class PasswordResetService {
       var message = String.format("User with id '%s' not found", userId);
       return new UnprocessableEntityException(message, LINK_INVALID);
     });
+  }
+
+  private String getForgotPasswordLink(Map<String, String> configMap) {
+    var forgotPasswordLinkHost = configMap.getOrDefault(FOLIO_HOST_CONFIG_KEY, BASE_URL_DEFAULT);
+    var forgotPasswordLinkPath = configMap.getOrDefault(
+      FORGOT_PASSWORD_UI_PATH_CONFIG_KEY, forgotPasswordUiPathDefault);
+    return forgotPasswordLinkHost + forgotPasswordLinkPath;
   }
 
   private static PasswordResetService.ExpirationTimeRecord getExpirationTime(Map<String, String> configMap) {

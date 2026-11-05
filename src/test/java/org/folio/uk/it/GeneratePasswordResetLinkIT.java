@@ -1,5 +1,6 @@
 package org.folio.uk.it;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -13,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.net.URI;
 import java.util.UUID;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +34,7 @@ import org.folio.uk.integration.notify.model.Notification;
 import org.folio.uk.support.TestConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -44,6 +47,9 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
   private static final String GENERATE_PASSWORD_RESET_LINK_PATH = "/users-keycloak/password-reset/link";
   private static final String MOCK_FOLIO_UI_HOST = "http://localhost:3000";
   private static final String DEFAULT_UI_URL = "/reset-password";
+  private static final String DEFAULT_FORGOT_PASSWORD_LINK = MOCK_FOLIO_UI_HOST + "/forgot-password";
+  private static final String CONFIGURED_FORGOT_PASSWORD_LINK = "https://diku.folio.example.org/custom/forgot-password";
+  private static final String CREATE_PASSWORD_EVENT = "CREATE_PASSWORD_EVENT";
   private static final String CLIENT_ID = "password-reset-client";
   private static final String RESET_PASSWORD_TOKEN = "ZHVtbXlKd3Q=.eyJzdWIiOiJyZXNldC1wYXNzd29yZC1jbGllbnQiLCJwYXN"
     + "zd29yZFJlc2V0QWN0aW9uSWQiOiI1YWMzYjgyZC1hN2Q0LTQzYTAtODI4NS0xMDRlODRlMDEyNzQifQ==.c2ln";
@@ -96,7 +102,8 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
           .withAdditionalProperty("user", TEST_USER)
           .withAdditionalProperty("link", expectedLink)
           .withAdditionalProperty("expirationTime", EXPIRATION_TIME_HOURS)
-          .withAdditionalProperty("expirationUnitOfTime", EXPIRATION_UNIT_OF_TIME_HOURS))
+          .withAdditionalProperty("expirationUnitOfTime", EXPIRATION_UNIT_OF_TIME_HOURS)
+          .withAdditionalProperty("forgotPasswordLink", DEFAULT_FORGOT_PASSWORD_LINK))
       .withRecipientId(TEST_USER_ID)
       .withLang(NOTIFICATION_LANG)
       .withText(StringUtils.EMPTY);
@@ -215,6 +222,76 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
     verify(notificationClient).sendNotification(any());
   }
 
+  @Test
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-empty-response.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
+  @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
+  @WireMockStub(scripts = "/wiremock/stubs/login/reset-non-existing-password.json")
+  @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
+  void generatePasswordResetLink_positive_createPasswordEmailContainsValidForgotPasswordLink() throws Exception {
+    callGeneratePasswordResetLink().andExpect(status().isOk());
+
+    var notification = captureSentNotification();
+    assertThat(notification.getEventConfigName()).isEqualTo(CREATE_PASSWORD_EVENT);
+    assertForgotPasswordLink(notification, DEFAULT_FORGOT_PASSWORD_LINK);
+  }
+
+  @Test
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-configs-empty-response.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
+  @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
+  @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
+  @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
+  void generatePasswordResetLink_positive_resetPasswordEmailContainsValidForgotPasswordLink() throws Exception {
+    callGeneratePasswordResetLink().andExpect(status().isOk());
+
+    var notification = captureSentNotification();
+    assertThat(notification.getEventConfigName()).isEqualTo(RESET_PASSWORD_EVENT);
+    assertForgotPasswordLink(notification, DEFAULT_FORGOT_PASSWORD_LINK);
+  }
+
+  @Test
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-forgot-password-configs-custom.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
+  @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
+  @WireMockStub(scripts = "/wiremock/stubs/login/reset-non-existing-password.json")
+  @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
+  void generatePasswordResetLink_positive_createPasswordEmailUsesConfiguredForgotPasswordPath() throws Exception {
+    callGeneratePasswordResetLink().andExpect(status().isOk());
+
+    var notification = captureSentNotification();
+    assertThat(notification.getEventConfigName()).isEqualTo(CREATE_PASSWORD_EVENT);
+    assertForgotPasswordLink(notification, CONFIGURED_FORGOT_PASSWORD_LINK);
+  }
+
+  @Test
+  @WireMockStub(scripts = "/wiremock/stubs/config/get-forgot-password-configs-custom.json")
+  @WireMockStub(scripts = "/wiremock/stubs/settings/get-base-url.json")
+  @WireMockStub(scripts = "/wiremock/stubs/users/get-diku-user.json")
+  @WireMockStub(scripts = "/wiremock/stubs/login/reset-existing-password.json")
+  @WireMockStub(scripts = "/wiremock/stubs/notify/create-password-reset-notification.json")
+  void generatePasswordResetLink_positive_resetPasswordEmailUsesConfiguredForgotPasswordPath() throws Exception {
+    callGeneratePasswordResetLink().andExpect(status().isOk());
+
+    var notification = captureSentNotification();
+    assertThat(notification.getEventConfigName()).isEqualTo(RESET_PASSWORD_EVENT);
+    assertForgotPasswordLink(notification, CONFIGURED_FORGOT_PASSWORD_LINK);
+  }
+
+  private Notification captureSentNotification() {
+    var captor = ArgumentCaptor.forClass(Notification.class);
+    verify(notificationClient).sendNotification(captor.capture());
+    return captor.getValue();
+  }
+
+  private static void assertForgotPasswordLink(Notification notification, String expectedLink) {
+    var forgotPasswordLink = (String) notification.getContext().getAdditionalProperties().get("forgotPasswordLink");
+    assertThat(forgotPasswordLink).isNotBlank().isEqualTo(expectedLink);
+    var uri = URI.create(forgotPasswordLink);
+    assertThat(uri.getScheme()).isIn("http", "https");
+    assertThat(uri.getHost()).isNotBlank();
+  }
+
   @SneakyThrows
   private void generateAndSendResetPasswordNotificationWhenPasswordExistsWith(
     String expectedExpirationTime, String expectedExpirationTimeOfUnit) {
@@ -230,7 +307,8 @@ class GeneratePasswordResetLinkIT extends BaseIntegrationTest {
           .withAdditionalProperty("user", TEST_USER)
           .withAdditionalProperty("link", expectedLink)
           .withAdditionalProperty("expirationTime", expectedExpirationTime)
-          .withAdditionalProperty("expirationUnitOfTime", expectedExpirationTimeOfUnit))
+          .withAdditionalProperty("expirationUnitOfTime", expectedExpirationTimeOfUnit)
+          .withAdditionalProperty("forgotPasswordLink", DEFAULT_FORGOT_PASSWORD_LINK))
       .withRecipientId(TEST_USER_ID)
       .withLang(NOTIFICATION_LANG)
       .withText(StringUtils.EMPTY);
