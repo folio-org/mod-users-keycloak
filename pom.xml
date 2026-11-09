@@ -41,11 +41,11 @@
     <kafka.version>4.2.0</kafka.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>14.3.0</maven-checkstyle.version>
+    <maven-checkstyle.version>14.4.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <openapi-generator.version>7.26.0</openapi-generator.version>
+    <openapi-generator.version>7.27.0</openapi-generator.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
     <argLine />
 
